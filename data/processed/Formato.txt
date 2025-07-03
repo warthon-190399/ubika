@@ -1,0 +1,26 @@
+Columnas
+--------
+nombre
+provincia
+Index(['precio_pen', 'precio_usd', 'mantenimiento_soles', 'area_m2',
+       'num_dorm', 'num_banios', 'num_estac', 'antiguedad',
+       'num_visualizaciones', 'fecha_pub', 'distrito', 'nivel_socioeconomico',
+       'direccion_completa', 'latitud', 'longitud'],
+      dtype='object')
+
+distrito
+--------
+array(['miraflores', 'lima cercado', 'chorrillos', 'san miguel',
+       'barranco', 'surco', 'san isidro', 'surquillo', 'los olivos',
+       'magdalena', 'lince', 'jesus maria', 'san borja', 'pueblo libre',
+       'comas', 'la molina', 'brena', 'san luis', 'carabayllo', 'rimac',
+       'la victoria', 'punta hermosa', 'callao', 'san bartolo',
+       'chaclacayo', 'independencia', 'cieneguilla', 'ate', 'pachacamac',
+       'punta negra', 'santa anita', 'lurin', 'ves', 'ancon',
+       'puente piedra', 'santa maria del mar', 'smp', 'lurigancho', 'sjl',
+       'sjm', 'vmt', nan, 'el agustino', 'pucusana'], dtype=object)
+
+provincia
+---------
+array(['huaura', 'lima', 'canete', 'huarochiri', 'barranca', 'huaral'],
+      dtype=object)

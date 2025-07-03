@@ -1,0 +1,98 @@
+,nombre,ubicacion,direccion_completa,distrito,provincia,latitud,longitud
+0,Agustino Plaza,"El Agustino, Lima","Agustino Plaza, El Agustino, Lima",el agustino, Lima,-12.0411033,-77.0030906
+1,Alameda Plaza,"San Juan de Lurigancho, Lima","Alameda Plaza, San Juan de Lurigancho, Lima",sjl, Lima,-11.9787838,-77.0109428
+2,Arequipa Center,"Cerro Colorado, Arequipa","Arequipa Center, Cerro Colorado, Arequipa",cerro colorado, Arequipa,-16.3747288,-71.55718759999999
+3,Arequipa Plaza Norte,"Cerro Colorado, Arequipa","Arequipa Plaza Norte, Cerro Colorado, Arequipa",cerro colorado, Arequipa,-16.3422824,-71.5833481
+4,Balta Shopping,"Miraflores, Lima","Balta Shopping, Miraflores, Lima",miraflores, Lima,-12.1229203,-77.03224829999999
+5,Cencosud Shopping Center La Molina,"La Molina, Lima","Cencosud Shopping Center La Molina, La Molina, Lima",la molina, Lima,-12.0820196,-76.928234
+6,Centro Comercial Arenales,"Lince, Lima","Centro Comercial Arenales, Lince, Lima",lince, Lima,-12.0819773,-77.0356669
+7,Centro Comercial Camino Real,"San Isidro, Lima","Centro Comercial Camino Real, San Isidro, Lima",san isidro, Lima,-12.0982203,-77.03705049999999
+8,Centro Comercial El Polo,"Santiago de Surco, Lima","Centro Comercial El Polo, Santiago de Surco, Lima",santiago de surco, Lima,-12.1013902,-76.970967
+9,Centro Comercial El Polo II,"Santiago de Surco, Lima","Centro Comercial El Polo II, Santiago de Surco, Lima",santiago de surco, Lima,-12.1013902,-76.970967
+10,Centro Comercial Risso,"Lince, Lima","Centro Comercial Risso, Lince, Lima",lince, Lima,-12.0864172,-77.0347137
+11,Centro Comercial Caminos del Inca,"Santiago de Surco, Lima","Centro Comercial Caminos del Inca, Santiago de Surco, Lima",santiago de surco, Lima,-12.113441,-76.9914083
+12,Gamarra Moda Plaza,"La Victoria, Lima","Gamarra Moda Plaza, La Victoria, Lima",la victoria, Lima,-12.0644768,-77.0161098
+13,Jockey Plaza Shopping Center,"Santiago de Surco, Lima","Jockey Plaza Shopping Center, Santiago de Surco, Lima",santiago de surco, Lima,-12.0852535,-76.9772493
+14,KM40,"Lurín / Punta Hermosa, Lima","KM40, Lurín / Punta Hermosa, Lima",lurin / punta hermosa, Lima,-12.3114989,-76.8359619
+15,Larcomar,"Miraflores, Lima","Larcomar, Miraflores, Lima",miraflores, Lima,-12.1319578,-77.03049159999999
+16,La Rambla Brasil,"Breña, Lima","La Rambla Brasil, Breña, Lima",brena, Lima,-12.0669389,-77.047381
+17,La Rambla San Borja,"San Borja, Lima","La Rambla San Borja, San Borja, Lima",san borja, Lima,-12.0888516,-77.0051573
+18,Mall Aventura Chiclayo,Chiclayo,"Mall Aventura Chiclayo, Chiclayo",chiclayo,,-6.763157499999999,-79.8613002
+19,Mall Aventura Arequipa,"Paucarpata, Arequipa","Mall Aventura Arequipa, Paucarpata, Arequipa",paucarpata, Arequipa,-16.4173429,-71.5137756
+20,Mall Aventura Iquitos,"Iquitos, Loreto","Mall Aventura Iquitos, Iquitos, Loreto",iquitos, Loreto,-3.7526118,-73.2470268
+21,Mall Aventura San Juan de Lurigancho,"San Juan de Lurigancho, Lima","Mall Aventura San Juan de Lurigancho, San Juan de Lurigancho, Lima",sjl, Lima,-12.0160002,-76.9991971
+22,Mall Aventura Santa Anita,"Santa Anita, Lima","Mall Aventura Santa Anita, Santa Anita, Lima",santa anita, Lima,-12.0568533,-76.97074219999999
+23,Mallplaza Bellavista,"Bellavista, Callao.","Mallplaza Bellavista, Bellavista, Callao.",bellavista, Callao.,-12.0551303,-77.1026218
+24,Mallplaza Cayma,"Cayma, Arequipa","Mallplaza Cayma, Cayma, Arequipa",cayma, Arequipa,-16.3902726,-71.5465425
+25,Mallplaza Comas,"Comas, Lima","Mallplaza Comas, Comas, Lima",comas, Lima,-11.9369469,-77.0653226
+26,Mallplaza Trujillo,"El Cortijo, Trujillo","Mallplaza Trujillo, El Cortijo, Trujillo",el cortijo, Trujillo,-8.0927297,-79.0545395
+27,Mall del Sur,"San Juan de Miraflores, Lima","Mall del Sur, San Juan de Miraflores, Lima",sjm, Lima,-12.1550691,-76.9822496
+28,Megaplaza Barranca,Barranca,"Megaplaza Barranca, Barranca",barranca,,-10.7513914,-77.7611184
+29,"Megaplaza Cajamarca
+(ex El Quinde Shopping Plaza Cajamarca)",Cajamarca,"Megaplaza Cajamarca
+(ex El Quinde Shopping Plaza Cajamarca), Cajamarca",cajamarca,,-7.148722999999999,-78.5097693
+30,Parque Cañete,Cañete,"Parque Cañete, Cañete",canete,,-12.9050867,-76.3637285
+31,"Megaplaza Ica
+(ex El Quinde Shopping Plaza Ica)",Ica,"Megaplaza Ica
+(ex El Quinde Shopping Plaza Ica), Ica",ica,,-14.074399,-75.7396929
+32,Megaplaza Chimbote,"Chimbote, Santa.","Megaplaza Chimbote, Chimbote, Santa.",chimbote, Santa.,-9.1023675,-78.55792249999999
+33,Megaplaza Express Chincha,Chincha,"Megaplaza Express Chincha, Chincha",chincha,,-13.42553,-76.13671099999999
+34,Megaplaza Express Villa,"Chorrillos, Lima","Megaplaza Express Villa, Chorrillos, Lima",chorrillos, Lima,-12.1967193,-77.0115993
+35,Megaplaza Express Villa El Salvador,"Villa El Salvador, Lima","Megaplaza Express Villa El Salvador, Villa El Salvador, Lima",ves, Lima,-12.2310091,-76.9108499
+36,Megaplaza Jaén,Jaén,"Megaplaza Jaén, Jaén",jaen,,-5.727606,-78.7962629
+37,Megaplaza Huaral,Huaral,"Megaplaza Huaral, Huaral",huaral,,-11.5016187,-77.2254069
+38,Megaplaza Lima Norte,"San Martín de Porres / Independencia, Lima[nota 1]​","Megaplaza Lima Norte, San Martín de Porres / Independencia, Lima[nota 1]​",san martin de porres / independencia, Lima[nota 1]​,-11.9890213,-77.05958269999999
+39,Minka,Callao,"Minka, Callao",callao,,-12.0482197,-77.11143419999999
+40,Open Plaza Angamos,"Surquillo, Lima","Open Plaza Angamos, Surquillo, Lima",surquillo, Lima,-12.1116941,-77.0125394
+41,Open Plaza Atocongo,"San Juan de Miraflores, Lima","Open Plaza Atocongo, San Juan de Miraflores, Lima",sjm, Lima,-12.1470801,-76.981243
+42,Open Plaza Cajamarca,Cajamarca,"Open Plaza Cajamarca, Cajamarca",cajamarca,,-7.1516647,-78.50520449999999
+43,Open Plaza Canta Callao,Callao,"Open Plaza Canta Callao, Callao",callao,,-11.9977951,-77.11296879999999
+44,Open Plaza Chiclayo,"La Victoria, Chiclayo","Open Plaza Chiclayo, La Victoria, Chiclayo",la victoria, Chiclayo,-6.7780929,-79.8358494
+45,Open Plaza Huánuco,Huánuco,"Open Plaza Huánuco, Huánuco",huanuco,,-9.9386245,-76.2477309
+46,Open Plaza Huancayo,"Huancayo, Junín","Open Plaza Huancayo, Huancayo, Junín",huancayo, Junín,-12.0621309,-75.2096174
+47,Open Plaza La Marina,"San Miguel, Lima","Open Plaza La Marina, San Miguel, Lima",san miguel, Lima,-12.0798963,-77.0887044
+48,Open Plaza Los Jardines,Trujillo,"Open Plaza Los Jardines, Trujillo",trujillo,,-8.0945727,-79.0230637
+49,Open Plaza Piura,Piura,"Open Plaza Piura, Piura",piura,,-5.182278999999999,-80.62213899999999
+50,Open Plaza Pucallpa,Pucallpa,"Open Plaza Pucallpa, Pucallpa",pucallpa,,-8.388396700000001,-74.56651939999999
+51,"Outlet Arauco Arequipa
+(ex Parque Lambramani)",Arequipa,"Outlet Arauco Arequipa
+(ex Parque Lambramani), Arequipa",arequipa,,-16.4110454,-71.5211049
+52,Parque La Molina,"La Molina, Lima","Parque La Molina, La Molina, Lima",la molina, Lima,-12.075563,-76.93615419999999
+53,Paseo Central,"Hunter, Arequipa","Paseo Central, Hunter, Arequipa",hunter, Arequipa,-16.4238755,-71.54643349999999
+54,Plaza Camacho,"La Molina, Lima","Plaza Camacho, La Molina, Lima",la molina, Lima,-12.080067,-76.9667147
+55,"Plaza Center La Molina
+(ex Molina Plaza)","La Molina, Lima","Plaza Center La Molina
+(ex Molina Plaza), La Molina, Lima",la molina, Lima,-12.0910772,-76.9500003
+56,Plaza Center San Martín de Porres,"San Martín de Porres, Lima","Plaza Center San Martín de Porres, San Martín de Porres, Lima",smp, Lima,-12.0107904,-77.0629223
+57,Plaza del Sol Huacho,Huacho,"Plaza del Sol Huacho, Huacho",huacho,,-11.1094613,-77.61369479999999
+58,Plaza del Sol Ica,Ica,"Plaza del Sol Ica, Ica",ica,,-14.0706335,-75.728512
+59,Plaza del Sol Piura Centro,Piura,"Plaza del Sol Piura Centro, Piura",piura,,-5.1971858,-80.6279416
+60,Plaza del Sol Piura Grau,Piura,"Plaza del Sol Piura Grau, Piura",piura,,-5.1926774,-80.6396778
+61,Plaza Santa Catalina,"La Victoria, Lima","Plaza Santa Catalina, La Victoria, Lima",la victoria, Lima,-12.0895382,-77.0199933
+62,Plaza Lima Sur,"Chorrillos, Lima","Plaza Lima Sur, Chorrillos, Lima",chorrillos, Lima,-12.1727686,-77.0132138
+63,Plaza Norte,"San Martín de Porres / Independencia, Lima[nota 1]​","Plaza Norte, San Martín de Porres / Independencia, Lima[nota 1]​",san martin de porres / independencia, Lima[nota 1]​,-12.0072289,-77.0597966
+64,Plaza San Miguel,"San Miguel, Lima","Plaza San Miguel, San Miguel, Lima",san miguel, Lima,-12.0776185,-77.0837672
+65,Real Plaza Arequipa,Arequipa,"Real Plaza Arequipa, Arequipa",arequipa,,-16.3892004,-71.54943089999999
+66,Real Plaza Cajamarca,Cajamarca,"Real Plaza Cajamarca, Cajamarca",cajamarca,,-7.154731099999999,-78.50594009999999
+67,Real Plaza Centro Cívico,"Lima, Lima","Real Plaza Centro Cívico, Lima, Lima",lima, Lima,-12.0567891,-77.0374173
+68,Real Plaza Chiclayo,Chiclayo,"Real Plaza Chiclayo, Chiclayo",chiclayo,,-6.7782675,-79.8326367
+69,Real Plaza Chimbote,"Chimbote, Ancash","Real Plaza Chimbote, Chimbote, Ancash",chimbote, Ancash,-9.1260116,-78.5363321
+70,Real Plaza Cusco,Cusco,"Real Plaza Cusco, Cusco",cusco,,-13.5239432,-71.95047269999999
+71,Real Plaza Guardia Civil,"Chorrillos, Lima","Real Plaza Guardia Civil, Chorrillos, Lima",chorrillos, Lima,-12.1728318,-76.9927479
+72,Real Plaza Huancayo,"Huancayo, Junín","Real Plaza Huancayo, Huancayo, Junín",huancayo, Junín,-12.0661894,-75.2052851
+73,Real Plaza Huánuco,Huánuco,"Real Plaza Huánuco, Huánuco",huanuco,,-9.9194012,-76.2410812
+74,Real Plaza Juliaca,"Juliaca, Puno","Real Plaza Juliaca, Juliaca, Puno",juliaca, Puno,-15.495415,-70.1303274
+75,Real Plaza Piura,Piura,"Real Plaza Piura, Piura",piura,,-5.1851812,-80.6419727
+76,"Real Plaza Primavera
+(ex Primavera Park & Plaza)","San Borja, Lima","Real Plaza Primavera
+(ex Primavera Park & Plaza), San Borja, Lima",san borja, Lima,-12.111522,-77.0019465
+77,Real Plaza Pro,"San Martín de Porres / Comas, Lima.[nota 2]​","Real Plaza Pro, San Martín de Porres / Comas, Lima.[nota 2]​",san martin de porres / comas, Lima.[nota 2]​,-11.9402253,-77.069578
+78,Real Plaza Pucallpa,Pucallpa,"Real Plaza Pucallpa, Pucallpa",pucallpa,,-8.3843265,-74.55625049999999
+79,Real Plaza Puruchuco,"Ate, Lima","Real Plaza Puruchuco, Ate, Lima",ate, Lima,-12.0413667,-76.9319773
+80,Real Plaza Salaverry,"Jesús María, Lima","Real Plaza Salaverry, Jesús María, Lima",jesus maria, Lima,-12.089713,-77.051756
+81,Real Plaza Santa Clara,"Ate, Lima","Real Plaza Santa Clara, Ate, Lima",ate, Lima,-12.0152597,-76.8854892
+82,Real Plaza Sullana,"Sullana, Piura","Real Plaza Sullana, Sullana, Piura",sullana, Piura,-4.918289,-80.6958599
+83,Real Plaza Trujillo,Trujillo,"Real Plaza Trujillo, Trujillo",trujillo,,-8.1311029,-79.0328798
+84,Real Plaza Villa María,"Villa María del Triunfo, Lima","Real Plaza Villa María, Villa María del Triunfo, Lima",vmt, Lima,-12.1803823,-76.9420878
+85,Royal Plaza,"San Martín de Porres / Independencia, Lima[nota 1]​","Royal Plaza, San Martín de Porres / Independencia, Lima[nota 1]​",san martin de porres / independencia, Lima[nota 1]​,-11.9977078,-77.0550569
+86,Strip Mall Paseo Fibra,"Magdalena del Mar / San Isidro, Lima[nota 3]​","Strip Mall Paseo Fibra, Magdalena del Mar / San Isidro, Lima[nota 3]​",magdalena del mar / san isidro, Lima[nota 3]​,-12.0933303,-77.0572845
