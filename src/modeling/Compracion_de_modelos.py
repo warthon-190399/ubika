@@ -13,16 +13,21 @@ from sklearn.preprocessing import StandardScaler
 # %% Read data
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
-input_path = os.path.join(BASE_DIR, "data", "processed", "proximidad_process.csv")
+input_path = os.path.join(BASE_DIR, "data", "processed", "proximidad_processed.csv")
 
 #output_path = os.path.join(BASE_DIR, "data", "processed", "malls_processed_format.csv")
 
-print(input_path)
-#df = pd.read_csv(input_path)
-
+if os.path.exists(input_path):
+    df = pd.read_csv(input_path)
+    print("Archivo leído correctamente")
+    
+else:
+    print("❌ El archivo no se encuentra en la ruta especificada.")
+# %%
+df
 # %% 
-X = df.drop("precio", axis=1)
-y = df["precio"]
+X = df.drop("precio_pen", axis=1)
+y = df["precio_pen"]
 # %% Scale of variables
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
