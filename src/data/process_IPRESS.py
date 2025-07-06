@@ -1,23 +1,23 @@
 
-#%%
-#Importa librerias
+#%% IMPORT LIBRARIES
 import pandas as pd
 import googlemaps
 import re
 import os
+import unicodedata
+from dotenv import load_dotenv
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
 input_path = os.path.join(BASE_DIR, "data", "raw", "IPRESS.csv")
+output_path = os.path.join(BASE_DIR, "data", "processed", "hospitales_processed.csv")
 
-print(input_path)
+input_path_env = os.path.join(BASE_DIR, ".env.example")
+load_dotenv(dotenv_path=input_path_env, override=True)
+
 df = pd.read_csv(input_path, encoding="latin1")
-
-#%%
-#API DE GOOGLE
-
-# Tu clave de API de Google
-API_KEY = "AIzaSyBAiYDo7nmexhH7rkLpwSA-sP_0IJ-FR-8"  # 👈 reemplaza esto por tu clave real
+#%% API DE GOOGLE
+API_KEY = os.getenv("GOOGLE_GEOENCODING_APIKEY").strip('"') # 👈 reemplaza esto por tu clave real
 
 # Crear cliente
 gmaps = googlemaps.Client(key=API_KEY)
@@ -35,11 +35,7 @@ def obtener_lat_lon(direccion):
 
 #Ejemplo: df2["ubicaciones_tupla"] = df["direccion_ubicacion"].apply(obtener_lat_lon) #API google
 
-#%%
-#FUNCIÓN LIMPIAR TEXTO
-
-#import re
-
+#%% FUNCIÓN LIMPIAR TEXTO
 def limpiar_direccion(direccion):
     if pd.isna(direccion):
         return None
@@ -104,25 +100,46 @@ def limpiar_direccion(direccion):
 
 #Ejemplo: df2["direccion_ubicacion"] = df1["direccion_ubicacion"].apply(limpiar_direccion)
 
+#%% EDIT VALUES IN COLUMNS
+df = df[df["Departamento"] == "LIMA"]
+df = df[df["Condición"] == "EN FUNCIONAMIENTO"]
+
+df = df[df["Tipo"] == "ESTABLECIMIENTO DE SALUD CON INTERNAMIENTO"]
+df["direccion_ubicacion"] = df["Dirección"] + ", " + df["Distrito"] + ", " + df["Provincia"]
+
+df["direccion_ubicacion"] = df["direccion_ubicacion"].apply(limpiar_direccion) #LIMPIAR TEXTO
+
+df["ubicaciones_tupla"] = df["direccion_ubicacion"].apply(obtener_lat_lon) #API google
+
+df["ubicaciones_tupla"] = df["ubicaciones_tupla"].astype("str")
+df[["latitud","longitud"]] = df["ubicaciones_tupla"].str.strip("()").str.split(",", expand=True)
+df["latitud"] = pd.to_numeric(df["latitud"], errors="coerce")
+df["longitud"] = pd.to_numeric(df["longitud"], errors="coerce")
+
+df = df[['Nombre del establecimiento', 'Provincia', 'Distrito','Dirección','direccion_ubicacion', 'latitud','longitud']]
+# %% Se renombrar columnas
+df.rename(columns = {"Nombre del establecimiento":"nombre",
+                     "Dirección":"direccion",
+                     "direccion_ubicacion":"direccion_completa",
+                     "Provincia":"provincia","Distrito":"distrito"
+                     }, inplace = True)
+df
+# %% EDIRdición de valores de la columna distrito
+def quitar_tildes(texto):
+    if isinstance(texto, str):
+        return unicodedata.normalize("NFKD", texto).encode("ASCII", "ignore").decode("utf-8")
+    return texto  # Si es NaN u otro tipo, lo devuelve igual
+
+df["distrito"] = df["distrito"].astype(str).apply(quitar_tildes).str.lower()
+df["distrito"] = df["distrito"].replace({"san juan de lurigancho":"sjl",
+                                         "san juan de miraflores":"sjm",
+                                         "villa maria del triunfo":"vmt",
+                                         "san martin de porres":"smp",
+                                         "villa el salvador":"ves"})
+df["distrito"].unique()
 #%%
-df2 = df[df["Departamento"] == "LIMA"]
-
-df2 = df2[df2["Condición"] == "EN FUNCIONAMIENTO"]
-
-df2 = df2[df2["Tipo"] == "ESTABLECIMIENTO DE SALUD CON INTERNAMIENTO"]
-df2["direccion_ubicacion"] = df2["Dirección"] + ", " + df2["Distrito"] + ", " + df2["Provincia"]
-
-df2["direccion_ubicacion"] = df2["direccion_ubicacion"].apply(limpiar_direccion) #LIMPIAR TEXTO
-
-df2["ubicaciones_tupla"] = df2["direccion_ubicacion"].apply(obtener_lat_lon) #API google
-
-df2["ubicaciones_tupla"] = df2["ubicaciones_tupla"].astype("str")
-df2[["lat","lon"]] = df2["ubicaciones_tupla"].str.strip("()").str.split(",", expand=True)
-df2["lat"] = pd.to_numeric(df2["lat"], errors="coerce")
-df2["lon"] = pd.to_numeric(df2["lon"], errors="coerce")
-
-df2 = df2[['Nombre del establecimiento', 'Departamento', 'Provincia', 'Distrito','Dirección','direccion_ubicacion', 'lat','lon']]
-
-#%%
-df2.to_csv("C:/PC/7. PROYECTOS/Ubika/data/processed/hospitales_processed.csv")
+df["provincia"] = df["provincia"].astype(str).apply(quitar_tildes).str.lower()
+df["provincia"].unique()
+# %%
+df.to_csv(output_path)
 # %%
