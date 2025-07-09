@@ -10,6 +10,9 @@ from xgboost import XGBRegressor
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.svm import SVR
 from sklearn.preprocessing import StandardScaler
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.optimizers import Adam
 # %% Read data
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
@@ -71,3 +74,4 @@ for nombre, modelo in modelos.items():
 # %% Show results
 df_resultados = pd.DataFrame(resultados).sort_values(by="RMSE")
 print(df_resultados)
+# %%

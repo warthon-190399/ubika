@@ -51,7 +51,7 @@ df["distrito"] = df["distrito"].replace({"san juan de lurigancho":"sjl",
                                          "villa el salvador":"ves"})
 df
 # %% Se eliminan duplicados
-df = df.drop_duplicates(subset=['nombre'])
+df = df.drop_duplicates(subset=['nombre','latitud','longitud'])
 df
 # %% Export CSV
 df.to_csv(output_path, index=False)
