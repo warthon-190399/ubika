@@ -16,7 +16,7 @@ from tensorflow.keras.optimizers import Adam
 # %% Read data
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
-input_path = os.path.join(BASE_DIR, "data", "processed", "proximidad_processed.csv")
+input_path = os.path.join(BASE_DIR, "data", "processed", "data_preprocessing.csv")
 
 #output_path = os.path.join(BASE_DIR, "data", "processed", "malls_processed_format.csv")
 
