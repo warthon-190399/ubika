@@ -7,7 +7,7 @@ def imputar_nan_por_grupo(df, columna_grupo):
         if columna == columna_grupo:
             continue  # Evitar modificar la columna usada para agrupar
     
-    if df[columna].isnull().any():
+        if df[columna].isnull().any():
             if df[columna].dtype in ['float64', 'int64']:
                 # Imputar con mediana por grupo
                 df[columna] = df.groupby(columna_grupo)[columna].transform(
@@ -22,6 +22,26 @@ def imputar_nan_por_grupo(df, columna_grupo):
                 print(f"✅ '{columna}' (texto) imputada con moda por '{columna_grupo}'")
 
     return df
+
+def eliminar_filas_nan(df, columna_objetivo):
+    """
+    Elimina las filas que contienen NaN en una columna específica.
+
+    Parámetros:
+    - df: DataFrame original
+    - columna_objetivo: str, nombre de la columna que debe no tener NaN
+
+    Retorna:
+    - df_filtrado: DataFrame sin las filas con NaN en la columna indicada
+    """
+    filas_antes = df.shape[0]
+    df_filtrado = df.dropna(subset=[columna_objetivo])
+    filas_despues = df_filtrado.shape[0]
+
+    print(f"✅ Se eliminaron {filas_antes - filas_despues} filas con NaN en '{columna_objetivo}'")
+    
+    return df_filtrado
+
 # %% Read df
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
@@ -29,10 +49,15 @@ input_path = os.path.join(BASE_DIR, "data", "processed", "proximidad_processed.c
 output_path = os.path.join(BASE_DIR, "data", "processed", "data_preprocessing.csv")
 
 df = pd.read_csv(input_path)
+# %% Drop rows by "distrito"
+df = eliminar_filas_nan(df, columna_objetivo = "distrito")
 # %% REPLACE NAN VALUES
 df = imputar_nan_por_grupo(df, columna_grupo="distrito")
-df
+# %% Drop rows by "num_estac"
+df = eliminar_filas_nan(df, columna_objetivo = "num_estac")
 # %% REPLACE VALUES IN "nivel_socieconomico" COLUMN
+df = eliminar_filas_nan(df, columna_objetivo = "fecha_pub")
+# %% REPLACE VALUES IN 'nivel_socioeconomico'
 orden_socioeco = {'A': 4, 'B': 3, 'C': 2, 'D': 1}
 df['nivel_socioeconomico'] = df['nivel_socioeconomico'].map(orden_socioeco)
 # %% CODE THE COLUMN 'distrito' TO NUMBERS
@@ -56,13 +81,12 @@ df = df[['precio_pen', 'mantenimiento_soles', 'area_m2',
        'dia_del_anio','distrito', 'nivel_socioeconomico',
        'latitud', 'longitud', 'num_colegios_prox',
        'num_malls_prox', 'num_hospitales_prox']]
-df
 # %% DROP VALUES OUT OF RANGE 
 q_low = df["precio_pen"].quantile(0.01)
 q_high = df["precio_pen"].quantile(0.99)
 df = df[(df["precio_pen"] >= q_low) & (df["precio_pen"] <= q_high)]
 # %%
-df
+df.info()
 # %% EXPORT TO CSV
 df.to_csv(output_path)
 # %%

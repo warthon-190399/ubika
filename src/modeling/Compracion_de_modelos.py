@@ -3,9 +3,13 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.metrics import mean_absolute_percentage_error, mean_absolute_error
 import os
 # %% Models
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import GradientBoostingRegressor
+from lightgbm import LGBMRegressor
+from catboost import CatBoostRegressor
 from xgboost import XGBRegressor
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.svm import SVR
@@ -26,8 +30,6 @@ if os.path.exists(input_path):
     
 else:
     print("❌ El archivo no se encuentra en la ruta especificada.")
-# %%
-df
 # %% 
 X = df.drop("precio_pen", axis=1)
 y = df["precio_pen"]
@@ -40,10 +42,14 @@ X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, 
 modelos = {
     "RandomForest": RandomForestRegressor(n_estimators=100, random_state=42),
     "XGBoost": XGBRegressor(n_estimators=100, random_state=42, verbosity=0),
+    "LightGBM": LGBMRegressor(n_estimators=100, random_state=42),
+    "CatBoost": CatBoostRegressor(verbose=0, random_state=42),
+    "GradientBoost": GradientBoostingRegressor(n_estimators=100, random_state=42),
     "KNN": KNeighborsRegressor(n_neighbors=5),
     "SVR": SVR(),
-    "NeuralNetwork": "keras_model"  # Esto lo manejamos aparte
+    "NeuralNetwork": "keras_model"
 }
+
 # %% Results
 resultados = []
 # %% Training and evaluation
@@ -63,11 +69,17 @@ for nombre, modelo in modelos.items():
         modelo.fit(X_train, y_train)
         y_pred = modelo.predict(X_test)
     
-    rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+    mae = mean_absolute_error(y_test, y_pred)
+    mse = mean_squared_error(y_test, y_pred)
+    mape = mean_absolute_percentage_error(y_test, y_pred)
+    rmse = np.sqrt(mse)
     r2 = r2_score(y_test, y_pred)
 
     resultados.append({
         "Modelo": nombre,
+        "MAE": round(mae, 2),
+        "MSE": round(mse, 2),
+        "MAPE": round(mape * 100, 2),  # en porcentaje
         "RMSE": round(rmse, 2),
         "R2 Score": round(r2, 4)
     })
