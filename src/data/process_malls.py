@@ -10,32 +10,10 @@ import os
 import re
 import unicodedata
 from dotenv import load_dotenv
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
-
-input_path_env = os.path.join(BASE_DIR, ".env.example")
-load_dotenv(dotenv_path=input_path_env, override=True)
-#%% SCRAP WIKIPEDIA
-url = "https://es.wikipedia.org/wiki/Anexo:Centros_comerciales_del_Per%C3%BA"
-
-data  = requests.get(url).text 
-soup = BeautifulSoup(data,"html.parser")
-table = soup.find('table')
-
-malls = []
-for row in table.find_all('tr'): # in html table row is represented by the tag <tr>
-    col = row.find_all('td') # in html a column is represented by the tag <td>
-    if col:
-        malls.append([col[0].text.strip(), col[1].text.strip()])
-
-df=pd.DataFrame(malls, columns = ["nombre", "ubicacion"])
-#%% API DE GOOGLE
+#%% FUNCTION "obtener_lat_lon", API DE GOOGLE
 API_KEY = os.getenv("GOOGLE_GEOENCODING_APIKEY").strip('"')  # 👈 reemplaza esto por tu clave real
-
 gmaps = googlemaps.Client(key=API_KEY) # Crear cliente
 
-# Función para obtener lat y lon desde una dirección
 def obtener_lat_lon(direccion):
     try:
         geocode_result = gmaps.geocode(direccion)
@@ -45,9 +23,7 @@ def obtener_lat_lon(direccion):
     except Exception as e:
         print(f"❌ Error en dirección '{direccion}': {e}")
     return (None, None)
-
-#Ejemplo: df2["ubicaciones_tupla"] = df["direccion_ubicacion"].apply(obtener_lat_lon) #API google
-#%% CLEAN COLUMN "DIRECCION"
+#%% FUNCTION "limpiar_direccion"
 def limpiar_direccion(direccion):
     if pd.isna(direccion):
         return None
@@ -109,8 +85,33 @@ def limpiar_direccion(direccion):
         direccion = direccion + ", Perú"
 
     return direccion.strip()
+# %% FUNCTION "quitar_tildes"
+def quitar_tildes(texto):
+    if isinstance(texto, str):
+        return unicodedata.normalize("NFKD", texto).encode("ASCII", "ignore").decode("utf-8")
+    return texto  # Si es NaN u otro tipo, lo devuelve igual
+# %% FILES LOCATION
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
 
-#Ejemplo: df2["direccion_ubicacion"] = df1["direccion_ubicacion"].apply(limpiar_direccion)
+input_path_env = os.path.join(BASE_DIR, ".env.example")
+output_path = os.path.join(BASE_DIR, "data", "processed", "malls_processed.csv")
+load_dotenv(dotenv_path=input_path_env, override=True)
+#%% SCRAP WIKIPEDIA
+url = "https://es.wikipedia.org/wiki/Anexo:Centros_comerciales_del_Per%C3%BA"
+
+data  = requests.get(url).text 
+soup = BeautifulSoup(data,"html.parser")
+table = soup.find('table')
+
+malls = []
+for row in table.find_all('tr'): # in html table row is represented by the tag <tr>
+    col = row.find_all('td') # in html a column is represented by the tag <td>
+    if col:
+        malls.append([col[0].text.strip(), col[1].text.strip()])
+
+df=pd.DataFrame(malls, columns = ["nombre", "ubicacion"])
+
 #%% CREATE COLUMNS
 df["direccion_ubicacion"] = df.nombre + ", "+ df.ubicacion 
 df[['distrito', 'provincia']] = df['ubicacion'].str.split(',', expand=True)
@@ -131,11 +132,6 @@ df
 df=df[["nombre","ubicacion","direccion_completa","distrito","provincia","latitud","longitud"]]
 df
 # %% EDIT VALUES IN THE COLUMN "DISTRITO"
-def quitar_tildes(texto):
-    if isinstance(texto, str):
-        return unicodedata.normalize("NFKD", texto).encode("ASCII", "ignore").decode("utf-8")
-    return texto  # Si es NaN u otro tipo, lo devuelve igual
-
 df["distrito"] = df["distrito"].astype(str).apply(quitar_tildes).str.lower()
 df["distrito"] = df["distrito"].replace({"san juan de lurigancho":"sjl",
                                          "san juan de miraflores":"sjm",
@@ -144,10 +140,5 @@ df["distrito"] = df["distrito"].replace({"san juan de lurigancho":"sjl",
                                          "villa el salvador":"ves"})
 df
 #%% EXPORT CSV
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
-
-output_path = os.path.join(BASE_DIR, "data", "processed", "malls_processed.csv")
-
 df.to_csv(output_path)
 # %%

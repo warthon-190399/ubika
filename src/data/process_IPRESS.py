@@ -6,23 +6,12 @@ import re
 import os
 import unicodedata
 from dotenv import load_dotenv
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
-input_path = os.path.join(BASE_DIR, "data", "raw", "IPRESS.csv")
-output_path = os.path.join(BASE_DIR, "data", "processed", "hospitales_processed.csv")
-
-input_path_env = os.path.join(BASE_DIR, ".env.example")
-load_dotenv(dotenv_path=input_path_env, override=True)
-
-df = pd.read_csv(input_path, encoding="latin1")
-#%% API DE GOOGLE
+#%% FUNCTION "obtener_lat_lon", API DE GOOGLE
 API_KEY = os.getenv("GOOGLE_GEOENCODING_APIKEY").strip('"') # 👈 reemplaza esto por tu clave real
 
 # Crear cliente
 gmaps = googlemaps.Client(key=API_KEY)
 
-# Función para obtener lat y lon desde una dirección
 def obtener_lat_lon(direccion):
     try:
         geocode_result = gmaps.geocode(direccion)
@@ -34,8 +23,7 @@ def obtener_lat_lon(direccion):
     return (None, None)
 
 #Ejemplo: df2["ubicaciones_tupla"] = df["direccion_ubicacion"].apply(obtener_lat_lon) #API google
-
-#%% FUNCIÓN LIMPIAR TEXTO
+#%% FUNCTION "limpiar_direccion"
 def limpiar_direccion(direccion):
     if pd.isna(direccion):
         return None
@@ -98,8 +86,21 @@ def limpiar_direccion(direccion):
 
     return direccion.strip()
 
-#Ejemplo: df2["direccion_ubicacion"] = df1["direccion_ubicacion"].apply(limpiar_direccion)
+# %% FUNCTION "quitar_tildes"
+def quitar_tildes(texto):
+    if isinstance(texto, str):
+        return unicodedata.normalize("NFKD", texto).encode("ASCII", "ignore").decode("utf-8")
+    return texto  # Si es NaN u otro tipo, lo devuelve igual
+# %%
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
+input_path = os.path.join(BASE_DIR, "data", "raw", "IPRESS.csv")
+output_path = os.path.join(BASE_DIR, "data", "processed", "hospitales_processed.csv")
 
+input_path_env = os.path.join(BASE_DIR, ".env.example")
+load_dotenv(dotenv_path=input_path_env, override=True)
+
+df = pd.read_csv(input_path, encoding="latin1")
 #%% EDIT VALUES IN COLUMNS
 df = df[df["Departamento"] == "LIMA"]
 df = df[df["Condición"] == "EN FUNCIONAMIENTO"]
@@ -125,11 +126,6 @@ df.rename(columns = {"Nombre del establecimiento":"nombre",
                      }, inplace = True)
 df
 # %% EDIRdición de valores de la columna distrito
-def quitar_tildes(texto):
-    if isinstance(texto, str):
-        return unicodedata.normalize("NFKD", texto).encode("ASCII", "ignore").decode("utf-8")
-    return texto  # Si es NaN u otro tipo, lo devuelve igual
-
 df["distrito"] = df["distrito"].astype(str).apply(quitar_tildes).str.lower()
 df["distrito"] = df["distrito"].replace({"san juan de lurigancho":"sjl",
                                          "san juan de miraflores":"sjm",
