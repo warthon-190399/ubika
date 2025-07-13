@@ -6,7 +6,7 @@ import os
 # %% IMPORT LIBRARIES FOR GRAPHS
 import seaborn as sns
 import matplotlib.pyplot as plt
-# %% 'proximidad_entre' FUNCTION
+# %% FUNCTION 'proximidad_entre'
 def proximidad_entre(df_departamentos_1, df_colegios_1, nombre_columna, radius_metros = 500):
     # Asegurarse que no hay NaNs
     df_colegios_1 = df_colegios_1.dropna(subset=['latitud', 'longitud']).reset_index(drop=True)
@@ -40,6 +40,9 @@ input_path_adondevivir = os.path.join(BASE_DIR, "data", "processed", "adondevivi
 input_path_malls = os.path.join(BASE_DIR, "data", "processed", "malls_processed.csv")
 input_path_colegios = os.path.join(BASE_DIR, "data", "processed", "colegios_processed.csv")
 input_path_hospitales = os.path.join(BASE_DIR, "data", "processed", "hospitales_processed.csv")
+input_path_tren = os.path.join(BASE_DIR, "data", "processed", "tren_processed.csv")
+input_path_metropolitano = os.path.join(BASE_DIR, "data", "processed", "metropolitano_processed.csv")
+input_path_comisarias = os.path.join(BASE_DIR, "data", "processed", "comisarias_processed.csv")
 
 output_path = os.path.join(BASE_DIR, "data", "processed", "proximidad_processed.csv")
 
@@ -47,13 +50,23 @@ df_adondevivir = pd.read_csv(input_path_adondevivir)
 df_malls = pd.read_csv(input_path_malls)
 df_colegios = pd.read_csv(input_path_colegios)
 df_hospitales = pd.read_csv(input_path_hospitales)
-
+df_tren = pd.read_csv(input_path_tren, sep='|')
+df_metropolitano = pd.read_csv(input_path_metropolitano, sep='|')
+df_comisarias = pd.read_csv(input_path_comisarias)
 # %% COLUMN 'num_colegios_prox' HAS BEEN ADDED
 df = proximidad_entre(df_adondevivir, df_colegios, 'num_colegios_prox')
 # %% COLUMN 'num_malls_prox' HAS BEEN ADDED
 df = proximidad_entre(df, df_malls, 'num_malls_prox')
 # %% COLUMN 'num_hospitales_prox' HAS BEEN ADDED
 df = proximidad_entre(df, df_hospitales, 'num_hospitales_prox')
+# %% COLUMN 'num_tren_est_prox' HAS BEEN ADDED
+df = proximidad_entre(df, df_tren, 'num_tren_est_prox')
+# %% COLUMN 'num_metro_est_prox' HAS BEEN ADDED
+df = proximidad_entre(df, df_metropolitano, 'num_metro_est_prox')
+# %% COLUMN 'num_comisarias_prox' HAS BEEN ADDED
+df = proximidad_entre(df, df_comisarias, 'num_comisarias_prox')
+# %%
+df
 # %% EXPORT TO CSV
 df.to_csv(output_path)
 # %%

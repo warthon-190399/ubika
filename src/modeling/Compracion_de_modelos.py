@@ -1,11 +1,11 @@
-# %% Import Libraries
+# %% IMPORT LIBRARIES
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.metrics import mean_absolute_percentage_error, mean_absolute_error
 import os
-# %% Models
+# %% IMPORT LIBRARIES FOR MODELS
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.ensemble import GradientBoostingRegressor
 from lightgbm import LGBMRegressor
@@ -17,6 +17,9 @@ from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.optimizers import Adam
+# %% IMPORT LIBRARIES FOR GRAPHS
+import seaborn as sns
+import matplotlib.pyplot as plt
 # %% Read data
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
@@ -30,10 +33,26 @@ if os.path.exists(input_path):
     
 else:
     print("❌ El archivo no se encuentra en la ruta especificada.")
-# %% 
+# %% DROP IRRELEBANS COLUMNS
+df = df.drop(["Unnamed: 0"], axis=1)
+
+#Keep only year and month, as house prices change at this temporal resolution
+df = df.drop(["dia","dia_semana","dia_del_anio"], axis=1) 
+
+# %% Calculate the correlation matrix using only numeric columns
+corr_matrix = df.corr(numeric_only=True)
+
+# Show a heatmap
+plt.figure(figsize=(12, 8))
+sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap='coolwarm', square=True, linewidths=0.5)
+plt.title("Matriz de Correlación")
+plt.tight_layout()
+plt.show()
+
+# %% SPLIT DATA IN X AND Y
 X = df.drop("precio_pen", axis=1)
 y = df["precio_pen"]
-# %% Scale of variables
+# %% SCALE OF VARIABLES
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 # %% Split data in train and test

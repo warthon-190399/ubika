@@ -1,7 +1,7 @@
 #%% Import Libraries
 import pandas as pd
 import os 
-#%% Functions
+#%% FUNCTION 'imputar_nan_por_grupo'
 def imputar_nan_por_grupo(df, columna_grupo):
     for columna in df.columns:
         if columna == columna_grupo:
@@ -23,6 +23,7 @@ def imputar_nan_por_grupo(df, columna_grupo):
 
     return df
 
+# %% FUNCTION 'eliminar_filas_nan'
 def eliminar_filas_nan(df, columna_objetivo):
     """
     Elimina las filas que contienen NaN en una columna específica.
