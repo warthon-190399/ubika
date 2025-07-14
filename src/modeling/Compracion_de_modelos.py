@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 # %% Read data
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
-input_path = os.path.join(BASE_DIR, "data", "processed", "data_preprocessing.csv")
+input_path = os.path.join(BASE_DIR, "data", "processed", "data_preprocessing_eng.csv")
 
 #output_path = os.path.join(BASE_DIR, "data", "processed", "malls_processed_format.csv")
 
@@ -33,14 +33,12 @@ if os.path.exists(input_path):
     
 else:
     print("❌ El archivo no se encuentra en la ruta especificada.")
-# %% DROP IRRELEBANS COLUMNS
-df = df.drop(["Unnamed: 0"], axis=1)
 
 #Keep only year and month, as house prices change at this temporal resolution
-df = df.drop(["dia","dia_semana","dia_del_anio"], axis=1) 
-
+df_modelling = df.drop(["precio_usd","fecha_pub","distrito", "nivel_socioeconomico", "direccion_completa", "latitud", "longitud", "tamano", "antiguedad_categoria","precio_distrito_prom", "precio_rel_distrito", "precio_m2_distrito", "precio_m2_rel"], axis=1) 
+#%%
 # %% Calculate the correlation matrix using only numeric columns
-corr_matrix = df.corr(numeric_only=True)
+corr_matrix = df_modelling.corr(numeric_only=True)
 
 # Show a heatmap
 plt.figure(figsize=(12, 8))
@@ -50,8 +48,8 @@ plt.tight_layout()
 plt.show()
 
 # %% SPLIT DATA IN X AND Y
-X = df.drop("precio_pen", axis=1)
-y = df["precio_pen"]
+X = df_modelling.drop("precio_pen", axis=1)
+y = df_modelling["precio_pen"]
 # %% SCALE OF VARIABLES
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
@@ -63,9 +61,9 @@ modelos = {
     "XGBoost": XGBRegressor(n_estimators=100, random_state=42, verbosity=0),
     "LightGBM": LGBMRegressor(n_estimators=100, random_state=42),
     "CatBoost": CatBoostRegressor(verbose=0, random_state=42),
-    "GradientBoost": GradientBoostingRegressor(n_estimators=100, random_state=42),
-    "KNN": KNeighborsRegressor(n_neighbors=5),
-    "SVR": SVR(),
+    #"GradientBoost": GradientBoostingRegressor(n_estimators=100, random_state=42),
+    #"KNN": KNeighborsRegressor(n_neighbors=5),
+    #"SVR": SVR(),
     "NeuralNetwork": "keras_model"
 }
 
@@ -105,4 +103,48 @@ for nombre, modelo in modelos.items():
 # %% Show results
 df_resultados = pd.DataFrame(resultados).sort_values(by="RMSE")
 print(df_resultados)
+# %%
+from catboost import CatBoostRegressor
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import make_scorer, mean_squared_error
+import numpy as np
+
+# Definir modelo base (sin entrenar)
+cat_model = CatBoostRegressor(verbose=0, random_state=42)
+
+# Definir el grid de hiperparámetros
+param_grid = {
+    'iterations': [100, 200],
+    'depth': [4, 6, 8],
+    'learning_rate': [0.01, 0.05, 0.1],
+    'l2_leaf_reg': [1, 3, 5]
+}
+
+# Definir el scoring (puedes usar R² o RMSE)
+#scorer = make_scorer(mean_squared_error, greater_is_better=False)
+
+# Configurar GridSearchCV
+grid_search = GridSearchCV(
+    estimator=cat_model,
+    param_grid=param_grid,
+    scoring="r2",        # Aquí usamos RMSE negativo
+    cv=3,                  # 5-fold cross-validation
+    n_jobs=-1              # Usa todos los núcleos disponibles
+)
+
+# Ejecutar la búsqueda de hiperparámetros
+grid_search.fit(X_train, y_train)
+
+# Mostrar mejores hiperparámetros
+print("✅ Mejores hiperparámetros encontrados:")
+print(grid_search.best_params_)
+
+# Predecir y evaluar
+best_cat_model = grid_search.best_estimator_
+y_pred = best_cat_model.predict(X_test)
+
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+print(f"📊 RMSE del mejor modelo CatBoost: {rmse:.2f}")
+# %%
+print("📈 Mejor R² obtenido:", grid_search.best_score_)
 # %%
