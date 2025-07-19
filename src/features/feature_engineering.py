@@ -11,8 +11,6 @@ output_path = os.path.join(BASE_DIR, "data", "processed", "data_preprocessing_en
 df = pd.read_csv(input_path)
 df_processed = df.copy()
 # %%
-df_processed['precio_m2'] = df_processed['precio_pen'] / df_processed['area_m2'].replace(0, pd.NA)
-df_processed['mantenimiento_rel'] = df_processed['mantenimiento_soles'] / df_processed['precio_pen'].replace(0, pd.NA)
 
 df_processed['total_ambientes'] = df_processed['num_dorm'] + df_processed['num_banios']
 
@@ -34,32 +32,13 @@ df_processed['tamano_cod'] = df_processed['tamano'].map({'pequeno': 1, 'mediano'
 df_processed['antiguedad_cod'] = df_processed['antiguedad_categoria'].map({'nuevo': 1, 'seminuevo': 2, 'antiguo': 3})
 df_processed['nivel_socioeconomico_cod'] = df_processed['nivel_socioeconomico'].map({'A': 1, 'B': 2, 'C': 3, 'D': 4})
 # %% precio total por distrito
+df_processed['total_servicios_prox'] = (
+    df_processed['num_colegios_prox'] + df_processed['num_malls_prox'] + df_processed['num_hospitales_prox'] +
+    df_processed['num_tren_est_prox'] + df_processed['num_metro_est_prox'] + df_processed['num_comisarias_prox']
+)
 
-
-
-
-precio_prom_distrito = df_processed.groupby('distrito')['precio_pen'].median().reset_index()
-precio_prom_distrito.columns = ['distrito', 'precio_distrito_prom']
-df_processed = df_processed.merge(precio_prom_distrito, on='distrito', how='left')
+df_processed['total_transporte_prox'] =  df_processed['num_tren_est_prox'] + df_processed['num_metro_est_prox']
 #%%
-# Diferencia entre precio del inmueble y promedio del distrito
-df_processed['precio_rel_distrito'] = df_processed['precio_pen'] - df_processed['precio_distrito_prom']
 
-# %%
-precio_m2_distrito = df_processed.groupby('distrito')['precio_m2'].median().reset_index()
-precio_m2_distrito.columns = ['distrito', 'precio_m2_distrito']
-
-df_processed = df_processed.merge(precio_m2_distrito, on='distrito', how='left')
-
-# Comparar con precio m2 del inmueble
-df_processed['precio_m2_rel'] = df_processed['precio_m2'] - df_processed['precio_m2_distrito']
-# %%
-df_processed['precio_m2_sobrevaluado']=np.where(df_processed['precio_m2_rel'] > 0, 1, 0)
-df_processed['precio_rel_sobrevaluado']=np.where(df_processed['precio_rel_distrito'] > 0, 1, 0)
-
-
-#df_processed_1 = df_processed[df_processed["direccion_completa"].notna()]
-# %%
-df_processed.info()
-#%%
 df_processed.to_csv(output_path, index = False)
+# %%
