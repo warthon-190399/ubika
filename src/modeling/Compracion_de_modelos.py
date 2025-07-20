@@ -12,8 +12,8 @@ from lightgbm import LGBMRegressor
 from catboost import CatBoostRegressor
 from xgboost import XGBRegressor
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import GridSearchCV
 import optuna
+import joblib
 #%%
 
 def objective(trial):
@@ -33,17 +33,24 @@ def objective(trial):
     return r2_score(y_test, y_pred)
 
 
-
-
 # %% Read data
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
 input_path = os.path.join(BASE_DIR, "data", "processed", "data_preprocessing_eng.csv")
+output_path = os.path.join(BASE_DIR, "data", "processed", "final_dataset.csv")
+output_model_path = os.path.join(BASE_DIR,"models","catboost_model.pkl")
+output_hyperparams_path = os.path.join(BASE_DIR,"models","catboost_hyperparams.pkl")
+
 
 df = pd.read_csv(input_path)
 
-df_modelling = df.drop(["precio_usd","fecha_pub","distrito", "nivel_socioeconomico", "direccion_completa", "latitud", "longitud", "tamano", "antiguedad_categoria"], axis=1) 
+df_modelling = df.drop(["precio_usd","fecha_pub","distrito", 
+                        "nivel_socioeconomico", "direccion_completa", 
+                        "latitud", "longitud", "tamano", 
+                        "antiguedad_categoria","num_comisarias_prox", 
+                        "total_transporte_prox", "num_metro_est_prox", 
+                        "num_malls_prox", "num_tren_est_prox"], axis=1) 
 
 
 # %% SPLIT DATA IN X AND Y
@@ -152,51 +159,20 @@ print(feature_importance)
 import shap
 
 # Entrenar el modelo CatBoost (usa tus mejores hiperparámetros de Optuna)
-model = CatBoostRegressor(**best_params, verbose=0, random_state=42)
-model.fit(X_train, y_train)
+final_model = CatBoostRegressor(**best_params, verbose=0, random_state=42)
+final_model.fit(X_train, y_train)
 
 # Calcula SHAP values para el conjunto de test
-explainer = shap.Explainer(model)
+explainer = shap.Explainer(final_model)
 shap_values = explainer(X_test)
 
 # Resumen de importancia global (similar a feature_importance pero con dirección)
 shap.summary_plot(shap_values, X_test, feature_names=X.columns)
 
-#%%
-# Definir modelo base (sin entrenar)
-cat_model = CatBoostRegressor(verbose=0, random_state=42)
-
-# Definir el grid de hiperparámetros
-param_grid = {
-    'iterations': [100, 200],
-    'depth': [3, 4, 6, 8],
-    'learning_rate': [0.01, 0.05, 0.1],
-    'l2_leaf_reg': [1, 3, 5]
-}
-
-grid_search = GridSearchCV(
-    estimator=cat_model,
-    param_grid=param_grid,
-    scoring="r2",    
-    cv=3,                  
-    n_jobs=-1              
-)
-
-# Ejecutar la búsqueda de hiperparámetros
-grid_search.fit(X_train, y_train)
-
-# Mostrar mejores hiperparámetros
-print("✅ Mejores hiperparámetros encontrados:")
-print(grid_search.best_params_)
-
-# Predecir y evaluar
-best_cat_model = grid_search.best_estimator_
-y_pred = best_cat_model.predict(X_test)
-
-rmse = np.sqrt(mean_squared_error(y_test, y_pred))
-print(f"📊 RMSE del mejor modelo CatBoost: {rmse:.2f}")
 # %%
-print("📈 Mejor R² obtenido:", grid_search.best_score_)
+joblib.dump(final_model, output_model_path)
+joblib.dump(best_params, output_hyperparams_path)
 # %%
-print(np.__version__)
+df_modelling.to_csv(output_path, index=False)
+
 # %%
