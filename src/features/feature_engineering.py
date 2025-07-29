@@ -98,18 +98,36 @@ df_processed['zona_funcional_cod'] = df_processed['zona_funcional'].map({'Callao
                                                                         'Otro':8,})
 #df_processed['zona_funcional_cod'] = df_processed['zona_funcional_cod'].astype(int)
 # %%
-#import matplotlib.pyplot as plt
+import seaborn as sns
+import matplotlib.pyplot as plt
 
-#df_grouped = df_processed.groupby('distrito').size().reset_index(name = 'conteo')
-#df_grouped = df_grouped.sort_values(by = "conteo", ascending=False)
+df_miraflores = df_processed[df_processed['distrito'] == 'miraflores']
 
-#df_grouped['porcentaje'] = 100*df['conteo']/df['conteo'].sum()
-#df_grouped['porcentaje_acumulado']=df['porcentaje'].cumsum()
+plt.figure(figsize=(6,4))
+sns.boxplot(data=df_miraflores, x='distrito', y='precio_pen')
+plt.title('Distribución de precios en Miraflores')
+plt.ylabel('Precio (S/.)')
+plt.tight_layout()
+plt.show()
 
-#Create graph
-#fig, ax1 = plt.subplots()
+df_miraflores.info()
+#%%
+p90 = df_miraflores['precio_pen'].quantile(0.85)
+df_miraflores = df_miraflores[df_miraflores['precio_pen'] <= p90]
 
-#ax1.bar(df[])
+plt.figure(figsize=(6,4))
+sns.boxplot(data=df_miraflores, x='distrito', y='precio_pen')
+plt.title('Distribución de precios en Miraflores')
+plt.ylabel('Precio (S/.)')
+plt.tight_layout()
+plt.show()
+
+df_miraflores.info()
+
+df_otros = df_processed[df_processed['distrito'] != 'miraflores']
+
+df_processed = pd.concat([df_miraflores, df_otros], ignore_index=True)
+df_processed
 # %% Drop 'num_visualizaciones' column 
 df_processed.drop('num_visualizaciones', axis=1, inplace=True)
 df_processed['nivel_socioeconomico_cod'].info()

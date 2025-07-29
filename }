@@ -1,0 +1,23 @@
+[33m86ee0db[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mjimmy_rama[m[33m)[m Se divide catboost en 2
+[33mfd5aa12[m[33m ([m[1;31morigin/tato_rework_jimmy[m[33m, [m[1;31morigin/jimmy_rama[m[33m)[m Se creo graficos en streamlit
+[33mcf2fd19[m Actualizacion de feature engineering y resultados de modelos Catboost
+[33m13821c5[m Primera prueba con la comparacion de modelos
+[33mab5b824[m Se agrega data de ubicacion de estaciones de tren, metropolitano y comisarias
+[33me39c47f[m Se ordena estructura de los codigos, 1. librerias, 2 funciones, 3 lo demas
+[33m9ba9722[m Se edita comparacion de modelo.py y data_preprocessing.py
+[33mbc4aa1d[m Se actuliza Compracion_de_modelos.py
+[33m7f9eb93[m Se crea data_preprocessing.py y se actuliza Compracion_de_modelos.py
+[33m3af8965[m Se dita compraracion de modelos
+[33m7d9c178[m Se crea hospitales_processed_format.csv
+[33me0472bc[m Merge pull request #2 from warthon-190399/main
+[33me65235e[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Merge pull request #1 from warthon-190399/jimmy_rama
+[33mfa5abcc[m Se crea el codigo Comparacion de modelo
+[33m92da5a6[m Se modifica data/processed/Formato.txt
+[33m6dd6201[m [200~Se agrega .csv:
+[33m2ef8c8e[m Se agrega process_malls.py y malls_processed.csv
+[33m21b43b8[m Se agrega process_IPRESS.py y hospitales_processed.csv
+[33m0d19324[m Se agrega process_IPRESS.py y hospitales_processed.csv
+[33m40ea347[m Se agrega process_IPRESS.py y hospitales_processed.csv
+[33m8d118f9[m[33m ([m[1;32mmain[m[33m)[m Agrega coordenadas, normalice adondevivir_processed y geo
+[33mba62271[m Agrega script de limpieza y archivo de colegios processed
+[33me0a91b9[m Agrega .gitignore y .env.example para proteger la API key
