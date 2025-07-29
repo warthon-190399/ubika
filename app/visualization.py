@@ -15,18 +15,32 @@ def run():
 
     # create sidebar with district selection
     st.sidebar.header("Filtros")
-    distritos_disponibles = df["nivel_socioeconomico"].unique()
-    distrito_seleccionado = st.sidebar.selectbox("Selecciona un nivel socioeconomico", distritos_disponibles)
+    #distritos_disponibles = df["nivel_socioeconomico"].unique()
+    distritos_disponibles = df["zona_funcional"].unique()
 
-    #Filter by district selected
-    df_filtrado = df[df["nivel_socioeconomico"] == distrito_seleccionado]
+    #distrito_seleccionado = st.sidebar.selectbox("Selecciona un nivel socieconomico", distritos_disponibles)
+    distrito_seleccionado = st.sidebar.selectbox("Selecciona una zona funcional", 
+                                                 sorted(distritos_disponibles))
+
+    #Filter by distric
+    #df_filtrado = df[df["nivel_socioeconomico"] == distrito_seleccionado]
+    df_filtrado = df[df["zona_funcional"] == distrito_seleccionado]
+
+    #--------------------------------------------------
+    distritos_disponibles2 = df_filtrado["nivel_socioeconomico"].unique()
+    distritos_ordenados2 = sorted([d for d in distritos_disponibles2 if pd.notna(d)])
+
+    distrito_seleccionado2 = st.sidebar.selectbox("Selecciona un nivel socieconomico", 
+                                                  distritos_ordenados2)
+    df_filtrado2 = df_filtrado[df_filtrado["nivel_socioeconomico"] == distrito_seleccionado2]
+    #--------------------------------------------------
 
     # Principal title
-    st.title(f"Análisis de precios en el distrito: {distrito_seleccionado}")
+    st.title(f"Análisis de precios en el distrito: {distrito_seleccionado2}")
 
-    st.subheader("Distribución de precios por nivel socioeconómico (Boxplot)")
+    #st.subheader("Distribución de precios por nivel socioeconómico (Boxplot)")
     fig_box = px.box(
-        df_filtrado,
+        df_filtrado2,
         x="nivel_socioeconomico",
         y="precio_pen",
         color= "distrito",
@@ -38,9 +52,9 @@ def run():
     )
 
     # graph 2: Violin Plot
-    st.subheader("Distribución de precios por nivel socioeconómico (Violin Plot)")
+    #st.subheader("Distribución de precios por nivel socioeconómico (Violin Plot)")
     fig_violin = px.violin(
-        df_filtrado,
+        df_filtrado2,
         x="nivel_socioeconomico",
         y="precio_pen",
         color = "distrito",
@@ -54,9 +68,9 @@ def run():
     )
     
     # Graph 3: Histograma
-    st.subheader("Histograma de precios")
+    #st.subheader("Histograma de precios")
     fig_hist = px.histogram(
-        df_filtrado,
+        df_filtrado2,
         x="precio_pen",
         color="distrito",
         nbins=30,

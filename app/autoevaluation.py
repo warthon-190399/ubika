@@ -8,50 +8,100 @@ import joblib
 def run():
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, ".."))
-    input_model_path = os.path.join(BASE_DIR, "models", "catboost_model.pkl")
-
+    input_model_path_l = os.path.join(BASE_DIR, "models", "catboost_model_l.pkl")
+    input_model_path_h = os.path.join(BASE_DIR, "models", "catboost_model_h.pkl")
     #st.write(input_model_path)
 
     # load model
-    model = joblib.load(input_model_path)
+    model_l = joblib.load(input_model_path_l)
+    model_h = joblib.load(input_model_path_h)
 
     st.title("Autoevaluador de Precio de Vivienda")
 
+    col1, col2 = st.columns([0.5, 2])
+
+    departamentos = ['miraflores', 'san isidro', 'san borja', 'surco', 'surquillo', 'jesus maria', 
+                     'lince', 'magdalena', 'pueblo libre', 'lima cercado', 'brena', 'la victoria', 
+                     'san luis', 'rimac', 'los olivos', 'comas', 'independencia', 'puente piedra', 
+                     'carabayllo', 'ancon', 'smp', 'ate', 'santa anita', 'lurigancho', 'chaclacayo', 
+                     'cieneguilla', 'el agustino', 'la molina','chorrillos', 'sjm', 'vmt', 'ves', 'lurin', 
+                     'pachacamac','punta hermosa', 'san bartolo', 'punta negra', 'pucusana', 
+                     'santa maria del mar', 'barranco','callao']
+
+    with col1:
+        st.markdown("**Distrito**")
+    with col2:
+        departamento_select = st.selectbox("", departamentos, label_visibility="collapsed")
+
+
     # input per user
-    mantenimiento_soles = st.number_input("Mantenimiento (S/.)", min_value=0.0)
-    area_m2 = st.number_input("Área (m²)", min_value=0.0)
-    num_dorm = st.number_input("Nº Dormitorios", min_value=0)
-    num_banios = st.number_input("Nº Baños", min_value=0)
-    num_estac = st.number_input("Nº Estacionamientos", min_value=0)
-    antiguedad = st.number_input("Antigüedad (años)", min_value=0)
-    num_visualizaciones = st.number_input("Visualizaciones", min_value=0)
-    num_colegios_prox = st.number_input("Colegios cerca", min_value=0)
-    num_malls_prox = st.number_input("Malls cerca", min_value=0)
-    num_hospitales_prox = st.number_input("Hospitales cerca", min_value=0)
-    num_tren_est_prox = st.number_input("Estaciones tren cerca", min_value=0)
-    num_metro_est_prox = st.number_input("Estaciones metro cerca", min_value=0)
-    num_comisarias_prox = st.number_input("Comisarías cerca", min_value=0)
-    total_ambientes = st.number_input("Total ambientes", min_value=0)
-    tiene_estac = st.selectbox("¿Tiene estacionamiento?", [0, 1])
-    tamano_cod = st.selectbox("Código tamaño", [0, 1, 2])  # depende de tu codificación
-    antiguedad_cod = st.selectbox("Código antigüedad", [0, 1, 2])
-    nivel_socioeconomico_cod = st.selectbox("Nivel socioeconómico (cod)", [0, 1, 2, 3])
-    total_servicios_prox = st.number_input("Servicios cerca", min_value=0)
-    total_transporte_prox = st.number_input("Transportes cerca", min_value=0)
+    campos = [
+        ("Mantenimiento (S/.)",0.0, "mantenimiento"),
+        ("Área (m²)",0.0, "area"),
+        ("Nº Dormitorios",0, "dormitorio"),
+        ("Nº Baños",0, "baño"),
+        ("Nº Estacionamientos",0, "estacionamiento"),
+        ("Antigüedad (años)",0, "antiguedad"),
+        ("Colegios cerca",0, "colegio"),
+        ("Hospitales cerca",0, "hospital"),
+        ("Total ambientes",0, "ambiente"),
+        ("¿Tiene estacionamiento?",[0, 1], "tieneestacionamiento"),
+        ("Código tamaño",[0, 1, 2], "codigotamaño"),
+        ("Código antigüedad",[0, 1, 2], "codigoantiguedad"),
+        ("Nivel socioeconómico (cod)",[0, 1, 2, 3], "nivelsocioeconomico"),
+        ("Servicios cerca",0, "servicioscerca"),
+        ("Zona funcional (cod)",[0, 1, 2, 3, 4, 5, 6, 7, 8], "zonafuncional")
+    ]
 
-    # button to predict
+    valores = []
+
+    for label, min_val, key in campos:
+        col1, col2 = st.columns([0.5, 2])
+        with col1:
+            st.markdown(f"**{label}**")
+
+        with col2:
+            if key in ["tieneestacionamiento","codigotamaño",
+                       "codigoantiguedad","nivelsocioeconomico", "zonafuncional"]:
+                valor = st.selectbox("", min_val,
+                                        label_visibility="collapsed", key = key)
+            else:
+                valor = st.number_input("", min_value=min_val,
+                                    label_visibility="collapsed", key = key)
+        valores.append(valor)
+
+    st.write("Valores enviados al modelo:", valores)
+
     if st.button("Estimar precio"):
-        input_data = np.array([[
-            mantenimiento_soles, area_m2, num_dorm, num_banios,
-            num_estac, antiguedad, num_visualizaciones, num_colegios_prox,
-            num_malls_prox, num_hospitales_prox, num_tren_est_prox,
-            num_metro_est_prox, num_comisarias_prox, total_ambientes, tiene_estac,
-            tamano_cod, antiguedad_cod, nivel_socioeconomico_cod,
-            total_servicios_prox, total_transporte_prox 
-        ]])
+        column_names = ['mantenimiento_soles', 'area_m2', 'num_dorm', 'num_banios', 'num_estac',
+                        'antiguedad', 'num_colegios_prox', 'num_hospitales_prox',
+                        'total_ambientes', 'tiene_estac', 'tamano_cod', 'antiguedad_cod',
+                        'nivel_socioeconomico_cod', 'total_servicios_prox',
+                        'zona_funcional_cod']
+        input_df = pd.DataFrame([valores], columns=column_names)
 
-        pred = model.predict(input_data)[0]
+        if departamento_select in ['miraflores', 'surco', 'san isidro','barranco']:
+            pred = model_h.predict(input_df)[0]
+        else:
+            pred = model_l.predict(input_df)[0]
         st.success(f"El precio estimado por el modelo es: S/. {pred:,.2f}")
 
-    #st.sidebar.title("Panel de Control")
-
+def zone_classification(distrito):
+    distrito = str(distrito).strip().lower()
+    if distrito in ['miraflores', 'san isidro', 'san borja', 'surco', 'surquillo', 'jesus maria', 'lince', 'magdalena', 'pueblo libre']:
+        return 4 # 'Lima Moderna'
+    elif distrito in ['lima cercado', 'brena', 'la victoria', 'san luis', 'rimac']:
+        return 2 # 'Lima Centro'
+    elif distrito in ['los olivos', 'comas', 'independencia', 'puente piedra', 'carabayllo', 'ancon', 'smp']:
+        return 5 # 'Lima Norte'
+    elif distrito in ['ate', 'santa anita', 'lurigancho', 'chaclacayo', 'cieneguilla', 'el agustino', 'la molina']:
+        return 3 #'Lima Este'
+    elif distrito in ['chorrillos', 'sjm', 'vmt', 'ves', 'lurin', 'pachacamac']:
+        return 7 # 'Lima Sur Urbana'
+    elif distrito in ['punta hermosa', 'san bartolo', 'punta negra', 'pucusana', 'santa maria del mar', 'barranco']:
+        return 6 # 'Lima Sur Balnearios'
+    elif distrito == 'callao':
+        return 1 #'Callao'
+    else:
+        return 8 # 'Otro
+    
