@@ -47,17 +47,10 @@ output_path = os.path.join(BASE_DIR, "data", "processed", "data_preprocessing_en
 df = pd.read_csv(input_path)
 df_processed = df.copy()
 # %%
-#df_grouped = (
-#    df_processed.groupby('nivel_socioeconomico')['distrito']
-#    .apply(lambda x: sorted(set(x)))
-#    .reset_index()
-#    )
-#df_grouped.columns = ['Nivel Socioeconómico', 'Distritos']
-
 df_processed['total_ambientes'] = df_processed['num_dorm'] + df_processed['num_banios']
 
 df_processed['tiene_estac'] = (df_processed['num_estac'] > 0).astype(int)
-#df_grouped
+
 # %%
 df_processed["tamano"] = pd.cut(
     df_processed["area_m2"],
@@ -65,14 +58,80 @@ df_processed["tamano"] = pd.cut(
     labels=["pequeno", "mediano", "grande"]
 )
 
-df_processed['antiguedad_categoria'] = pd.cut(
-    df_processed['antiguedad'],
-    bins=[-1, 5, 20, float('inf')],
-    labels=['nuevo', 'seminuevo', 'antiguo']
-)
+zona_apeim = {
+    # 1
+    'puente piedra': 1,
+    'comas': 1,
+    'carabayllo': 1,
+    
+    # 2
+    'independencia': 2,
+    'los olivos': 2,
+    'smp': 2,  # San Martín de Porres
+    
+    # 3
+    'san juan de lurigancho': 3,
+    
+    # 4
+    'lima cercado': 4,
+    'rimac': 4,
+    'brena': 4,
+    'la victoria': 4,
+    
+    # 5
+    'ate': 5,
+    'chaclacayo': 5,
+    'lurigancho': 5,
+    'santa anita': 5,
+    'san luis': 5,
+    'el agustino': 5,
+    
+    # 6
+    'jesus maria': 6,
+    'lince': 6,
+    'pueblo libre': 6,
+    'magdalena': 6,
+    'san miguel': 6,
+    
+    # 7
+    'miraflores': 7,
+    'san isidro': 7,
+    'san borja': 7,
+    'surco': 7,
+    'la molina': 7,
+    
+    # 8
+    'surquillo': 8,
+    'barranco': 8,
+    'chorrillos': 8,
+    'san juan de miraflores': 8,
+    
+    # 9
+    'ves': 9,
+    'villa maria del triunfo': 9,
+    'lurin': 9,
+    'pachacamac': 9,
+    
+    # 10
+    'callao': 10,
+    'bellavista': 10,
+    'la perla': 10,
+    'la punta': 10,
+    'carmen de la legua': 10,
+    'ventanilla': 10
+}
+
+# df_processed['antiguedad_categoria'] = pd.cut(
+#     df_processed['antiguedad'],
+#     bins=[-1, 5, 20, float('inf')],
+#     labels=['nuevo', 'seminuevo', 'antiguo']
+# )
+
+#df_processed['antiguedad_cod'] = df_processed['antiguedad_categoria'].map({'nuevo': 1, 'seminuevo': 2, 'antiguo': 3})
+df_processed['zona_apeim_cod'] = df_processed["distrito"].map(zona_apeim)
 
 df_processed['tamano_cod'] = df_processed['tamano'].map({'pequeno': 1, 'mediano': 2, 'grande': 3})
-df_processed['antiguedad_cod'] = df_processed['antiguedad_categoria'].map({'nuevo': 1, 'seminuevo': 2, 'antiguo': 3})
+
 
 #df_processed['nivel_socioeconomico'] = df_processed['nivel_socioeconomico'].apply(nivel_socioeconomico)
 
@@ -112,8 +171,12 @@ plt.show()
 
 df_miraflores.info()
 #%%
-p90 = df_miraflores['precio_pen'].quantile(0.85)
-df_miraflores = df_miraflores[df_miraflores['precio_pen'] <= p90]
+p75 = df_miraflores['precio_pen'].quantile(0.70)
+p25 = df_miraflores['precio_pen'].quantile(0.30)
+
+df_miraflores = df_miraflores[
+    (df_miraflores['precio_pen'] >= p25) & (df_miraflores['precio_pen'] <= p75)
+    ]
 
 plt.figure(figsize=(6,4))
 sns.boxplot(data=df_miraflores, x='distrito', y='precio_pen')

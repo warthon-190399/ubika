@@ -53,7 +53,7 @@ print(df_modelling['distrito'].unique())
 df_modelling = df_modelling.drop(["precio_usd","fecha_pub","distrito", 
                         "nivel_socioeconomico", "direccion_completa", 
                         "latitud", "longitud", "tamano", 
-                        "antiguedad_categoria","num_comisarias_prox", 
+                        "num_comisarias_prox", 
                         "total_transporte_prox", "num_metro_est_prox", 
                         "num_malls_prox", "num_tren_est_prox", 
                         "zona_funcional"], axis=1) 

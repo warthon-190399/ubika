@@ -25,10 +25,11 @@ def objective(trial):
             'bagging_temperature': trial.suggest_float('bagging_temperature', 0.0, 1.0),  # Controla el muestreo de instancias
             'border_count': trial.suggest_int('border_count', 32, 255),  # Número de divisiones para variables numéricas
             'verbose': 0,
-            'random_state': 42
+            'random_state': 42,
+            'early_stopping_rounds':50
                 }
     model = CatBoostRegressor(**params)
-    model.fit(X_train, y_train, eval_set=[(X_test, y_test)], early_stopping_rounds=50, verbose=False)
+    model.fit(X_train, y_train, eval_set=[(X_val, y_val)], verbose=False)
     y_pred = model.predict(X_test)
     return r2_score(y_test, y_pred)
 
@@ -36,32 +37,47 @@ def objective(trial):
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
 input_path = os.path.join(BASE_DIR, "data", "processed", "data_preprocessing_eng.csv")
-output_path = os.path.join(BASE_DIR, "data", "processed", "final_dataset_h.csv")
-output_model_path = os.path.join(BASE_DIR,"models","catboost_model_h.pkl")
-output_hyperparams_path = os.path.join(BASE_DIR,"models","catboost_hyperparams_h.pkl")
+output_path = os.path.join(BASE_DIR, "data", "processed", "final_dataset_h_prueba.csv")
+output_model_path = os.path.join(BASE_DIR,"models","catboost_model_h_prueba.pkl")
+output_hyperparams_path = os.path.join(BASE_DIR,"models","catboost_hyperparams_h_prueba.pkl")
 
 # %%
 df = pd.read_csv(input_path)
 
 # data without 'miraflores', 'surco', 'san isidro','barranco'
 df_modelling = df.copy()
-df_modelling = df_modelling[df_modelling['distrito'].isin(['miraflores', 'surco', 'san isidro','barranco'])]
+#df_modelling = df_modelling[df_modelling['distrito'].isin(['miraflores', 'surco', 'san isidro','barranco'])]
+
+zona_apeim={"puente piedra":"1", "coma":"1",}
 
 print(df_modelling['distrito'].unique())
 
-df_modelling = df_modelling.drop(["precio_usd","fecha_pub","distrito", 
-                        "nivel_socioeconomico", "direccion_completa", 
-                        "latitud", "longitud", "tamano", 
-                        "antiguedad_categoria","num_comisarias_prox", 
-                        "total_transporte_prox", "num_metro_est_prox", 
-                        "num_malls_prox", "num_tren_est_prox", 
-                        "zona_funcional"], axis=1) 
+# df_modelling = df_modelling.drop(["precio_usd","fecha_pub","distrito", 
+#                         "nivel_socioeconomico", "direccion_completa", 
+#                         "latitud", "longitud", "tamano", 
+#                         #"antiguedad_categoria",
+#                         "num_comisarias_prox", 
+#                         "total_transporte_prox", "num_metro_est_prox", 
+#                         "num_malls_prox", "num_tren_est_prox", 
+#                         "zona_funcional",'total_ambientes',
+#                         'tiene_estac',
+#                         'tamano_cod',
+#                         "nivel_socioeconomico_cod",
+#                         "total_servicios_prox",
+#                         "zona_funcional_cod"], axis=1) 
+
+df_modelling = df_modelling[['precio_pen', 'mantenimiento_soles', 'area_m2', 'num_dorm',
+       'num_banios', 'num_estac', 'antiguedad','zona_apeim_cod']]
+
 #print(df_modelling.info())
 print(df_modelling.columns)
+# %%
+#df_modelling["distrito"].unique()
 # %% SPLIT DATA IN X AND Y
 X = df_modelling.drop("precio_pen", axis=1)
 
 y = df_modelling["precio_pen"]
+X.columns
 # %% Calculate the correlation matrix using only numeric columns
 corr_matrix = X.corr(numeric_only=True)
 
@@ -78,20 +94,28 @@ scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
 # %% Split data in train and test
-X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+# X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+X_train, X_temp, y_train, y_temp = train_test_split(X_scaled, y, test_size=0.4, random_state=42)
+
+X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42)
 # %% Dictionary of models
 modelos = {
-    "RandomForest": RandomForestRegressor(n_estimators=100, random_state=42),
-    "XGBoost": XGBRegressor(n_estimators=100, random_state=42, verbosity=0),
-    "LightGBM": LGBMRegressor(n_estimators=100, random_state=42),
-    "CatBoost": CatBoostRegressor(verbose=0, random_state=42)
+    #"RandomForest": RandomForestRegressor(n_estimators=100, random_state=42),
+    "XGBoost": XGBRegressor(n_estimators=100, random_state=42, verbosity=0, early_stopping_rounds=50, eval_metric="rmse"),
+    "LightGBM": LGBMRegressor(n_estimators=100, random_state=42, early_stopping_rounds=50),
+    "CatBoost": CatBoostRegressor(verbose=0, random_state=42, early_stopping_rounds=50)
 }
 
 resultados = []
 
 for nombre, modelo in modelos.items():
 
-    modelo.fit(X_train, y_train)
+    modelo.fit(
+        X_train, 
+        y_train,
+        eval_set=[(X_val, y_val)]
+    )
+    joblib.dump(modelo, f"C:/PC/7. PROYECTOS/Ubika/models/{nombre}_prueba.pkl")
     y_pred = modelo.predict(X_test)
     
     mae = mean_absolute_error(y_test, y_pred)
@@ -122,6 +146,7 @@ print("Mejor R²:", study.best_value)
 #%%
 best_params = study.best_params
 
+
 final_model = CatBoostRegressor(
     iterations=best_params['iterations'],
     depth=best_params['depth'],
@@ -131,19 +156,18 @@ final_model = CatBoostRegressor(
     bagging_temperature=best_params['bagging_temperature'],
     border_count=best_params['border_count'],
     verbose=0,
-    random_state=42
+    random_state=42,
+    early_stopping_rounds = 50
 )
 
 final_model.fit(X_train,
                 y_train,
-                eval_set=[(X_test, y_test)],
-                early_stopping_rounds=50
+                eval_set=[(X_val, y_val)]
                 )
 
 y_pred = final_model.predict(X_test)
 r2 = r2_score(y_test, y_pred)
 print(f"R2 final: {r2:.4f}")
-
 
 #%%
 feature_importance = pd.DataFrame({
