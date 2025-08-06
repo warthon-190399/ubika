@@ -2,7 +2,7 @@ import streamlit as st
 import os
 import pandas as pd
 import plotly.express as px
-
+ 
 def run():
     st.title("visualization")
 
@@ -80,10 +80,10 @@ def run():
     
     
     fig_scatter = px.scatter(
-        df,
+        df_filtrado2,
         x = "area_m2",
         y = "precio_pen",
-        color = "nivel_socioeconomico",
+        color = "distrito",
         #size = "mantenimiento_soles",
         hover_data = ["mantenimiento_soles","antiguedad","total_ambientes"],
         title = "Relación entre área y precio según distrito",
@@ -97,26 +97,32 @@ def run():
 
     col1, col2 = st.columns(2)
 
-    st.plotly_chart(fig_box, use_container_width=True)
+    #st.plotly_chart(fig_box, use_container_width=True)
     with col1:
         
         st.plotly_chart(fig_violin, use_container_width=True)
+        st.plotly_chart(fig_box, use_container_width=True)
 
     with col2:
         st.plotly_chart(fig_hist, use_container_width=True)
+        st.plotly_chart(fig_scatter, use_container_width=True)
 
-    st.plotly_chart(fig_scatter, use_container_width=True)
+    #st.plotly_chart(fig_scatter, use_container_width=True)
+
+    centro_lat = df_filtrado2["latitud"].median()
+    centro_lon = df_filtrado2["longitud"].median()
+    #center={"lat": -12.053675190475358, "lon": -77.04217016334559},
 
     # Mapa de burbujas
     st.subheader("Mapa de propiedades por ubicación")
     fig_burbujas = px.scatter_mapbox(
-        df,
+        df_filtrado2,
         lat="latitud",
         lon="longitud",
         size="precio_pen",
-        color="nivel_socioeconomico",
+        color="distrito",
         size_max=20,
-        center={"lat": -12.053675190475358, "lon": -77.04217016334559},
+        center={"lat": centro_lat, "lon": centro_lon},
         zoom=11,
         mapbox_style="carto-darkmatter",
         width=70,
@@ -124,18 +130,19 @@ def run():
         title="Distribución de precios por zona",
         height=800,
     )
+    
     st.plotly_chart(fig_burbujas)
 
     # Mapa de calor (Heatmap)
     st.subheader("Mapa de calor según precio")
     fig_heatmap = px.density_mapbox(
-        df,
+        df_filtrado2,
         lat="latitud",
         lon="longitud",
         z="precio_pen",
         radius=30,
         color_continuous_scale="Viridis",
-        center={"lat": -12.053675190475358, "lon": -77.04217016334559},
+        center={"lat": centro_lat, "lon": centro_lon},
         zoom=11,
         mapbox_style="carto-darkmatter",
         width=70,

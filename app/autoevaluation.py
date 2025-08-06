@@ -9,10 +9,10 @@ def run():
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, ".."))
     input_model_path_l = os.path.join(BASE_DIR, "models", "catboost_model_l.pkl")
-    input_model_path_h = os.path.join(BASE_DIR, "models", "XGBoost_prueba.pkl")
+    input_model_path_h = os.path.join(BASE_DIR, "models", "catboost_model_h.pkl")
     #st.write(input_model_path)
 
-    input_df = os.path.join(BASE_DIR, "data", "processed", "final_dataset_h_prueba.csv")
+    input_df = os.path.join(BASE_DIR, "data", "processed", "final_dataset_h.csv")
     df = pd.read_csv(input_df)
 
     # load model
@@ -54,7 +54,7 @@ def run():
     #     ("Servicios cerca",0, "servicioscerca"),
     #     ("Zona funcional (cod)",[0, 1, 2, 3, 4, 5, 6, 7, 8], "zonafuncional")
     # ]
-
+ 
 
     campos = [
         ("Mantenimiento (S/.)",0.0, "mantenimiento"),
@@ -63,9 +63,10 @@ def run():
         ("Nº Baños",0, "baño"),
         ("Nº Estacionamientos",0, "estacionamiento"),
         ("Antigüedad (años)",0, "antiguedad"),
-        ("Zona apeim (cod)",df["zona_apeim_cod"].unique().tolist(), "zonafuncional")
+        ("N° de servicios cerca",0, "servicios"),
+        ("Zona apeim (cod)",[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "zonafuncional")
     ]
-
+    
     valores = []
 
     for label, min_val, key in campos:
@@ -78,6 +79,31 @@ def run():
                        "nivelsocioeconomico", "zonafuncional"]:
                 valor = st.selectbox("", min_val,
                                         label_visibility="collapsed", key = key)
+            
+            elif key == "antiguedad":
+                opciones_antiguedad = ["No sé"] + list(range(0, 101))  # puedes ajustar el rango máximo
+                seleccion = st.selectbox("", opciones_antiguedad, label_visibility="collapsed", key=key)
+                valor = np.nan if seleccion == "No sé" else seleccion
+            
+            elif key == "mantenimiento":
+                seleccion = st.selectbox(
+                    "¿Conoces la antigüedad?", 
+                    ["Ingresar valor", "No sé"], 
+                    label_visibility="collapsed", 
+                    key=f"{key}_opcion"
+                )
+
+                if seleccion == "Ingresar valor":
+                    valor = st.number_input(
+                        "", 
+                        min_value=0, 
+                        max_value=100,  # puedes ajustar el máximo si lo deseas
+                        label_visibility="collapsed", 
+                        key=key
+                    )
+                else:
+                    valor = np.nan
+                        
             else:
                 valor = st.number_input("", min_value=min_val,
                                     label_visibility="collapsed", key = key)
@@ -93,7 +119,7 @@ def run():
         #                 'nivel_socioeconomico_cod', 'total_servicios_prox',
         #                 'zona_funcional_cod']
         column_names = ['mantenimiento_soles', 'area_m2', 'num_dorm', 'num_banios', 'num_estac',
-                        'antiguedad', 'zona_apeim_cod']
+                        'antiguedad','total_servicios_prox', 'zona_apeim_cod']
         
         input_df = pd.DataFrame([valores], columns=column_names)
 

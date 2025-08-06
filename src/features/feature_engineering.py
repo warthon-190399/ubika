@@ -46,6 +46,10 @@ output_path = os.path.join(BASE_DIR, "data", "processed", "data_preprocessing_en
 
 df = pd.read_csv(input_path)
 df_processed = df.copy()
+#%%
+df_processed.columns
+# %%
+df_processed['nivel_socioeconomico']
 # %%
 df_processed['total_ambientes'] = df_processed['num_dorm'] + df_processed['num_banios']
 
@@ -121,21 +125,22 @@ zona_apeim = {
     'ventanilla': 10
 }
 
-# df_processed['antiguedad_categoria'] = pd.cut(
-#     df_processed['antiguedad'],
-#     bins=[-1, 5, 20, float('inf')],
-#     labels=['nuevo', 'seminuevo', 'antiguo']
-# )
+df_processed['antiguedad_categoria'] = pd.cut(
+    df_processed['antiguedad'],
+    bins=[-1, 5, 20, float('inf')],
+    labels=['nuevo', 'seminuevo', 'antiguo']
+ )
 
-#df_processed['antiguedad_cod'] = df_processed['antiguedad_categoria'].map({'nuevo': 1, 'seminuevo': 2, 'antiguo': 3})
+df_processed['antiguedad_cod'] = df_processed['antiguedad_categoria'].map({'nuevo': 1, 'seminuevo': 2, 'antiguo': 3})
 df_processed['zona_apeim_cod'] = df_processed["distrito"].map(zona_apeim)
 
 df_processed['tamano_cod'] = df_processed['tamano'].map({'pequeno': 1, 'mediano': 2, 'grande': 3})
 
-
 #df_processed['nivel_socioeconomico'] = df_processed['nivel_socioeconomico'].apply(nivel_socioeconomico)
 
 df_processed['nivel_socioeconomico_cod'] = df_processed['nivel_socioeconomico'].map({'A': 1, 'B': 2, 'C': 3, 'D': 4})
+df_processed['nivel_socioeconomico_cod']
+
 # %% precio total por distrito
 df_processed['total_servicios_prox'] = (
     df_processed['num_colegios_prox'] + df_processed['num_malls_prox'] + df_processed['num_hospitales_prox'] +
@@ -171,21 +176,21 @@ plt.show()
 
 df_miraflores.info()
 #%%
-p75 = df_miraflores['precio_pen'].quantile(0.70)
-p25 = df_miraflores['precio_pen'].quantile(0.30)
+# ph = df_miraflores['precio_pen'].quantile(0.70)
+# pl = df_miraflores['precio_pen'].quantile(0.30)
 
-df_miraflores = df_miraflores[
-    (df_miraflores['precio_pen'] >= p25) & (df_miraflores['precio_pen'] <= p75)
-    ]
+# df_miraflores = df_miraflores[
+#     (df_miraflores['precio_pen'] >= pl) & (df_miraflores['precio_pen'] <= ph)
+#     ]
 
-plt.figure(figsize=(6,4))
-sns.boxplot(data=df_miraflores, x='distrito', y='precio_pen')
-plt.title('Distribución de precios en Miraflores')
-plt.ylabel('Precio (S/.)')
-plt.tight_layout()
-plt.show()
+# plt.figure(figsize=(6,4))
+# sns.boxplot(data=df_miraflores, x='distrito', y='precio_pen')
+# plt.title('Distribución de precios en Miraflores')
+# plt.ylabel('Precio (S/.)')
+# plt.tight_layout()
+# plt.show()
 
-df_miraflores.info()
+# df_miraflores.info()
 
 df_otros = df_processed[df_processed['distrito'] != 'miraflores']
 

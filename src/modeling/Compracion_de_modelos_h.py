@@ -37,20 +37,20 @@ def objective(trial):
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
 input_path = os.path.join(BASE_DIR, "data", "processed", "data_preprocessing_eng.csv")
-output_path = os.path.join(BASE_DIR, "data", "processed", "final_dataset_h_prueba.csv")
-output_model_path = os.path.join(BASE_DIR,"models","catboost_model_h_prueba.pkl")
-output_hyperparams_path = os.path.join(BASE_DIR,"models","catboost_hyperparams_h_prueba.pkl")
+output_path = os.path.join(BASE_DIR, "data", "processed", "final_dataset_h.csv")
+output_model_path = os.path.join(BASE_DIR,"models","catboost_model_h.pkl")
+output_hyperparams_path = os.path.join(BASE_DIR,"models","catboost_hyperparams_h.pkl")
 
 # %%
 df = pd.read_csv(input_path)
 
 # data without 'miraflores', 'surco', 'san isidro','barranco'
 df_modelling = df.copy()
-#df_modelling = df_modelling[df_modelling['distrito'].isin(['miraflores', 'surco', 'san isidro','barranco'])]
+df_modelling = df_modelling[df_modelling['distrito'].isin(['miraflores', 'surco', 'san isidro','barranco'])]
 
 zona_apeim={"puente piedra":"1", "coma":"1",}
 
-print(df_modelling['distrito'].unique())
+print(df_modelling.columns)
 
 # df_modelling = df_modelling.drop(["precio_usd","fecha_pub","distrito", 
 #                         "nivel_socioeconomico", "direccion_completa", 
@@ -65,14 +65,15 @@ print(df_modelling['distrito'].unique())
 #                         "nivel_socioeconomico_cod",
 #                         "total_servicios_prox",
 #                         "zona_funcional_cod"], axis=1) 
-
-df_modelling = df_modelling[['precio_pen', 'mantenimiento_soles', 'area_m2', 'num_dorm',
-       'num_banios', 'num_estac', 'antiguedad','zona_apeim_cod']]
-
-#print(df_modelling.info())
-print(df_modelling.columns)
 # %%
-#df_modelling["distrito"].unique()
+df_modelling = df_modelling[['precio_pen', 'mantenimiento_soles', 'area_m2', 'num_dorm',
+       'num_banios', 'num_estac', 'antiguedad','total_servicios_prox','zona_apeim_cod']]
+
+#%% Replace NaN in num_estac with zero
+df_modelling['num_estac'] = df_modelling['num_estac'].fillna(0)
+
+print(df_modelling.info())
+#print(df_modelling.columns)
 # %% SPLIT DATA IN X AND Y
 X = df_modelling.drop("precio_pen", axis=1)
 
@@ -87,15 +88,8 @@ plt.title("Matriz de Correlación")
 plt.tight_layout()
 plt.show()
 
-
-# %% SCALE OF VARIABLES
-
-scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X)
-
 # %% Split data in train and test
-# X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
-X_train, X_temp, y_train, y_temp = train_test_split(X_scaled, y, test_size=0.4, random_state=42)
+X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.4, random_state=42)
 
 X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42)
 # %% Dictionary of models

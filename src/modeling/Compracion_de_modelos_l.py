@@ -48,16 +48,22 @@ df = pd.read_csv(input_path)
 df_modelling = df.copy()
 df_modelling = df_modelling[~df_modelling['distrito'].isin(['miraflores', 'surco', 'san isidro','barranco'])]
 
-print(df_modelling['distrito'].unique())
+# df_modelling = df_modelling.drop(["precio_usd","fecha_pub","distrito", 
+#                         "nivel_socioeconomico", "direccion_completa", 
+#                         "latitud", "longitud", "tamano", 
+#                         "num_comisarias_prox", 
+#                         "total_transporte_prox", "num_metro_est_prox", 
+#                         "num_malls_prox", "num_tren_est_prox", 
+#                         "zona_funcional"], axis=1) 
 
-df_modelling = df_modelling.drop(["precio_usd","fecha_pub","distrito", 
-                        "nivel_socioeconomico", "direccion_completa", 
-                        "latitud", "longitud", "tamano", 
-                        "num_comisarias_prox", 
-                        "total_transporte_prox", "num_metro_est_prox", 
-                        "num_malls_prox", "num_tren_est_prox", 
-                        "zona_funcional"], axis=1) 
-print(df_modelling.info())
+df_modelling = df_modelling[['precio_pen', 'mantenimiento_soles', 'area_m2', 'num_dorm',
+       'num_banios', 'num_estac', 'antiguedad','total_servicios_prox','zona_apeim_cod']]
+
+#%% Replace NaN in num_estac with zero
+df_modelling['num_estac'] = df_modelling['num_estac'].fillna(0)
+
+#print(df_modelling.info())
+print(df_modelling.columns)
 # %% SPLIT DATA IN X AND Y
 X = df_modelling.drop("precio_pen", axis=1)
 
@@ -75,11 +81,11 @@ plt.show()
 
 # %% SCALE OF VARIABLES
 
-scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X)
+#scaler = StandardScaler()
+#X_scaled = scaler.fit_transform(X)
 
 # %% Split data in train and test
-X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 # %% Dictionary of models
 modelos = {
     "RandomForest": RandomForestRegressor(n_estimators=100, random_state=42),
