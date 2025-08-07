@@ -49,6 +49,8 @@ df_processed = df.copy()
 #%%
 df_processed.columns
 # %%
+df_processed['distrito'].unique()
+# %%
 df_processed['nivel_socioeconomico']
 # %%
 df_processed['total_ambientes'] = df_processed['num_dorm'] + df_processed['num_banios']
