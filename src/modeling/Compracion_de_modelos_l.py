@@ -38,8 +38,8 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
 input_path = os.path.join(BASE_DIR, "data", "processed", "data_preprocessing_eng.csv")
 output_path = os.path.join(BASE_DIR, "data", "processed", "final_dataset_l.csv")
-output_model_path = os.path.join(BASE_DIR,"models","catboost_model_l.pkl")
-output_hyperparams_path = os.path.join(BASE_DIR,"models","catboost_hyperparams_l.pkl")
+output_model_path = os.path.join(BASE_DIR,"models","randomforest_model_l.pkl")
+output_hyperparams_path = os.path.join(BASE_DIR,"models","randomforest_hyperparams_l.pkl")
 
 # %%
 df = pd.read_csv(input_path)
@@ -48,21 +48,13 @@ df = pd.read_csv(input_path)
 df_modelling = df.copy()
 df_modelling = df_modelling[~df_modelling['distrito'].isin(['miraflores', 'surco', 'san isidro','barranco'])]
 
-# df_modelling = df_modelling.drop(["precio_usd","fecha_pub","distrito", 
-#                         "nivel_socioeconomico", "direccion_completa", 
-#                         "latitud", "longitud", "tamano", 
-#                         "num_comisarias_prox", 
-#                         "total_transporte_prox", "num_metro_est_prox", 
-#                         "num_malls_prox", "num_tren_est_prox", 
-#                         "zona_funcional"], axis=1) 
-
 df_modelling = df_modelling[['precio_pen', 'mantenimiento_soles', 'area_m2', 'num_dorm',
-       'num_banios', 'num_estac', 'antiguedad','total_servicios_prox','zona_apeim_cod']]
+       'num_banios', 'num_estac', 'antiguedad','total_servicios_prox','total_transporte_aprox',
+       'zona_apeim_cod','categoria_crimenes_cod']]
 
 #%% Replace NaN in num_estac with zero
 df_modelling['num_estac'] = df_modelling['num_estac'].fillna(0)
 
-#print(df_modelling.info())
 print(df_modelling.columns)
 # %% SPLIT DATA IN X AND Y
 X = df_modelling.drop("precio_pen", axis=1)
@@ -77,12 +69,6 @@ sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap='coolwarm', square=True, li
 plt.title("Matriz de Correlación")
 plt.tight_layout()
 plt.show()
-
-
-# %% SCALE OF VARIABLES
-
-#scaler = StandardScaler()
-#X_scaled = scaler.fit_transform(X)
 
 # %% Split data in train and test
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -129,28 +115,41 @@ print("Mejor R²:", study.best_value)
 #%%
 best_params = study.best_params
 
-final_model = CatBoostRegressor(
-    iterations=best_params['iterations'],
-    depth=best_params['depth'],
-    learning_rate=best_params['learning_rate'],
-    l2_leaf_reg=best_params['l2_leaf_reg'],
-    random_strength=best_params['random_strength'],
-    bagging_temperature=best_params['bagging_temperature'],
-    border_count=best_params['border_count'],
-    verbose=0,
-    random_state=42
+# final_model = CatBoostRegressor(
+#     iterations=best_params['iterations'],
+#     depth=best_params['depth'],
+#     learning_rate=best_params['learning_rate'],
+#     l2_leaf_reg=best_params['l2_leaf_reg'],
+#     random_strength=best_params['random_strength'],
+#     bagging_temperature=best_params['bagging_temperature'],
+#     border_count=best_params['border_count'],
+#     verbose=0,
+#     random_state=42
+# )
+
+final_model = RandomForestRegressor(
+    n_estimators=best_params.get('n_estimators',200),
+    max_depth=best_params.get('max_depth',None),
+    min_samples_split=best_params.get('min_samples_split',2),
+    min_samples_leaf=best_params.get('min_samples_leaf',1),
+    max_features=best_params.get('max_features','sqrt'),
+    bootstrap=best_params.get('boosttrap',True),
+    random_state=42,
+    n_jobs=-1
 )
 
-final_model.fit(X_train,
-                y_train,
-                eval_set=[(X_test, y_test)],
-                early_stopping_rounds=50
-                )
+# final_model.fit(
+#     X_train,y_train,
+#     eval_set=[(X_test, y_test)],
+#     early_stopping_rounds=50
+#     )
+
+# Train (without eval_set)
+final_model.fit(X_train, y_train)
 
 y_pred = final_model.predict(X_test)
 r2 = r2_score(y_test, y_pred)
 print(f"R2 final: {r2:.4f}")
-
 
 #%%
 feature_importance = pd.DataFrame({
@@ -161,7 +160,7 @@ feature_importance = pd.DataFrame({
 print(feature_importance)
 
 #%%
-# Entrenar el modelo CatBoost (usa tus mejores hiperparámetros de Optuna)
+# Fit the CatBoost model with Optuna-optimized hyperparameters
 final_model = CatBoostRegressor(**best_params, verbose=0, random_state=42)
 final_model.fit(X_train, y_train)
 

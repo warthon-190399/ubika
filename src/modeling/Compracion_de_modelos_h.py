@@ -49,31 +49,17 @@ df_modelling = df.copy()
 df_modelling = df_modelling[df_modelling['distrito'].isin(['miraflores', 'surco', 'san isidro','barranco'])]
 
 zona_apeim={"puente piedra":"1", "coma":"1",}
-
-print(df_modelling.columns)
-
-# df_modelling = df_modelling.drop(["precio_usd","fecha_pub","distrito", 
-#                         "nivel_socioeconomico", "direccion_completa", 
-#                         "latitud", "longitud", "tamano", 
-#                         #"antiguedad_categoria",
-#                         "num_comisarias_prox", 
-#                         "total_transporte_prox", "num_metro_est_prox", 
-#                         "num_malls_prox", "num_tren_est_prox", 
-#                         "zona_funcional",'total_ambientes',
-#                         'tiene_estac',
-#                         'tamano_cod',
-#                         "nivel_socioeconomico_cod",
-#                         "total_servicios_prox",
-#                         "zona_funcional_cod"], axis=1) 
+# %%
+df_modelling.columns
 # %%
 df_modelling = df_modelling[['precio_pen', 'mantenimiento_soles', 'area_m2', 'num_dorm',
-       'num_banios', 'num_estac', 'antiguedad','total_servicios_prox','zona_apeim_cod']]
+       'num_banios', 'num_estac', 'antiguedad','total_servicios_prox','total_transporte_aprox',
+       'zona_apeim_cod','categoria_crimenes_cod']]
 
 #%% Replace NaN in num_estac with zero
 df_modelling['num_estac'] = df_modelling['num_estac'].fillna(0)
 
 print(df_modelling.info())
-#print(df_modelling.columns)
 # %% SPLIT DATA IN X AND Y
 X = df_modelling.drop("precio_pen", axis=1)
 

@@ -9,7 +9,8 @@ import joblib
 from sklearn.neighbors import BallTree
 from geopy.geocoders import Nominatim
 import unidecode
- 
+from folium.plugins import Geocoder
+
 def run():
     zona_apeim = {
         # 1
@@ -93,8 +94,9 @@ def run():
     #Read data
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, ".."))
-    input_model_path_l = os.path.join(BASE_DIR, "models", "catboost_model_l.pkl")
+    input_model_path_l = os.path.join(BASE_DIR, "models", "randomforest_model_l.pkl")
     input_model_path_h = os.path.join(BASE_DIR, "models", "catboost_model_h.pkl")
+    input_bins_labels = os.path.join(BASE_DIR, "models", "bins_labels.pkl")
 
     input_path_malls = os.path.join(BASE_DIR, "data", "processed", "malls_processed.csv")
     input_path_colegios = os.path.join(BASE_DIR, "data", "processed", "colegios_processed.csv")
@@ -102,17 +104,20 @@ def run():
     input_path_tren = os.path.join(BASE_DIR, "data", "processed", "tren_processed.csv")
     input_path_metropolitano = os.path.join(BASE_DIR, "data", "processed", "metropolitano_processed.csv")
     input_path_comisarias = os.path.join(BASE_DIR, "data", "processed", "comisarias_processed.csv")
+    input_path_inpe = os.path.join(BASE_DIR, "data", "processed", "inpe_processed.csv")
 
     df_malls = pd.read_csv(input_path_malls)
     df_colegios = pd.read_csv(input_path_colegios)
     df_hospitales = pd.read_csv(input_path_hospitales)
-    df_tren = pd.read_csv(input_path_tren, sep='|')
-    df_metropolitano = pd.read_csv(input_path_metropolitano, sep='|')
+    df_tren = pd.read_csv(input_path_tren)
+    df_metropolitano = pd.read_csv(input_path_metropolitano)
     df_comisarias = pd.read_csv(input_path_comisarias)
+    df_inpe = pd.read_csv(input_path_inpe)
 
-    # load model
+    # load models
     model_l = joblib.load(input_model_path_l)
     model_h = joblib.load(input_model_path_h)
+    bins, labels = joblib.load(input_bins_labels)
 
     st.title("Autoevaluador de Precio de Vivienda")
 
@@ -120,48 +125,15 @@ def run():
 
     with col1:
     #-------------------------------------------------
-        #Base map focused on Lima
-        m = folium.Map(location=[-12.05, -77.04], zoom_start=11)
+        if "lat" not in st.session_state:
+            st.session_state.lat = -12.05
+        if "lon" not in st.session_state:
+            st.session_state.lon = -77.04
+        if "address" not in st.session_state:
+            st.session_state.address = "Lima, Perú"
 
-        #Add the fetuare for the user to click
-        m.add_child(folium.LatLngPopup())
-
-        #Show the map and the selected area
-        output = st_folium(m, width=700, height=500)
-
-        #Show selected location
-        if output["last_clicked"]:
-            lat = output["last_clicked"]["lat"]
-            lon = output["last_clicked"]["lng"]
-            #st.write(f"Ubicación seleccionada: Latitud: {lat:.5f}, Longitud: {lon:.5f}")
-
-        else:
-            st.info("Haz clic en el mapa para seleccionar una ubicación.")
-
-        num_colegios_prox = proximidad_entre(lat, lon, df_colegios)[0]
-        num_malls_prox = proximidad_entre(lat, lon, df_malls)[0]
-        num_hospitales_prox = proximidad_entre(lat, lon, df_hospitales)[0]
-        num_est_tren_prox = proximidad_entre(lat, lon, df_tren)[0]
-        num_est_metro_prox = proximidad_entre(lat, lon, df_metropolitano)[0]
-        num_comisarias_prox = proximidad_entre(lat, lon, df_comisarias)[0]
-        #distrito_encontrado_folium = detectar_distrito(lat, lon, distritos_lima)
-
-        st.write(f"N° de colegios cercanos: {num_colegios_prox}")
-        st.write(f"N° de malls cercanos: {num_malls_prox}")
-        st.write(f"N° de hospitales cercanos: {num_hospitales_prox}")
-        st.write(f"N° de estaciones de tren cercanos: {num_est_tren_prox}")
-        st.write(f"N° de estaciones de metropolitano cercanos: {num_est_metro_prox}")
-        st.write(f"N° de comisarias cercanas: {num_comisarias_prox}")
-        #st.write(f"Distrito: {distrito_encontrado_folium}")
-
-        total_servicios = num_colegios_prox + num_malls_prox + num_hospitales_prox + num_est_tren_prox + num_est_metro_prox + num_comisarias_prox
-        total_servicios = int(total_servicios)
-
-        st.write(f"Total servicios: {total_servicios}")
-    #-------------------------------------------------
-    with col2:
-        
-        col1, col2 = st.columns([1, 2])
+        #Text input address
+        address_input = st.text_input("Ingresa dirección:")
 
         distritos = ['miraflores', 'san isidro', 'san borja', 'surco', 'surquillo', 'jesus maria', 
                         'lince', 'magdalena', 'pueblo libre', 'lima cercado', 'brena', 'la victoria', 
@@ -170,33 +142,84 @@ def run():
                         'cieneguilla', 'el agustino', 'la molina','chorrillos', 'sjm', 'vmt', 'ves', 'lurin', 
                         'pachacamac','punta hermosa', 'san bartolo', 'punta negra', 'pucusana', 
                         'santa maria del mar', 'barranco','callao','sjl']
-                        
-
-        with col1:
-           st.markdown("**Distrito**")
-        with col2:
-            distrito_select = st.selectbox("", distritos, label_visibility="collapsed")
-        #--------------------------------------------------------------------------------
-
-            # input per user
-            # campos = [
-            #     ("Mantenimiento (S/.)",0.0, "mantenimiento"),
-            #     ("Área (m²)",0.0, "area"),
-            #     ("Nº Dormitorios",0, "dormitorio"),
-            #     ("Nº Baños",0, "baño"),
-            #     ("Nº Estacionamientos",0, "estacionamiento"),
-            #     ("Antigüedad (años)",0, "antiguedad"),
-            #     ("Colegios cerca",0, "colegio"),
-            #     ("Hospitales cerca",0, "hospital"),
-            #     ("Total ambientes",0, "ambiente"),
-            #     ("¿Tiene estacionamiento?",[0, 1], "tieneestacionamiento"),
-            #     ("Código tamaño",[0, 1, 2], "codigotamaño"),
-            #     ("Nivel socioeconómico (cod)",[0, 1, 2, 3], "nivelsocioeconomico"),
-            #     ("Servicios cerca",0, "servicioscerca"),
-            #     ("Zona funcional (cod)",[0, 1, 2, 3, 4, 5, 6, 7, 8], "zonafuncional")
-            # ]
         
+        distrito_select = st.selectbox("", distritos, label_visibility="collapsed")
 
+        if st.button("🔍 Buscar dirección"):
+            full_address = f"{address_input} + {distrito_select}, Lima, Perú"
+
+            #Geocoding
+            geolocator = Nominatim(user_agent="streamlit_map")
+            location = geolocator.geocode(full_address)
+            
+            if location:
+                st.session_state.lat = location.latitude
+                st.session_state.lon = location.longitude
+                st.session_state.address = full_address
+                st.success(f"📍 Dirección encontrada: {full_address}")
+                st.write(f"🌍 Coordenadas: **Latitud:** {location.latitude}, **Longitud:** {location.longitude}")
+                st.rerun()
+            else:
+                st.error("❌ No se encontró la dirección. Verifica la información ingresada.")
+
+        lat = st.session_state.lat
+        lon = st.session_state.lon
+        
+        #Show
+        m = folium.Map(
+            location=[st.session_state.lat, st.session_state.lon],
+            zoom_start=18,
+            min_zoom=18,
+            max_zoom=18,
+            dragging=False,
+            zoom_control=False,
+            scrollWheelZoom=False,
+            doubleClickZoom=False
+        )
+
+        #
+        folium.Marker(
+            [st.session_state.lat, st.session_state.lon],
+            popup=st.session_state.address,
+            tooltip="Ubicación encontrada"
+        ).add_to(m)
+
+        st_folium(m, width=700, height=500)
+        #---------------------------------------------------------
+
+        num_colegios_prox = proximidad_entre(lat, lon, df_colegios)[0]
+        num_malls_prox = proximidad_entre(lat, lon, df_malls)[0]
+        num_hospitales_prox = proximidad_entre(lat, lon, df_hospitales)[0]
+        num_est_tren_prox = proximidad_entre(lat, lon, df_tren)[0]
+        num_est_metro_prox = proximidad_entre(lat, lon, df_metropolitano)[0]
+        num_comisarias_prox = proximidad_entre(lat, lon, df_comisarias)[0]
+        num_crimenes_prox = proximidad_entre(lat, lon, df_inpe)[0]
+
+        st.write(f"N° de colegios cercanos: {num_colegios_prox}")
+        st.write(f"N° de malls cercanos: {num_malls_prox}")
+        st.write(f"N° de hospitales cercanos: {num_hospitales_prox}")
+        st.write(f"N° de estaciones de tren cercanos: {num_est_tren_prox}")
+        st.write(f"N° de estaciones de metropolitano cercanos: {num_est_metro_prox}")
+        st.write(f"N° de comisarias cercanas: {num_comisarias_prox}")
+        st.write(f"N° de crimenes cercanos: {num_crimenes_prox}")
+
+        total_servicios = num_colegios_prox + num_malls_prox + num_hospitales_prox + num_comisarias_prox
+        total_servicios = int(total_servicios)
+        st.write(f"Total servicios: {total_servicios}")
+
+        total_transporte =  num_est_tren_prox + num_est_metro_prox 
+        total_transporte = int(total_transporte)
+        st.write(f"Total transporte: {total_transporte}")
+
+        categoria_crimenes = pd.cut([num_crimenes_prox],bins=bins,labels=labels, include_lowest=True)
+        categoria_crimenes = pd.Categorical(categoria_crimenes, categories=labels)
+        categoria_crimenes = categoria_crimenes.codes[0] + 1
+        categoria_crimenes = int(categoria_crimenes)
+        st.write(f"Categoria crimenes: {categoria_crimenes}")
+
+    #-------------------------------------------------
+    with col2: #Colum 2
+        #--------------------------------------------------------------------------------
         campos = [
                 ("Mantenimiento (S/.)",0.0, "mantenimiento"),
                 ("Área (m²)",0.0, "area"),
@@ -206,9 +229,6 @@ def run():
                 ("Antigüedad (años)",0, "antiguedad")
             ]
             
-            #("Zona apeim (cod)",[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "zonafuncional")
-            #("N° de servicios cerca",0, "servicios"),
-
         valores = []
 
         for label, min_val, key in campos:
@@ -254,20 +274,17 @@ def run():
 
         valor_apeim = zona_apeim[distrito_select]
         #valor_apeim = zona_apeim[distrito_encontrado_folium]
-        valores.append(valor_apeim)
         valores.append(total_servicios)
+        valores.append(total_transporte)
+        valores.append(valor_apeim)
+        valores.append(categoria_crimenes)
 
         st.write("Valores enviados al modelo:", valores)
 
 
         if st.button("Estimar precio"):
-                # column_names = ['mantenimiento_soles', 'area_m2', 'num_dorm', 'num_banios', 'num_estac',
-                #                 'antiguedad', 'num_colegios_prox', 'num_hospitales_prox',
-                #                 'total_ambientes', 'tiene_estac', 'tamano_cod',
-                #                 'nivel_socioeconomico_cod', 'total_servicios_prox',
-                #                 'zona_funcional_cod']
                 column_names = ['mantenimiento_soles', 'area_m2', 'num_dorm', 'num_banios', 'num_estac',
-                                'antiguedad','total_servicios_prox', 'zona_apeim_cod']
+                                'antiguedad','total_servicios_prox', 'total_transporte_aprox', 'zona_apeim_cod','categoria_crimenes_cod']
                 
                 input_df = pd.DataFrame([valores], columns=column_names)
 

@@ -2,45 +2,29 @@ import streamlit as st
 import os
 import pandas as pd
 import plotly.express as px
- 
-def run():
-    st.title("visualization")
 
+def run():
 
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, ".."))
     input_model_path = os.path.join(BASE_DIR, "data", "processed","data_preprocessing_eng.csv")
 
     df = pd.read_csv(input_model_path)
-
+    st.write(df.columns)
     # create sidebar with district selection
     st.sidebar.header("Filtros")
-    #distritos_disponibles = df["nivel_socioeconomico"].unique()
-    distritos_disponibles = df["zona_funcional"].unique()
+    distritos_disponibles = df["nivel_socioeconomico"].unique()
+    distrito_seleccionado = st.sidebar.selectbox("Selecciona un nivel socioeconomico", distritos_disponibles)
 
-    #distrito_seleccionado = st.sidebar.selectbox("Selecciona un nivel socieconomico", distritos_disponibles)
-    distrito_seleccionado = st.sidebar.selectbox("Selecciona una zona funcional", 
-                                                 sorted(distritos_disponibles))
-
-    #Filter by distric
-    #df_filtrado = df[df["nivel_socioeconomico"] == distrito_seleccionado]
-    df_filtrado = df[df["zona_funcional"] == distrito_seleccionado]
-
-    #--------------------------------------------------
-    distritos_disponibles2 = df_filtrado["nivel_socioeconomico"].unique()
-    distritos_ordenados2 = sorted([d for d in distritos_disponibles2 if pd.notna(d)])
-
-    distrito_seleccionado2 = st.sidebar.selectbox("Selecciona un nivel socieconomico", 
-                                                  distritos_ordenados2)
-    df_filtrado2 = df_filtrado[df_filtrado["nivel_socioeconomico"] == distrito_seleccionado2]
-    #--------------------------------------------------
+    #Filter by district selected
+    df_filtrado = df[df["nivel_socioeconomico"] == distrito_seleccionado]
 
     # Principal title
-    st.title(f"Análisis de precios en el distrito: {distrito_seleccionado2}")
+    st.title(f"Análisis de precios en el distrito: {distrito_seleccionado}")
 
-    #st.subheader("Distribución de precios por nivel socioeconómico (Boxplot)")
+    st.subheader("Distribución de precios por nivel socioeconómico (Boxplot)")
     fig_box = px.box(
-        df_filtrado2,
+        df_filtrado,
         x="nivel_socioeconomico",
         y="precio_pen",
         color= "distrito",
@@ -52,9 +36,9 @@ def run():
     )
 
     # graph 2: Violin Plot
-    #st.subheader("Distribución de precios por nivel socioeconómico (Violin Plot)")
+    st.subheader("Distribución de precios por nivel socioeconómico (Violin Plot)")
     fig_violin = px.violin(
-        df_filtrado2,
+        df_filtrado,
         x="nivel_socioeconomico",
         y="precio_pen",
         color = "distrito",
@@ -68,9 +52,9 @@ def run():
     )
     
     # Graph 3: Histograma
-    #st.subheader("Histograma de precios")
+    st.subheader("Histograma de precios")
     fig_hist = px.histogram(
-        df_filtrado2,
+        df_filtrado,
         x="precio_pen",
         color="distrito",
         nbins=30,
@@ -80,10 +64,10 @@ def run():
     
     
     fig_scatter = px.scatter(
-        df_filtrado2,
+        df,
         x = "area_m2",
         y = "precio_pen",
-        color = "distrito",
+        color = "nivel_socioeconomico",
         #size = "mantenimiento_soles",
         hover_data = ["mantenimiento_soles","antiguedad","total_ambientes"],
         title = "Relación entre área y precio según distrito",
@@ -97,32 +81,26 @@ def run():
 
     col1, col2 = st.columns(2)
 
-    #st.plotly_chart(fig_box, use_container_width=True)
+    st.plotly_chart(fig_box, use_container_width=True)
     with col1:
         
         st.plotly_chart(fig_violin, use_container_width=True)
-        st.plotly_chart(fig_box, use_container_width=True)
 
     with col2:
         st.plotly_chart(fig_hist, use_container_width=True)
-        st.plotly_chart(fig_scatter, use_container_width=True)
 
-    #st.plotly_chart(fig_scatter, use_container_width=True)
-
-    centro_lat = df_filtrado2["latitud"].median()
-    centro_lon = df_filtrado2["longitud"].median()
-    #center={"lat": -12.053675190475358, "lon": -77.04217016334559},
+    st.plotly_chart(fig_scatter, use_container_width=True)
 
     # Mapa de burbujas
     st.subheader("Mapa de propiedades por ubicación")
     fig_burbujas = px.scatter_mapbox(
-        df_filtrado2,
+        df,
         lat="latitud",
         lon="longitud",
         size="precio_pen",
-        color="distrito",
+        color="nivel_socioeconomico",
         size_max=20,
-        center={"lat": centro_lat, "lon": centro_lon},
+        center={"lat": -12.053675190475358, "lon": -77.04217016334559},
         zoom=11,
         mapbox_style="carto-darkmatter",
         width=70,
@@ -130,19 +108,18 @@ def run():
         title="Distribución de precios por zona",
         height=800,
     )
-    
     st.plotly_chart(fig_burbujas)
 
     # Mapa de calor (Heatmap)
     st.subheader("Mapa de calor según precio")
     fig_heatmap = px.density_mapbox(
-        df_filtrado2,
+        df,
         lat="latitud",
         lon="longitud",
         z="precio_pen",
         radius=30,
         color_continuous_scale="Viridis",
-        center={"lat": centro_lat, "lon": centro_lon},
+        center={"lat": -12.053675190475358, "lon": -77.04217016334559},
         zoom=11,
         mapbox_style="carto-darkmatter",
         width=70,

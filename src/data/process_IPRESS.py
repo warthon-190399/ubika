@@ -1,18 +1,18 @@
-
 #%% IMPORT LIBRARIES
+
 import pandas as pd
 import googlemaps
 import re
 import os
 import unicodedata
 from dotenv import load_dotenv
-#%% FUNCTION "obtener_lat_lon", API DE GOOGLE
-API_KEY = os.getenv("GOOGLE_GEOENCODING_APIKEY").strip('"') # 👈 reemplaza esto por tu clave real
 
-# Crear cliente
+#%% FUNCTION "obtener_lat_lon", API DE GOOGLE
+
+API_KEY = os.getenv("GOOGLE_GEOENCODING_APIKEY").strip('"')  # 👈 reemplaza esto por tu clave real
 gmaps = googlemaps.Client(key=API_KEY)
 
-def obtener_lat_lon(direccion):
+def getting_lat_lon(direccion):
     try:
         geocode_result = gmaps.geocode(direccion)
         if geocode_result:
@@ -22,9 +22,8 @@ def obtener_lat_lon(direccion):
         print(f"❌ Error en dirección '{direccion}': {e}")
     return (None, None)
 
-#Ejemplo: df2["ubicaciones_tupla"] = df["direccion_ubicacion"].apply(obtener_lat_lon) #API google
 #%% FUNCTION "limpiar_direccion"
-def limpiar_direccion(direccion):
+def direction_format(direccion):
     if pd.isna(direccion):
         return None
     
@@ -86,56 +85,80 @@ def limpiar_direccion(direccion):
 
     return direccion.strip()
 
-# %% FUNCTION "quitar_tildes"
-def quitar_tildes(texto):
-    if isinstance(texto, str):
-        return unicodedata.normalize("NFKD", texto).encode("ASCII", "ignore").decode("utf-8")
-    return texto  # Si es NaN u otro tipo, lo devuelve igual
 # %%
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
 input_path = os.path.join(BASE_DIR, "data", "raw", "IPRESS.csv")
 output_path = os.path.join(BASE_DIR, "data", "processed", "hospitales_processed.csv")
 
-input_path_env = os.path.join(BASE_DIR, ".env.example")
+input_path_env = os.path.join(BASE_DIR, ".env")
 load_dotenv(dotenv_path=input_path_env, override=True)
 
 df = pd.read_csv(input_path, encoding="latin1")
+
+df_clean = df.copy()
+
+#%%
+
+df_clean.columns = (
+    df_clean.columns
+    .str.strip()
+    .str.lower()
+    .map(lambda x: unicodedata.normalize('NFKD', x).encode('ascii', 'ignore').decode('utf-8'))
+    .str.replace(" ", "_")
+    .str.replace("/", "_")
+    .str.replace("__", "_")
+)
+
+for col in df_clean.select_dtypes(include="object").columns:
+    df_clean[col] = (
+        df_clean[col] 
+        .astype(str)
+        .str.strip()
+        .str.lower()
+        .str.normalize("NFKD")  # quitar tildes y acentos
+        .str.encode("ascii", "ignore")
+        .str.decode("utf-8")
+    )
+#%%
+df_clean.columns
+
 #%% EDIT VALUES IN COLUMNS
-df = df[df["Departamento"] == "LIMA"]
-df = df[df["Condición"] == "EN FUNCIONAMIENTO"]
+df_clean = df_clean[(df_clean["departamento"] == "lima") & 
+                    (df_clean["condicion"] == "en funcionamiento") &
+                    (df_clean["tipo"] == "establecimiento de salud con internamiento")
+                    ]
 
-df = df[df["Tipo"] == "ESTABLECIMIENTO DE SALUD CON INTERNAMIENTO"]
-df["direccion_ubicacion"] = df["Dirección"] + ", " + df["Distrito"] + ", " + df["Provincia"]
+df_clean["direccion_ubicacion"] = df_clean["direccion"] + ", " + df_clean["distrito"] + ", " + df_clean["provincia"]
 
-df["direccion_ubicacion"] = df["direccion_ubicacion"].apply(limpiar_direccion) #LIMPIAR TEXTO
 
-df["ubicaciones_tupla"] = df["direccion_ubicacion"].apply(obtener_lat_lon) #API google
+df_clean["direccion_ubicacion"] = df_clean["direccion_ubicacion"].apply(direction_format) #LIMPIAR TEXTO
 
-df["ubicaciones_tupla"] = df["ubicaciones_tupla"].astype("str")
-df[["latitud","longitud"]] = df["ubicaciones_tupla"].str.strip("()").str.split(",", expand=True)
-df["latitud"] = pd.to_numeric(df["latitud"], errors="coerce")
-df["longitud"] = pd.to_numeric(df["longitud"], errors="coerce")
+df_clean["ubicaciones_tupla"] = df_clean["direccion_ubicacion"].apply(getting_lat_lon) #API google
 
-df = df[['Nombre del establecimiento', 'Provincia', 'Distrito','Dirección','direccion_ubicacion', 'latitud','longitud']]
-# %% Se renombrar columnas
-df.rename(columns = {"Nombre del establecimiento":"nombre",
-                     "Dirección":"direccion",
-                     "direccion_ubicacion":"direccion_completa",
-                     "Provincia":"provincia","Distrito":"distrito"
-                     }, inplace = True)
-df
+df_clean["ubicaciones_tupla"] = df_clean["ubicaciones_tupla"].astype("str")
+
+df_clean[["latitud","longitud"]] = df_clean["ubicaciones_tupla"].str.strip("()").str.split(",", expand=True)
+
+df_clean["latitud"] = pd.to_numeric(df_clean["latitud"], errors="coerce")
+
+df_clean["longitud"] = pd.to_numeric(df_clean["longitud"], errors="coerce")
+#%%
+df_clean = df_clean[['nombre_del_establecimiento', 'provincia', 'distrito', 'direccion', 'direccion_ubicacion', 'latitud','longitud']]
+
 # %% EDIRdición de valores de la columna distrito
-df["distrito"] = df["distrito"].astype(str).apply(quitar_tildes).str.lower()
-df["distrito"] = df["distrito"].replace({"san juan de lurigancho":"sjl",
+
+df_clean["distrito"] = df_clean["distrito"].replace({"san juan de lurigancho":"sjl",
                                          "san juan de miraflores":"sjm",
                                          "villa maria del triunfo":"vmt",
                                          "san martin de porres":"smp",
-                                         "villa el salvador":"ves"})
-df["distrito"].unique()
+                                         "villa el salvador":"ves",
+                                         "lima": "lima cercado"
+                                         })
+
+df_clean = df_clean.reset_index()
 #%%
-df["provincia"] = df["provincia"].astype(str).apply(quitar_tildes).str.lower()
-df["provincia"].unique()
-# %%
-df.to_csv(output_path)
+
+df_clean.to_csv(output_path, index=False)
 # %%
