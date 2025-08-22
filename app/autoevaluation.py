@@ -10,6 +10,8 @@ from sklearn.neighbors import BallTree
 from geopy.geocoders import Nominatim
 import unidecode
 from folium.plugins import Geocoder
+from folium.features import DivIcon
+import unicodedata
 
 def run():
     zona_apeim = {
@@ -30,6 +32,7 @@ def run():
 
         # 4
         'lima cercado': 4,
+        'cercado de lima':4,
         'rimac': 4,
         'brena': 4,
         'la victoria': 4,
@@ -54,6 +57,7 @@ def run():
         'miraflores': 7,
         'san isidro': 7,
         'san borja': 7,
+        'santiago de surco': 7,   # agregado
         'surco': 7,
         'la molina': 7,
 
@@ -80,17 +84,19 @@ def run():
         'callao': 10,
     }
 
-    distritos_lima = [
-        'ate', 'barranco', 'brena', 'carabayllo', 'chaclacayo', 'chorrillos', 'cieneguilla',
-        'comas', 'el agustino', 'independencia', 'jesus maria', 'la molina', 'la victoria',
-        'lince', 'los olivos', 'lurigancho', 'lurin', 'magdalena del mar',
-        'pueblo libre', 'miraflores', 'pachacamac', 'puente piedra', 'rimac',
-        'san bartolo', 'san borja', 'san isidro', 'san juan de lurigancho',
-        'san juan de miraflores', 'san luis', 'san martin de porres', 'san miguel',
-        'santa anita', 'santa maria del mar', 'santa rosa', 'santiago de surco',
-        'surquillo', 'villa el salvador', 'villa maria del triunfo', 'callao'
+    distritos = [
+        "-", "Ate", "Barranco", "Breña", "Callao", "Carabayllo", "Cercado de Lima", 
+        "Chaclacayo", "Chorrillos", "Cieneguilla", "Comas", "El Agustino", 
+        "Independencia", "Jesús María", "La Molina", "La Victoria", "Lince", 
+        "Los Olivos", "Lurigancho-Chosica", "Lurín", "Magdalena del Mar", 
+        "Miraflores", "Pachacámac", "Pueblo Libre", "Puente Piedra", "Rímac", 
+        "San Bartolo", "San Borja", "San Isidro", "San Juan de Lurigancho", 
+        "San Juan de Miraflores", "San Luis", "San Martín de Porres", 
+        "San Miguel", "Santa Anita", "Santa María del Mar", "Santa Rosa", 
+        "Santiago de Surco", "Surquillo", "Villa El Salvador", 
+        "Villa María del Triunfo"
     ]
-
+ 
     #Read data
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, ".."))
@@ -121,108 +127,242 @@ def run():
 
     st.title("Autoevaluador de Precio de Vivienda")
 
+    if "lat" not in st.session_state:
+        st.session_state.lat = -12.05
+    if "lon" not in st.session_state:
+        st.session_state.lon = -77.04
+    if "address" not in st.session_state:
+        st.session_state.address = "Lima, Perú"
+    if "message" not in st.session_state:
+        st.session_state.message = None
+    if "coords" not in st.session_state:
+        st.session_state.coords = None
+    if "active_tab" not in st.session_state:
+        st.session_state.active_tab = 0  # Tab por defecto
+    if "zoom_start" not in st.session_state:
+        st.session_state.zoom_start = 18
+    if "min_zoom" not in st.session_state:
+        st.session_state.min_zoom = 18
+    if "max_zoom" not in st.session_state:
+        st.session_state.max_zoom = 18
+    if "manipulate" not in st.session_state:
+        st.session_state.manipulate = False
+    if "last_active_tab" not in st.session_state:
+        st.session_state.last_active_tab = st.session_state.active_tab
+    # if "distrito_default" not in st.session_state:
+    #     st.session_state.distrito_default = distritos[0]  # Valor inicial
+
+    defaults_por_tab = {
+        0: distritos[0],
+        1: distritos[0],
+        2: distritos[0],
+    }
+
+    if st.session_state.active_tab != st.session_state.last_active_tab:
+        st.session_state["distrito_select"] = defaults_por_tab[st.session_state.active_tab]
+        st.session_state.last_active_tab = st.session_state.active_tab
+
     col1, col2 = st.columns(2)
 
     with col1:
-    #-------------------------------------------------
-        if "lat" not in st.session_state:
-            st.session_state.lat = -12.05
-        if "lon" not in st.session_state:
-            st.session_state.lon = -77.04
-        if "address" not in st.session_state:
-            st.session_state.address = "Lima, Perú"
-
-        #Text input address
-        address_input = st.text_input("Ingresa dirección:")
-
-        distritos = ['miraflores', 'san isidro', 'san borja', 'surco', 'surquillo', 'jesus maria', 
-                        'lince', 'magdalena', 'pueblo libre', 'lima cercado', 'brena', 'la victoria', 
-                        'san luis', 'rimac', 'los olivos', 'comas', 'independencia', 'puente piedra', 
-                        'carabayllo', 'ancon', 'smp', 'ate', 'santa anita', 'lurigancho', 'chaclacayo', 
-                        'cieneguilla', 'el agustino', 'la molina','chorrillos', 'sjm', 'vmt', 'ves', 'lurin', 
-                        'pachacamac','punta hermosa', 'san bartolo', 'punta negra', 'pucusana', 
-                        'santa maria del mar', 'barranco','callao','sjl']
+        tab_names = ["🔍 Buscar dirección", "🗺️ Buscar en el mapa", "🛰️ Buscar latitud y longitud"]
+        active_tab = st.radio(
+            "Selecciona una opción:", 
+            tab_names, 
+            index=st.session_state.active_tab, 
+            horizontal=True
+            )
         
-        distrito_select = st.selectbox("", distritos, label_visibility="collapsed")
+        if active_tab != tab_names[st.session_state.active_tab]:
+            st.session_state.active_tab = tab_names.index(active_tab)
+            st.session_state.force_refresh = True
+        else:
+            st.session_state.force_refresh = False
 
-        if st.button("🔍 Buscar dirección"):
-            full_address = f"{address_input} + {distrito_select}, Lima, Perú"
+        m = folium.Map(
+                    location=[st.session_state.lat, st.session_state.lon],
+                    zoom_start=st.session_state.zoom_start,
+                    min_zoom=st.session_state.min_zoom,
+                    max_zoom=st.session_state.max_zoom,
+                    dragging=st.session_state.manipulate,
+                    zoom_control=st.session_state.manipulate,
+                    scrollWheelZoom=st.session_state.manipulate,
+                    doubleClickZoom=st.session_state.manipulate
+                )
 
-            #Geocoding
-            geolocator = Nominatim(user_agent="streamlit_map")
-            location = geolocator.geocode(full_address)
+        if st.session_state.active_tab == 0:
+            st.session_state.manipulate = False
             
-            if location:
-                st.session_state.lat = location.latitude
-                st.session_state.lon = location.longitude
-                st.session_state.address = full_address
-                st.success(f"📍 Dirección encontrada: {full_address}")
-                st.write(f"🌍 Coordenadas: **Latitud:** {location.latitude}, **Longitud:** {location.longitude}")
-                st.rerun()
-            else:
-                st.error("❌ No se encontró la dirección. Verifica la información ingresada.")
+            folium.Marker(
+                [st.session_state.lat, st.session_state.lon],
+                popup=st.session_state.address,
+                tooltip="Ubicación encontrada"
+                ).add_to(m)
 
+            if "coords" in st.session_state and st.session_state.coords:
+                st.write(st.session_state.coords)
+                st_folium(m, width=700, height=500)
+            else:
+                st.error(st.session_state.message)
+                st.session_state.lat = -12.05
+                st.session_state.lon = -77.04
+            
+        if st.session_state.active_tab == 1:
+            if st.session_state.force_refresh:
+                st.rerun()
+            
+            if st.session_state.lat and st.session_state.lon:
+                    folium.Marker(
+                        [st.session_state.lat, st.session_state.lon],
+                        popup="Ubicación seleccionada",
+                        tooltip="Ubicación guardada"
+                    ).add_to(m)
+   
+            m.add_child(folium.LatLngPopup())
+
+            st.write(st.session_state.coords)
+            map_data=st_folium(m, width=700, height=500)
+
+            if map_data["last_clicked"]:
+                lat_clicked= map_data["last_clicked"]["lat"]
+                lon_clicked = map_data["last_clicked"]["lng"]
+
+                st.session_state.lat = lat_clicked
+                st.session_state.lon = lon_clicked
+                st.session_state.zoom = map_data["zoom"]
+                st.session_state.coords = f"🌍 Coordenadas: **Latitud:** {round(lat_clicked,7)}, **Longitud:** {round(lon_clicked,7)}"
+        if st.session_state.active_tab == 2:
+            st.session_state.manipulate = False
+            
+            folium.Marker(
+                [st.session_state.lat, st.session_state.lon],
+                popup=st.session_state.address,
+                tooltip="Ubicación encontrada"
+                ).add_to(m)
+
+            if "coords" in st.session_state and st.session_state.coords:
+                #st.write(st.session_state.coords)
+                st_folium(m, width=700, height=500)
+            else:
+                st.error(st.session_state.message)
+                st.session_state.lat = -12.05
+                st.session_state.lon = -77.04
+
+    with col2:
+    #-------------------------------------------------
+        #--------------TAB 1------------------
+        if st.session_state.active_tab == 0:
+            st.session_state.distrito_default = distritos[0]
+
+            #Text input address
+            address_input = st.text_input("Ingrese dirección:")
+            distrito_select = st.selectbox(
+                "",
+                distritos,
+                index=distritos.index(st.session_state.get("distrito_select", defaults_por_tab[st.session_state.active_tab])),
+                key="distrito_select",
+                label_visibility="collapsed"
+                )
+            full_address = f"{address_input}, {distrito_select}, Lima, Perú"
+            
+            if st.button("🔍 Buscar dirección"):
+                if address_input =="":
+                    st.session_state.message = f"❌ Ingrese dirección"
+                    st.session_state.coords = None
+                    st.rerun()
+                elif distrito_select == "-":
+                    st.session_state.message = f"❌ Seleccione un distrito"
+                    st.session_state.coords = None
+                    st.rerun()
+                else:
+                    #Geocoding
+                    geolocator = Nominatim(user_agent="myApp", timeout=20)
+                    location = geolocator.geocode(full_address)
+
+                    if location:
+                        st.session_state.zoom_start = 18
+                        st.session_state.min_zoom = 18
+                        st.session_state.max_zoom = 18
+                        st.session_state.manipulate = False
+                        
+                        st.session_state.lat = location.latitude
+                        st.session_state.lon = location.longitude
+                        st.session_state.address = full_address
+                        st.session_state.message = f"📍 Dirección encontrada: {full_address}"
+                        st.session_state.coords = f"🌍 Coordenadas: **Latitud:** {location.latitude}, **Longitud:** {location.longitude}"
+                        st.rerun()
+                    else:
+                        st.session_state.message = f"❌ No se encontró la dirección. Verifica la información ingresada: {full_address}"
+                        st.session_state.coords = None
+                        st.rerun()
+        #----------------------------Button: Buscar en el mapa--------------------------
+        elif st.session_state.active_tab == 1:
+            st.session_state.distrito_default = distritos[0]
+
+            st.warning("🗺️ Desplázate y haz clic en el mapa para ubicar la vivienda")
+            
+            distrito_select = st.selectbox(
+                "", 
+                distritos,
+                index=distritos.index(st.session_state.get("distrito_select", defaults_por_tab[st.session_state.active_tab])),
+                key="distrito_select",
+                label_visibility="collapsed"
+                )
+
+            #st.write(st.session_state.coords)
+
+            st.session_state.zoom_start = 18
+            st.session_state.min_zoom = 5
+            st.session_state.max_zoom = 20
+            st.session_state.manipulate = True
+
+        elif st.session_state.active_tab == 2: 
+            st.session_state.distrito_default = distritos[0]
+
+            lat_input = st.text_input("Ingrese latitud:")
+            lon_input = st.text_input("Ingrese longitud:")
+
+            distrito_select = st.selectbox(
+                "",
+                distritos,
+                index=distritos.index(st.session_state.get("distrito_select", defaults_por_tab[st.session_state.active_tab])),
+                key="distrito_select",
+                label_visibility="collapsed"
+                )
+
+            if st.button("🔍 Buscar dirección"):
+                geolocator = Nominatim(user_agent="myApp", timeout=20)
+                location = geolocator.reverse((lat_input,lon_input), language="es")
+
+                full_address = location.address
+
+                if location:
+                    st.session_state.zoom_start = 18
+                    st.session_state.min_zoom = 18
+                    st.session_state.max_zoom = 18
+                    st.session_state.manipulate = False
+                    
+                    st.session_state.lat = lat_input
+                    st.session_state.lon = lon_input
+                    st.session_state.address = full_address
+                    st.session_state.message = f"📍 Dirección encontrada: {full_address}"
+                    st.session_state.coords = f"🌍 Coordenadas: **Latitud:** {location.latitude}, **Longitud:** {location.longitude}"
+                    st.rerun()
+                else:
+                    st.session_state.message = f"❌ No se encontró la dirección. Verifica la información ingresada: {full_address}"
+                    st.session_state.coords = None
+                    st.rerun()
         lat = st.session_state.lat
         lon = st.session_state.lon
-        
-        #Show
-        m = folium.Map(
-            location=[st.session_state.lat, st.session_state.lon],
-            zoom_start=18,
-            min_zoom=18,
-            max_zoom=18,
-            dragging=False,
-            zoom_control=False,
-            scrollWheelZoom=False,
-            doubleClickZoom=False
-        )
 
-        #
-        folium.Marker(
-            [st.session_state.lat, st.session_state.lon],
-            popup=st.session_state.address,
-            tooltip="Ubicación encontrada"
-        ).add_to(m)
+        lat = float(lat)
+        lon = float(lon)
 
-        st_folium(m, width=700, height=500)
-        #---------------------------------------------------------
-
-        num_colegios_prox = proximidad_entre(lat, lon, df_colegios)[0]
-        num_malls_prox = proximidad_entre(lat, lon, df_malls)[0]
-        num_hospitales_prox = proximidad_entre(lat, lon, df_hospitales)[0]
-        num_est_tren_prox = proximidad_entre(lat, lon, df_tren)[0]
-        num_est_metro_prox = proximidad_entre(lat, lon, df_metropolitano)[0]
-        num_comisarias_prox = proximidad_entre(lat, lon, df_comisarias)[0]
-        num_crimenes_prox = proximidad_entre(lat, lon, df_inpe)[0]
-
-        st.write(f"N° de colegios cercanos: {num_colegios_prox}")
-        st.write(f"N° de malls cercanos: {num_malls_prox}")
-        st.write(f"N° de hospitales cercanos: {num_hospitales_prox}")
-        st.write(f"N° de estaciones de tren cercanos: {num_est_tren_prox}")
-        st.write(f"N° de estaciones de metropolitano cercanos: {num_est_metro_prox}")
-        st.write(f"N° de comisarias cercanas: {num_comisarias_prox}")
-        st.write(f"N° de crimenes cercanos: {num_crimenes_prox}")
-
-        total_servicios = num_colegios_prox + num_malls_prox + num_hospitales_prox + num_comisarias_prox
-        total_servicios = int(total_servicios)
-        st.write(f"Total servicios: {total_servicios}")
-
-        total_transporte =  num_est_tren_prox + num_est_metro_prox 
-        total_transporte = int(total_transporte)
-        st.write(f"Total transporte: {total_transporte}")
-
-        categoria_crimenes = pd.cut([num_crimenes_prox],bins=bins,labels=labels, include_lowest=True)
-        categoria_crimenes = pd.Categorical(categoria_crimenes, categories=labels)
-        categoria_crimenes = categoria_crimenes.codes[0] + 1
-        categoria_crimenes = int(categoria_crimenes)
-        st.write(f"Categoria crimenes: {categoria_crimenes}")
-
-    #-------------------------------------------------
-    with col2: #Colum 2
+    #with col2: #Colum 2
         #--------------------------------------------------------------------------------
         campos = [
-                ("Mantenimiento (S/.)",0.0, "mantenimiento"),
-                ("Área (m²)",0.0, "area"),
+                ("Mantenimiento (S/.)",0, "mantenimiento"),
+                ("Área (m²)",0, "area"),
                 ("Nº Dormitorios",0, "dormitorio"),
                 ("Nº Baños",0, "baño"),
                 ("Nº Estacionamientos",0, "estacionamiento"),
@@ -270,19 +410,46 @@ def run():
                     else:
                         valor = st.number_input("", min_value=min_val,
                                             label_visibility="collapsed", key = key)
-                valores.append(valor)
-
-        valor_apeim = zona_apeim[distrito_select]
-        #valor_apeim = zona_apeim[distrito_encontrado_folium]
-        valores.append(total_servicios)
-        valores.append(total_transporte)
-        valores.append(valor_apeim)
-        valores.append(categoria_crimenes)
-
-        st.write("Valores enviados al modelo:", valores)
-
+                valores.append(valor) #Add values
 
         if st.button("Estimar precio"):
+            if distrito_select == "-":
+                st.error("Seleccione distrito")
+            else:
+                #---------------------------------
+                # Calculate prox
+                num_colegios_prox = proximidad_entre(lat, lon, df_colegios)[0]
+                num_malls_prox = proximidad_entre(lat, lon, df_malls)[0]
+                num_hospitales_prox = proximidad_entre(lat, lon, df_hospitales)[0]
+                num_est_tren_prox = proximidad_entre(lat, lon, df_tren)[0]
+                num_est_metro_prox = proximidad_entre(lat, lon, df_metropolitano)[0]
+                num_comisarias_prox = proximidad_entre(lat, lon, df_comisarias)[0]
+                num_crimenes_prox = proximidad_entre(lat, lon, df_inpe)[0]
+
+                total_servicios = num_colegios_prox + num_malls_prox + num_hospitales_prox + num_comisarias_prox
+                total_servicios = int(total_servicios)
+
+                total_transporte =  num_est_tren_prox + num_est_metro_prox 
+                total_transporte = int(total_transporte)
+
+                categoria_crimenes = pd.cut([num_crimenes_prox],bins=bins,labels=labels, include_lowest=True)
+                categoria_crimenes = pd.Categorical(categoria_crimenes, categories=labels)
+                categoria_crimenes = categoria_crimenes.codes[0] + 1
+                categoria_crimenes = int(categoria_crimenes)
+
+                #District edit
+                distrito_select = normalizar_texto(distrito_select)
+                valor_apeim = zona_apeim[distrito_select]
+
+                #Add vaules
+                valores.append(total_servicios)
+                valores.append(total_transporte)
+                valores.append(valor_apeim)
+                valores.append(categoria_crimenes)
+
+                #Print values
+                #st.write("Valores enviados al modelo:", valores)
+                #---------------------------------
                 column_names = ['mantenimiento_soles', 'area_m2', 'num_dorm', 'num_banios', 'num_estac',
                                 'antiguedad','total_servicios_prox', 'total_transporte_aprox', 'zona_apeim_cod','categoria_crimenes_cod']
                 
@@ -336,3 +503,9 @@ def detectar_distrito(lat, lon, distritos_folium):
 
     #st.warning(address_parts.values())
     return None
+
+def normalizar_texto(texto: str) -> str:
+    return ''.join(
+        c for c in unicodedata.normalize('NFD', texto)
+        if unicodedata.category(c) != 'Mn'
+    ).lower()
