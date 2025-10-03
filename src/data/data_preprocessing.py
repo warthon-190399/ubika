@@ -20,6 +20,7 @@ output_path = os.path.join(BASE_DIR, "data", "processed", "data_preprocessing.cs
 
 df = pd.read_csv(input_path)
 df_processed = df.copy()
+
 # %% DROP VALUES OUT OF RANGE 
 
 q_low = df["precio_pen"].quantile(0.01)
@@ -51,6 +52,7 @@ cols_a_imputar = ['num_dorm', 'num_banios', 'antiguedad']
 medianas = train_data.groupby('distrito')[cols_a_imputar].median()
 
 df_processed = df_processed.apply(imputar_con_medianas, axis=1)
+
 # %%
 
 conteo_coordenadas = df_processed.groupby(['latitud', 'longitud']).size().reset_index(name='conteo')
@@ -60,4 +62,5 @@ conteo_coordenadas.index = conteo_coordenadas.index+1
 # %% EXPORT TO CSV
 
 df_processed.to_csv(output_path, index=False)
+
 # %%
