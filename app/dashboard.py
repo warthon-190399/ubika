@@ -232,14 +232,16 @@ def run():
 
         if selected_rows.empty:
             df_map = df_oportunidades
+            df_map2 = None
         else:
             df_map = selected_rows
+            df_map2 = selected_rows
 
-        st.session_state["data"] = df_map
+        st.session_state["data"] = df_map2
         #------------------------------
-        if st.button("Cargar DataFrame"):
-            st.session_state["data"] = df_map
-            st.success("Data guardada en session_state")
+        #if st.button("Cargar DataFrame"):
+        #    st.session_state["data"] = df_map
+        #    st.success("Data guardada en session_state")
         #------------------------------
 
         layer_points = pdk.Layer(

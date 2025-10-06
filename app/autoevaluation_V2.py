@@ -14,10 +14,6 @@ from folium.features import DivIcon
 import unicodedata
 
 def run():
-    if st.session_state["data"] is not None:
-        st.write("DataFrame recibido desde Autoevaluador:")
-        st.dataframe(st.session_state["data"])
-    
     zona_apeim = {
         # 1
         'puente piedra': 1,
@@ -130,6 +126,40 @@ def run():
     bins, labels = joblib.load(input_bins_labels)
 
     st.title("Autoevaluador de Precio de Vivienda")
+
+    #-------------------------------------------------------
+    if st.session_state["data"] is not None:
+        #st.write("DataFrame recibido desde Autoevaluador:")
+        st.dataframe(st.session_state["data"])
+
+        df_dasboard = st.session_state["data"]
+        opciones = st.session_state["data"].iloc[:,4].tolist()
+
+        valor_actual = st.session_state.get("direccion_select_dashboard", opciones[0] if opciones else None)
+
+        if opciones:
+            direccion_select_dashboard = st.selectbox(
+                "Selecciona una dirección:",
+                opciones,
+                index = opciones.index(valor_actual) if valor_actual in opciones else 0,
+                key="direccion_select_dashboard",
+                label_visibility="collapsed"
+            )
+            st.write(f"Seleccionaste: {direccion_select_dashboard}")
+        
+            #filtro = df["direccion_completa"] == direccion_select_dashboard
+
+            # if filtro.any():
+            #     st.session_state["lat"] = df.loc[filtro, "lat"].iloc[0,10]
+            #     st.session_state["lon"] = df.loc[filtro, "lon"].iloc[0,11]
+            # else:
+            #     st.warning("No se encontró la dirección seleccionada en los datos.")
+        
+        else:
+            st.warning("No hay direcciones disponibles para seleccionar.")
+    else:
+        st.info("No se ha cargado ningún DataFrame desde Dashboard.")
+    #-------------------------------------------------------
 
     if "lat" not in st.session_state:
         st.session_state.lat = -12.05
