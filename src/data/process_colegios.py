@@ -1,19 +1,18 @@
+#%% Import Libraries
 import pandas as pd
 import os 
-
+# %% Read df
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
 
-# Ruta al archivo de entrada
 input_path = os.path.join(BASE_DIR, "data", "raw", "colegios.csv")
-
 output_path = os.path.join(BASE_DIR, "data", "processed", "colegios_processed.csv")
 
-df_raw = pd.read_csv(input_path, sep="|")
+df = pd.read_csv(input_path, sep="|")
+df_clean = df.copy()
 
-df = df_raw.copy()
-
-df.columns = (
-    df.columns
+df_clean.columns = (
+    df_clean.columns
     .str.strip()
     .str.lower()
     .str.replace(" ", "_")
@@ -22,14 +21,15 @@ df.columns = (
     .str.replace("á", "a").str.replace("é", "e")
     .str.replace("í", "i").str.replace("ó", "o").str.replace("ú", "u")
 )
+df_clean.rename(columns = {"nombre_de_ss.ee.":"nombre"}, inplace = True)
 
-columns_to_drop = ["codigo_modular", "anexo", "ubigeo", "codigo_dre_ugel", "dre___ugel", "centro_poblado", "codigo_centro_poblado", "codigo_local", "altitud", "fuente_de_coordenadas"]
+df_clean = df_clean[['nombre', 'distrito', 
+       'direccion', 'nivel__modalidad', 'gestion__dependencia',
+       'latitud', 'longitud']]
 
-df = df.drop(columns=columns_to_drop, errors="ignore")
-
-for col in df.select_dtypes(include="object").columns:
-    df[col] = (
-        df[col] 
+for col in df_clean.select_dtypes(include="object").columns:
+    df_clean[col] = (
+        df_clean[col] 
         .astype(str)
         .str.strip()
         .str.lower()
@@ -38,7 +38,16 @@ for col in df.select_dtypes(include="object").columns:
         .str.decode("utf-8")
     )
 
-df["latitud"] = pd.to_numeric(df["latitud"], errors="coerce")
-df["longitud"] = pd.to_numeric(df["longitud"], errors="coerce")
+df_clean["latitud"] = pd.to_numeric(df_clean["latitud"], errors="coerce")
+df_clean["longitud"] = pd.to_numeric(df_clean["longitud"], errors="coerce")
+df_clean["distrito"] = df_clean["distrito"].replace({"san juan de lurigancho":"sjl",
+                                         "san juan de miraflores":"sjm",
+                                         "villa maria del triunfo":"vmt",
+                                         "san martin de porres":"smp",
+                                         "villa el salvador":"ves"})
 
-df.to_csv(output_path, index=False)
+df_clean = df_clean.drop_duplicates(subset=['nombre','latitud','longitud']).reset_index()
+
+# %% Export CSV
+df_clean.to_csv(output_path, index=False)
+# %%

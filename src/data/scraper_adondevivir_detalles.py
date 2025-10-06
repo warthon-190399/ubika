@@ -3,9 +3,15 @@ from playwright.sync_api import sync_playwright
 from datetime import datetime, timedelta
 import time
 import random
+import os 
 
-csv_path = "D:/DS_Portafolio/ubika/data/raw//adondevivir/adondevivir_todo3.csv"
-output_path = "D:/DS_Portafolio/ubika/data/raw/adondevivir/adondevivir_todo3_completo.csv"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
+csv_path = os.path.join(BASE_DIR, "data", "raw", "adondevivir_todas_las_paginas.csv")
+output_path = os.path.join(BASE_DIR, "data", "processed", "adondevivir_todo3_completo.csv")
+
+#csv_path = "D:/DS_Portafolio/ubika/data/raw//adondevivir/adondevivir_todo3.csv"
+#output_path = "D:/DS_Portafolio/ubika/data/raw/adondevivir/adondevivir_todo3_completo.csv"
 
 df = pd.read_csv(csv_path)
 
