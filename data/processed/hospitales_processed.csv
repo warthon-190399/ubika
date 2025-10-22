@@ -1,4 +1,4 @@
-index,nombre_del_establecimiento,provincia,distrito,direccion,direccion_ubicacion,latitud,longitud
+index,nombre,provincia,distrito,direccion,direccion_ubicacion,latitud,longitud
 30,veronesi sociedad anonima cerrada,huaura,huacho,avenida tupac amaru 516 distrito huacho provincia huaura departamento lima,"Avenida Tupac Amaru 516 Distrito Huacho Provincia Huaura Departamento Lima, Huacho, Huaura, Perú",-11.1075134,-77.597561
 275,hospital maria auxiliadora,lima,sjm,calle miguel iglesias n968,"Calle Miguel Iglesias N968, San Juan De Miraflores, Lima, Perú",-12.160955,-76.9591429
 280,centro de cirugia plastica s.a.c.,lima,san isidro,calle 32 n 366 oficina 101 y 202,"Calle 32 N 366 Oficina 101 Y 202, San Isidro, Lima, Perú",-12.1076006,-77.01128059999999

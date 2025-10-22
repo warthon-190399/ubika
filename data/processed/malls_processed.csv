@@ -1,29 +1,1605 @@
-,nombre,direccion_completa,distrito,latitud,longitud
-0,Villa El Salvador,Av. Separadora Industrial con Av. Velasco Alvarado,ves,-12.2059787,-76.93551459999999
-1,Parque Industrial,Av. Separadora Industrial con Av. El Sol,ves,-12.1973281,-76.93910939999999
-2,Pumacahua,Av. La Unión con Ca. Capitán Elías Aguirre,vmt,,
-3,Villa María,Av. Pachacútec con Av. Santa Rosa,vmt,-12.1947882,-76.9346399
-4,María Auxiliadora,Av. Pachacútec con Jr. Angamos / Av. Pachacútec con Av. 1,"villa maria del triunfo y
-san juan de miraflores",-14.1533566,-75.6920782
-5,San Juan,Av. Los Héroes con Av. César Canevaro,sjm,-12.156654,-76.9660775
-6,Atocongo,Av. Los Héroes con Av. Antonio Buckingham,sjm,-12.1524865,-76.9762196
-7,Jorge Chávez,Av. Tomás Marsano con Av. Andrés Tinoco,santiago de surco,-12.14267,-76.9911163
-8,Ayacucho,Av. Tomás Marsano con Av. Ayacucho,santiago de surco,-12.1355638,-76.9980444
-9,Cabitos,Av. Aviación con Óvalo Higuereta / Cabitos,santiago de surco,-12.1272459,-77.0004046
-10,Angamos,Av. Aviación con Av. Angamos Este,san borja,-12.1118166,-77.00032039999999
-11,San Borja Sur,Av. Aviación con Av. San Borja Sur,san borja,-12.1008238,-77.00184130000001
-12,La Cultura,Av. Aviación con Av. Javier Prado Este,san borja,-12.0882829,-77.0034356
-13,Nicolás Arriola,Av. Aviación con Av. Nicolás Arriola,la victoria,-12.0924997,-77.0030271
-14,Gamarra,Av. Aviación con Jr. Hipólito Unanue,la victoria,-12.0924997,-77.0030271
-15,Veintiocho de Julio,Av. Aviación con Av. Veintiocho de Julio,la victoria,-12.0609618,-77.0131032
-16,Miguel Grau,Av. Miguel Grau con Av. Nicolás Ayllón,lima,-12.0549555,-77.01349689999999
-17,El Ángel,Av. Locumba con Av. El Ángel (Cementerio),lima y el agustino,-17.614459,-70.7629369
-18,Presbítero Maestro,Av. Locumba con Ca. Rivera y Dávalos,lima,-17.614459,-70.7629369
-19,Caja de Agua,Av. Próceres de la Independencia con Ca. El Tumi,sjl,,
-20,Pirámide del Sol,Av. Próceres de la Independencia con Av. Pirámide del Sol,sjl,-12.017527,-77.0021343
-21,Los Jardines,Av. Próceres de la Independencia con Av. Los Jardines,sjl,-12.0060104,-77.0058166
-22,Los Postes,Av. Próceres de la Independencia con Av. Los Postes,sjl,-11.9971634,-77.0097782
-23,San Carlos,Av. Próceres de la Independencia con Av. El Sol,sjl,-11.9848181,-77.0065616
-24,San Martín,Av. Fernando Wiese con Av. Canto Rey,sjl,-11.9747635,-77.0002954
-25,Santa Rosa,Av. Fernando Wiese con Av. Santa Rosa,sjl,-33.5386576,-70.6344492
-26,Bayóvar,Av. Fernando Wiese con Av. Héroes del Cenepa,sjl,-11.958692,-76.9869075
+nombre,latitud,longitud
+Ripley,-12.0862037,-76.9753818
+Plaza Vea,-12.0574878,-77.0376989
+Plaza Vea,-12.0220304,-76.9969498
+Real Plaza,-12.056575,-77.0375943
+Plaza Vea,-11.1099384,-77.6132549
+Wong,-12.089883,-77.0055793
+Mercado Bolivar,-12.0728734,-77.0655359
+Tottus Atocongo,-12.1475791,-76.9807458
+Metro,-12.0062986,-77.0600749
+Tottus,-11.9939964,-77.0619646
+Ripley Max,-11.9956134,-77.0620124
+Falabella,-11.9936658,-77.0603622
+Wong,-12.762122,-76.6011594
+Mercado Municipal Churin,-10.8090493,-76.875166
+Plaza Vea,-12.0916358,-76.9502115
+Wong,-12.0918502,-76.9508679
+Ripley,-12.0074075,-77.0591555
+Ripley,-12.0774676,-77.0827161
+Tottus,-12.0792883,-77.0884094
+"Mercado ""La Parada""",-11.1036214,-77.6090842
+Wong,-12.076708,-77.081219
+Minimarket Urcosol,-12.0720488,-77.0686946
+Plaza Vea,-12.0481304,-77.0330813
+Tottus Express,-12.1295635,-77.0223023
+Centro Comercial Balta,-12.1229297,-77.0322474
+Ripley,-12.7627918,-76.6028447
+Plaza Vea,-12.274071,-76.8733897
+Falabella,-12.0062842,-77.0570894
+Estilos,-12.00554,-77.0576157
+Falabella,-12.0767175,-77.0834859
+Plaza Vea,-12.0849172,-76.9756698
+CasaIdeas,-12.0866111,-76.9759858
+Plaza Vea,-12.1728213,-76.9926674
+Mercado María Magdalena,-10.7963988,-77.7150807
+Mercado Productores de Santa Anita,-12.0418806,-76.9482449
+Mercado Villa Jardín,-12.0782484,-76.9920742
+Mercado Tantamayo,-11.9593354,-77.0967296
+Donna,-12.0830756,-76.8977099
+Mercado N° de Santa Clara,-12.0191716,-76.886805
+Galería comercial Barrio chino,-12.0516519,-77.0255944
+Mercado de salamanca,-12.0753999,-76.987557
+,-12.075114,-76.9874873
+,-12.0741023,-76.9869562
+Ransa Comercial,-12.1196535,-77.0372316
+Emolientero de Surco,-12.1380772,-77.0016148
+Metro,-12.0405547,-77.0012765
+Plaza Vea,-12.2313377,-76.9106984
+Dolce Mela Valle Hermoso,-12.1268803,-76.9752005
+Oechsle,-12.0562485,-77.0377515
+Rivera,-11.9392427,-77.066564
+Ripley,-12.0888432,-77.005221
+Oechsle,-12.0901346,-77.0050646
+Plaza Vea,-12.089914,-77.004267
+Galeria La estrella de Caquetá,-12.0338958,-77.0426388
+Galería Capón,-12.0511865,-77.0251655
+Tottus,-12.0856462,-76.9791644
+Oechsle,-12.0869817,-76.9754531
+Las Malvinas,-12.0418383,-77.0181061
+Tottus,-12.1555349,-76.9816331
+Falabella,-12.1540439,-76.9825652
+Metro,-12.1735816,-77.0126796
+Oechsle,-12.1113215,-77.0018244
+Metro,-12.1102677,-77.0021214
+Plaza Vea,-12.0657587,-77.0485241
+París,-12.0662237,-77.0479965
+Ripley,-12.0663368,-77.047258
+Falabella,-12.0571756,-77.0377311
+Plaza Vea,-12.0157497,-76.8861462
+El Óvalo,-12.0539353,-76.963509
+Mercado Huamantaga,-11.8635398,-77.0748957
+Mercado de Productores de San Isidro,-12.108776,-77.0537496
+Plaza Vea,-11.9396555,-77.0698289
+Tottus,-12.097334,-76.9947601
+Galería Mina de Oro,-12.0533446,-77.0260148
+Galería Cuzco,-12.0532135,-77.026346
+Galería Tradición,-12.0522394,-77.0285499
+Mercado Central,-12.0526789,-77.0275729
+Huancaya,-12.2046092,-75.7992496
+Señor de los Milagros,-12.0444186,-77.0390824
+,-12.0442235,-77.0405352
+Distribuidora nuevo mundo,-12.0916777,-77.0347503
+Economax,-12.0649801,-77.0297755
+Mercado Municipal Manco Cápac,-12.0688843,-77.0289717
+Vivanda Pezet,-12.1025598,-77.052177
+,-12.115835,-77.0446562
+Plaza Vea,-12.0895002,-77.0752343
+,-12.0593796,-77.0727748
+Cayetano Heredia,-12.0470988,-77.0355366
+MERCADO,-11.9648284,-77.0608908
+Product baratos,-12.0494744,-77.0239183
+Centro Comercial de artesania,-12.0445549,-77.0322941
+Mercado tres regiones,-11.8484528,-77.0937361
+Metro,-12.0404046,-77.0292348
+Ripley,-12.1723708,-77.0141617
+Mercado Las Poncianas,-11.9824347,-77.1014879
+Quality Store,-12.1259207,-77.0190814
+Casa Linda,-11.8811862,-77.0691676
+Galería Camaná,-12.0458053,-77.0326598
+Oechsle,-12.0478715,-77.0330911
+Jet Market,-12.0967852,-77.0230856
+PlazaVea Chaclacayo,-11.9763092,-76.7716208
+Mass,-12.0826135,-77.08226
+Vuelve,-12.1401201,-76.9844373
+Centro Comercial Esperanza,-12.1205523,-77.0278645
+Plaza Vea,-11.9329993,-77.0455594
+Metro,-12.0817726,-77.0357032
+Flora & Fauna,-12.1109228,-77.0478345
+Kaita,-12.0898824,-77.0350312
+Arakaki,-12.1055949,-77.0473221
+Falabella,-12.112203,-77.0120534
+Tottus,-12.1591942,-76.989059
+Zofra Lima,-12.0566513,-77.0286189
+Mass,-12.1591547,-76.9885686
+Mass,-12.1669358,-76.9904253
+HP Carnes,-12.0665131,-76.9593179
+Oechsle,-11.9933446,-77.0596393
+Feria comercial La Perrocholi,-12.0423545,-77.0302962
+Metro,-12.0426713,-77.0425316
+Galería Bueno Bonito y Barato,-12.0438746,-77.0437816
+Polvos Argentinos,-12.0418188,-77.0448224
+MegaPro,-11.941173,-77.0703787
+Centro Comercial de 7 de Agosto,-12.0425636,-77.0293247
+Lamba,-12.056227,-77.035264
+Palacio Mayor,-12.0580542,-77.0309242
+Aguas Marinas,-12.0572095,-77.0276062
+Movicentro,-12.0572332,-77.0270738
+Turismo Tacna,-12.0576199,-77.0269346
+Tarpuy,-12.056582,-77.0266084
+Perú Plaza,-12.0574832,-77.0262105
+Galeria Santa Catalina,-12.0559504,-77.0266106
+Andahuaylas,-12.0561599,-77.0266327
+Plaza Central,-12.0549855,-77.0270319
+Galería La Gran Mesa,-12.0542868,-77.0266391
+Mina de Oro,-12.0537449,-77.026832
+"Centro comercial Andahuaylas ""La Cochera""",-12.0535646,-77.0265763
+Galería Jesús Nazareno,-12.0528031,-77.0264704
+Capón Center,-12.0530023,-77.0254515
+,-12.0524359,-77.0279145
+Santa Felicita,-12.0495771,-77.0257406
+Galería La Moneda,-12.0489948,-77.0244232
+Tienda Amazonas,-12.0449086,-77.0236423
+San Ildefonso,-12.0451293,-77.0230455
+Electroferretero,-12.0411672,-77.0170703
+Centro Comercial TEA,-12.0454114,-77.0365555
+,-12.0530379,-77.0281528
+Nova Center,-12.0534886,-77.0281706
+Centro comercial La Zona,-12.0543,-77.0277103
+Campo ferial San Marcos,-12.0553114,-77.0316979
+Mercado de Ciudad y Campo,-12.0253469,-77.0282587
+Guizando,-12.0615292,-77.0153835
+,-12.0622573,-77.0150992
+Galería Comercial San Pedro,-12.069984,-77.013054
+Gamarra Moda Plaza,-12.0708582,-77.0124809
+Mercado cooperativo 1 de Julio,-12.0500101,-77.0111092
+Alfrimac-food,-11.925755,-77.071229
+Alfrimac Perú sac,-11.9256924,-77.0713191
+Mercado de Abastos,-12.1875027,-77.0079983
+Centro Comercial Tomas Guido,-12.0869434,-77.0326624
+Maxssi Tiendas,-11.9752928,-77.0721912
+Bodeguita de Charito,-11.9017665,-77.0361182
+AliStore,-12.0052704,-77.0735905
+G.C. Plaza Business Lampa,-12.0504216,-77.0316971
+Urban Hall,-12.0487114,-77.0317238
+Galería La Limeñita,-12.0472226,-77.0294245
+Oeshle,-12.048112,-77.033021
+Totto Perú,-12.0879714,-77.0876235
+Enrique Milla Ochoa,-11.9571897,-77.0795447
+Tercer Milenio,-12.0667707,-77.0184195
+InOutlet Premium Lurín,-12.2866177,-76.8748272
+Plaza Vea,-12.0301923,-77.0362253
+Centro Comercial Mega Rekord,-12.0674383,-77.0507454
+Centro Comercial Breña,-12.0674147,-77.0495015
+El Emporio,-12.0759995,-77.0499813
+Galería San Francisco,-12.0461901,-77.027047
+Galería La Casona,-12.0487523,-77.0274164
+Galería Balcón de HuallaGa,-12.0485215,-77.0274729
+Galería Panorama,-12.0489604,-77.028872
+Centro Comercial Emancipación,-12.0514251,-77.0298298
+Wilson Plaza,-12.0557423,-77.0377278
+Mercado Santa Rosa,-12.0156361,-76.8181814
+JP Logística SAC,-12.0165396,-76.9307881
+capón center,-12.1152257,-77.0102011
+Plaza Vea,-12.180381,-76.9428299
+Oechsle,-12.1806747,-76.9425992
+Los 3 Chanchitos,-12.0839764,-76.9286193
+Tottus,-12.082664,-76.9289632
+Continental S.A.C Tapiceros,-12.0633684,-76.9685298
+Bioferia de Miraflores,-12.1270753,-77.0222797
+Mercado Municipal,-10.6960318,-77.7794171
+Mercado la Victoria,-12.3330021,-76.8245039
+,-12.132437,-77.02075
+,-12.5742933,-76.7074137
+Plaza Vea,-10.7514186,-77.7617114
+Mercado Municipal Unidad Vecinal 3,-12.0517054,-77.0814096
+Ravichagua,-11.9426706,-76.7117121
+Tottus,-12.1977661,-76.964383
+Kami Motors,-12.0118439,-77.0723716
+Centro Comercial PLATAforma,-12.1516689,-76.9786584
+San Martín,-12.1375057,-77.0208046
+Tambo,-12.0259304,-77.009943
+Mercado La Merced,-12.0455071,-77.0392908
+,-12.1118443,-76.871513
+Mercado de lince,-12.0793852,-77.0322339
+Falabella,-13.07592,-76.3731115
+Welcome Asia Market,-12.0993082,-77.0021822
+Metro,-12.0842702,-77.0138444
+Mi Huaraz,-10.853275,-77.6918386
+Tottus,-13.0751931,-76.3735801
+,-12.1037552,-77.0016083
+Plaza Vea,-12.2023504,-76.9334329
+Plaza Vea,-12.1724416,-76.9924228
+Abarrotes Flor,-12.1475132,-77.0150611
+Minimarket Chama,-12.129159,-76.9979728
+Centro Comercial Acuario,-12.1227567,-77.0290268
+Galería Santa Patricia,-12.0893545,-77.073731
+Flora y Fauna,-12.111145,-76.9866226
+Plaza Manco Cápac,-12.0633394,-77.0290236
+Almacen signia,-12.0529281,-76.9682548
+Mecardo Sarita Colonia,-12.1394408,-76.9598536
+Mercado VIPSE,-12.1334718,-76.9920613
+Mercado El Trebol,-12.0349092,-77.0429638
+Colegio Fujimori,-11.949206,-77.0808269
+Mercado Señor de Los Milagros,-11.759254,-76.2992363
+Avicola Rosita,-11.4994969,-77.2104239
+CarWash,-11.4977481,-77.2158744
+Mercado de Abastos de Huaral,-11.4941161,-77.2055453
+Tottus,-12.1121831,-77.0112782
+Megaplaza - Huaral,-11.5023196,-77.2255548
+Mercado de las Terrazas,-11.9723786,-77.0138917
+Supermarket Mass,-11.7739934,-77.1745287
+Multicentro Benavides,-12.1283346,-76.9911393
+CAM PERU,-12.0449024,-77.0794313
+TAMBO,-11.9717648,-77.0716714
+Mercado El Establo,-11.9047206,-77.030585
+Flora & Fauna,-12.1012931,-77.0019019
+Dollarcity,-12.1842237,-77.0005303
+Kio service plaza,-12.2537373,-76.9288174
+Patio Panorama Lifestyle Center,-12.0828749,-76.9686493
+París,-12.0873232,-76.9777241
+Ripley,-12.1555678,-76.9814813
+Santa Natura,-12.0066257,-77.0592413
+Corporación Vega,-11.9240459,-77.0406999
+CC Qatun,-12.0180674,-76.8836736
+GMRC,-12.0171114,-76.9377436
+Wong,-12.1314014,-77.0313593
+El Proveedor,-12.0454012,-77.0231663
+La Quinta,-12.0500513,-77.0249482
+Posada de Junín,-12.0502061,-77.0246773
+La Moneda,-12.0503818,-77.0243662
+Galería Las Tiendas,-12.0483367,-77.0238708
+,-12.0667543,-77.0743711
+Boulevard Girasoles,-11.9760242,-76.7864441
+Mara Biomarket & Cafe,-12.1224729,-77.0269331
+Mercado San jose(cevicheria andrea),-12.074458,-77.0492501
+Plaza Vea entrada 1 Valle Hermoso,-12.127196,-76.975298
+PlazaVea entrada 2 Valle Hermoso,-12.1269831,-76.9753455
+Wong,-12.1228117,-77.0322008
+Falabella,-12.0865988,-76.9780323
+Minimarket Nando,-10.6752223,-77.8196347
+Bodega Anónima,-12.1118445,-77.0193775
+Mercado Royal,-12.0813706,-76.9931038
+Mercado El Rosario,-11.496716,-77.2134023
+Mini Mercado Pedrito SRL,-12.1271194,-77.0308896
+Tambo,-12.0595293,-77.0350149
+MaxiAhorro Manco Cápac,-12.0670134,-77.0292916
+MaxiAhorro Chorrillos,-12.1748413,-77.0183731
+MaxiAhorro Lince,-12.0821561,-77.0285085
+MaxiAhorro Rímac,-12.0396557,-77.0326094
+MaxiAhorro Barranca,-10.7519902,-77.7592883
+MaxiAhorro Canto Grande,-11.9786248,-77.0107975
+MaxiAhorro México,-12.0664692,-77.0054376
+MaxiAhorro Gran Caquetá,-12.0307442,-77.0499572
+Maxi Ahorro Huacho,-11.1197727,-77.6103057
+Mercado Megacentro Tagge,-12.2240643,-76.9091531
+Mercado Carmelo,-11.9757947,-77.1093103
+La Feria de Gamarra,-12.2126947,-76.9341093
+Mercado Señor de los Milagros,-12.2249267,-76.8895303
+Inmaculada Concepcción,-11.4688397,-76.6236228
+Mercado Municipal de Yauyos,-12.4594937,-75.9198307
+Mercado Nueva Esperanza,-12.1733122,-76.932558
+Mercado Virgen del Carmen,-12.1730735,-76.9321333
+Mercado La Esperanza,-12.1734728,-76.9317807
+Mercado 5 Estrellas,-12.1739079,-76.9318562
+Tottus,-12.1119591,-77.0372658
+Centro Comercial Villa Las Palmas,-12.228989,-76.893507
+Mercado y Reloj Central,-10.8017762,-77.7452831
+Donde Wili Market,-12.0836589,-76.8977643
+Mercado Elycielo,-12.1669084,-76.960735
+Oxxo,-12.0856401,-76.9129162
+PROFAM,-11.8151843,-77.16254
+Mercado Canta Callao,-11.98346,-77.098002
+Mercado 28 de septiembre,-11.9559986,-76.9921558
+Menestras Selectas,-12.0690142,-77.0115453
+Vivanda,-12.7629246,-76.6008076
+Centro Comercial Cantuarias,-12.1215036,-77.0285275
+Mercado Talara,-12.2336116,-76.9418749
+Franco Supermercado,-12.1205839,-76.9776401
+Municipal Market Miraflores,-12.1110924,-77.0489673
+Centro Comercial Guizaldo Plaza,-12.0670018,-77.0500098
+Gran Mercado El Pino,-11.8569544,-77.0416111
+Mercado Nueva Generación Chama,-12.2324887,-76.917354
+Mercado César Vallejo,-12.2194691,-76.9478462
+Gran marcado Zapallal,-11.8438008,-77.1014974
+Centro Comercial Marsano Center,-12.1166665,-77.0090529
+El Tifon,-12.0325607,-76.9279222
+Mercado Santa Ana,-11.9236538,-76.6624788
+Tottus,-11.9370865,-77.0649057
+Ripley,-11.9361051,-77.0652812
+,-12.0115495,-77.0325649
+Minimercado El Marquez,-12.201403,-77.0200422
+Minimercado El Porvenir,-12.2019523,-77.020289
+Centro Comercial 28 de Julio,-11.9390118,-76.6964674
+Mercado Niño Jesús de Chosica,-11.9355132,-76.6941018
+Mercado Virgen del Carmen,-11.9347466,-76.69356
+Centro comercial Echenique,-11.9329769,-76.6933575
+Save-A-Lot,40.7311125,-84.0821671
+Plaza Vea,-12.0488773,-77.0393339
+Mercado Plaza Torre Blanca,-11.8513428,-77.0029792
+,-12.0314131,-77.066028
+Santa Natura,-11.8934043,-77.0400152
+Tienda Mass,-12.1368738,-77.004836
+Home Market Gourmet,-12.1211489,-76.9878078
+Mercado 29 de Septiembre,-11.8241066,-77.1603192
+El Paseo,-12.1218295,-77.0275953
+Mercado Huascar,-11.9674277,-77.0046626
+Asociación de Comerciantes San Marcos,-12.0530243,-77.0272501
+Mass,-12.0170137,-77.0417758
+Plaza Vea,-12.077302,-77.0838409
+Mercado San Martin,-12.1259233,-77.0297939
+Mèxico,-11.9551841,-77.0606311
+Mercado Municipal,-12.3465626,-75.786015
+Freshmart,-12.1301367,-77.0243716
+Ripley,-12.0566879,-76.9702498
+Ripley,-12.0160157,-76.998997
+Plaza Vea,-12.0160638,-76.9993577
+,-12.0531873,-76.9638278
+Mercado 15 de Junio,-11.9203223,-77.0871493
+Bodega Melissa,-12.0333071,-76.9582508
+Mass,-12.1561759,-77.0151089
+Dollarcity,-12.1243545,-77.0298181
+Minimercado Alameda de Villa,-12.2111554,-76.9453944
+Redexa,-11.0939482,-77.5965617
+Jomer almacen,-11.1153896,-77.5948896
+Mercado de Oyon,-10.6697126,-76.7730758
+Tienda Mass,-11.9015507,-77.0553356
+Supermercado MASS,-12.3648274,-76.7952608
+Mercado Cooperativa de Pro,-11.9352337,-77.0773517
+denisil,-12.1553811,-77.0212288
+negociaciones cartamagico,-12.1578729,-77.0233101
+Holi Supermercado,-12.1396887,-77.0227593
+MERCADO MODELO SAN MIGUEL,-12.0862222,-77.0905
+MERCADOS AFILIADOS,-12.0700245,-76.9599509
+CENTRO COMERCIAL MODELO PROFAM,-11.8145196,-77.1621456
+,-12.021665,-77.0786876
+ASOCIACION DE COMERCIANTES DEL MERCADO 21 DE JULIO VILLAS DE ANCON,-11.7372152,-77.1426308
+Plaza Auto Servicios,-11.1012083,-77.5962835
+Ecovive,-12.1376208,-77.022362
+Plaza I-run,-12.0605104,-77.0280776
+Mass,-12.1202498,-77.0361202
+Mass,-12.142464,-77.0091496
+Mass,-12.0093889,-77.0572139
+Wong,-12.311686,-76.8364937
+Mercado Viejo,-10.7529843,-77.7612084
+Organa,-12.0921856,-77.0714551
+,-12.0930523,-77.0691589
+Campos de vida,-12.0936741,-77.0736688
+Runnings,40.7545595,-84.1486321
+Mass,-12.090781,-77.0827191
+,-11.5027808,-77.2253512
+Cielo Plaza,-12.2144515,-76.906422
+Mass,-12.0519761,-77.0434889
+Tienda Mass,-12.1061806,-77.0228008
+Plaza Huayna Cápac,-12.1995402,-76.9591849
+Pesca Terminal,-12.1184036,-77.0250667
+Market Lídet,-12.1020745,-76.9503308
+Minimercado Festejo,-12.1016743,-76.9501663
+Molishop,-12.1021175,-76.9504414
+Tambo+,-12.1164929,-77.0366847
+Mass,-12.1247397,-77.0318185
+Mercado Nuevo Horizonte,-12.0012773,-76.8534088
+Holi Supermercado,-12.1171715,-77.0063262
+Holi Supermercado,-12.112873,-77.0459378
+Holi Supermercado,-12.0826698,-77.0504192
+Larcomar,-12.1322195,-77.0305491
+Kohl's,39.9163864,-75.4265963
+Acme,39.9177279,-75.4295739
+Plaza Vea,-12.0760277,-77.0646201
+Centro Comercial El Polo,-12.1014365,-76.9709964
+Plaza Norte,-12.0062801,-77.0587711
+Metro,-12.0065516,-77.0039277
+MegaPlaza Lima Norte,-11.9944396,-77.0611497
+Royal Plaza,-11.990603,-77.0626765
+Plaza Vea,-11.9890217,-77.0628231
+Mercado de Productores Fiori,-12.0100475,-77.0581291
+Complejo Comercial Mayorista Unicachi,-11.9389663,-77.0661885
+Supermercado de Zarate,-12.0276276,-77.0069227
+Mercado Ganimedes,-11.9823608,-77.0122463
+Mercado de Comas,-11.9556219,-77.0481595
+Plaza Vea,-11.9911216,-77.0160352
+Ripley Max,-11.9327441,-77.0445777
+Metro,-11.9756378,-77.0022103
+,-11.9804949,-77.0581472
+Mercado Sarita Colonia,-11.9686295,-76.9930476
+Plaza Vea,-11.99459,-77.0722545
+Mercado 24 de Junio,-12.0337843,-76.998733
+Plaza Vea,-12.1120947,-77.0295412
+Mercado de Magdalena,-12.0909253,-77.0731484
+Metro,-12.0892296,-77.0578826
+Mecado No. 2 Surco,-12.1462265,-77.0139406
+Mercado Risso N° 2,-12.0864853,-77.0425732
+Mercado Mayorista N°2 de Frutas,-12.0685908,-76.9984893
+Mercado Union Progreso,-12.2368427,-76.9378952
+Centro Comercial La Fontana,-12.0769334,-76.9639571
+Centro Comercial La Rotonda,-12.0729274,-76.9550471
+Mercado Central de Mangomarca,-12.0169661,-76.9849349
+Real Plaza Primavera,-12.1102853,-77.0017146
+Mercado Municipal de Punta Negra,-12.3666741,-76.7940952
+Centro Comercial Municipal,-12.4827773,-76.7972323
+Mercado Modelo San Martin de Porres,-12.4824469,-76.797687
+Centro Comercial Polvos Azules,-12.0616541,-77.0335023
+Mercado Mayorista CONSAC,-12.0048557,-77.0714837
+Mercado La Cantuta,-12.0245307,-76.9891495
+Tottus,-12.0239403,-76.9732394
+Mall Aventura San Juan de Lurigancho,-12.0162806,-76.9996249
+Mercado Santa Rosa de América,-12.0129935,-77.0086031
+Tottus,-12.0134586,-77.0053935
+Candy,-12.0906819,-77.0670475
+Mercado Santiago Apostol,-12.1465609,-77.0070657
+Mercado Santa Elizabeth,-11.9875872,-77.0134666
+Mercado Modelo,-13.0750869,-76.3846374
+Metro,-12.0538432,-77.0429252
+Mercado Central N°2,-12.1887734,-76.926563
+Plaza San Miguel,-12.0769091,-77.0826211
+Plaza Lima Sur,-12.1729185,-77.0134721
+Open Plaza,-12.0796558,-77.0886905
+Atocongo Open Plaza,-12.1471718,-76.9809565
+Tottus,-12.0404214,-77.0001285
+Tottus,-11.8687514,-77.0730678
+Metro,-12.0760809,-77.0890123
+Mercado Nro 1 Surquillo,-12.1180911,-77.0254885
+Mall Plaza del Sol,-11.1091866,-77.6138152
+Mercado Centenario,-11.1033788,-77.6084576
+Mercado Central y Modelo,-11.1064732,-77.6095801
+Centro Comercial Shopping Center San Miguel,-12.0751599,-77.0818912
+Boulevard Plaza San Miguel,-12.0758792,-77.082663
+Metro,-10.7483385,-77.7641284
+Mercado Túpac Amaru,-12.2267506,-76.9310887
+Plaza Vea,-12.010623,-77.0800494
+Metro,-11.987843,-77.0632813
+Metro Pedro Miota,-12.1679986,-76.9783649
+Metro,-12.1464879,-77.0220082
+Boulevard de Asia,-12.7625634,-76.6035899
+Plaza Vea,-12.1485463,-76.9870048
+Wong Marsano,-12.1428313,-76.9901299
+Real Plaza Pro,-11.9400928,-77.0697663
+Arenales Plaza,-12.0820256,-77.0356302
+Metro,-12.0752562,-77.0260772
+Plaza Vea,-12.0537694,-77.0416274
+Inka Plaza,-12.1158116,-77.0288658
+Mercado Nro 2 Surquillo,-12.1107237,-77.0240716
+Plaza Vea,-12.0866722,-77.0348331
+Wong,-12.0920985,-77.0417597
+Real Plaza Salaverry,-12.0898344,-77.0527283
+Vivanda,-12.091934,-77.0456001
+Metro,-12.0842762,-77.0138407
+La Rambla,-12.0894891,-77.0047853
+Centro Comercial Polvos Rosados,-12.1264223,-76.9996919
+Mercado el Eden,-12.1283297,-76.9978251
+Plaza Vea,-12.1075205,-77.0391482
+Vivanda,-12.103729,-77.0380376
+Mercado Gonzales Prada,-12.1166181,-77.0193406
+Galerias Garcilazo,-12.0553107,-77.0378748
+Compuplaza,-12.0550301,-77.0378595
+Galerias Wilson,-12.0555677,-77.0386474
+Galeria Richi,-12.0601822,-77.0322884
+Centro Comercial Lima Park,-12.0526611,-77.0324326
+Centro Comercial Polvos Blancos,-12.0560951,-77.0291783
+Wong Óvalo Gutierrez,-12.1101367,-77.0361804
+Centro Comercial Cachina Fashion,-12.0451453,-77.0526308
+ViaMix Plaza,-12.0431219,-77.0501092
+Plaza Vea,-12.0415459,-77.0219681
+Parque Pedro Cánepa,-12.0646919,-77.0147666
+Mercado Minorista de La Parada,-12.0642528,-77.011134
+Mercado Municipal 3 de Febrero,-12.0655839,-77.0113733
+Mercado Mayorista,-12.0654709,-77.0103291
+Metro,-11.9340348,-77.0564928
+Mercado Virgen de Las Mercedes,-12.2780921,-76.8701998
+Mall Aventura Santa Anita,-12.0562909,-76.970855
+Wong,-12.0601336,-76.9634293
+Galeria Salud,-12.0463438,-77.0383977
+Reply,-12.0489956,-77.0337128
+Mercado Central Mariscal Ramon Castilla,-12.0501292,-77.0260653
+Fronteras Unidas de Grau,-12.0580644,-77.0274273
+Mercado Ovalo de Naranjal,-11.9806576,-77.0645772
+Mercado Hiper,-11.9675921,-77.0605849
+Mega Plaza Santa Clara,-12.0194852,-76.886553
+,-12.0169939,-76.8845401
+Tienda Minaya,-12.0256161,-77.0564694
+Mercado Productores de Santa Anita,-12.0418432,-76.9482047
+Mercado Los Próceres,-12.1524029,-76.9879148
+Mercado Virgen del Carmen,-11.992933,-77.0047316
+Mercado COVIDA,-11.9944857,-77.0766948
+Metro,-12.0701173,-76.9579053
+Plaza Vea,-12.0698193,-76.9579174
+Wong,-12.0806002,-76.9673796
+Plaza Camacho,-12.0796567,-76.9668327
+Mercado Particular La Pólvora,-12.0764406,-77.016013
+Market Capon,-12.1188135,-77.0318186
+Mercado Buenos Aires,-12.0541757,-77.0195219
+Mercado San Antonio,-12.029393,-77.0852548
+Wong,-12.1216472,-77.0112522
+Mercado La Unión,-11.956241,-76.992902
+Mercado Arriba Perú,-11.9566597,-76.99285
+Mercado 19 de Mayo,-11.9563314,-76.9922272
+Supermercado Candy,-12.0221545,-76.9634228
+Centro Comercial Fiori,-12.0101147,-77.0596795
+Gran Mercado Mayorista de Lima,-12.0386765,-76.9443826
+Tottus,-12.072677,-76.9509223
+Plaza Vea,-12.1112602,-77.0068598
+Mercadito La Capullana,-12.1381674,-77.0014769
+Plaza Vea,-12.1427214,-77.0029114
+Mercado Señor de Los Milagros,-12.1202207,-76.9978739
+Mercado Corazón de Jesús,-11.9355232,-76.6932835
+Centro Comercial Agustino Plaza,-12.040925,-77.0031779
+,-12.0407025,-77.0016546
+Plaza Vea,-11.4973442,-77.213938
+Metro,-12.0109773,-77.0904352
+Mercado Tres Regiones,-11.8855157,-77.0295658
+Mercado San Martín de Porres,-12.2114631,-76.9507134
+Plaza Villa Sur,-12.2124382,-76.9333471
+Mercado Sectorial N° 1,-12.1899284,-76.9423199
+Mercado Mayorista Plaza Unicachi Sur,-12.1992937,-76.9646649
+Mercado 3 de Octubre,-12.2212919,-76.9393546
+Mercado Pachacámac,-12.2324044,-76.9222917
+Mercado Cristo Pachacamilla,-12.2320384,-76.9225211
+Mercado 24 de Junio,-12.205737,-76.9427796
+Mercado Modelo,-12.2086283,-76.9469389
+Mercado Villa Alejandro,-12.2368208,-76.9109438
+Mercado Santa Rosa Viña del Mar,-12.2104523,-76.9545685
+Tottus Pachacutec,-12.2043663,-76.927971
+Mercado Los Laureles,-12.1905953,-76.9322092
+Mercado 12 de Mayo,-12.1917021,-76.9557003
+Mercado Sagrado Corazón de Jesús,-12.1918935,-76.9555764
+Mercado 5 de Junio,-12.1920878,-76.9601923
+"Mercado ""Santa Ursula""",-12.1826839,-76.9644222
+Mercado Virgen de Cocharcas,-12.1959266,-76.9596456
+MegaPlaza Villa El Salvador II,-12.1972995,-76.9645235
+Mercado Unión,-12.1971942,-76.9242023
+Mercado Las Flores de Villa,-12.1907428,-76.9756522
+Mercado 5 de Diciembre,-12.1944021,-76.975729
+Centro Comercial San Pedro,-12.1971395,-76.9818984
+Mercado Santa Isabel de Villa,-12.2004228,-76.9790055
+Mercado Inca Pachacutec,-12.185123,-76.939234
+Mercado San Camilo,-12.2334095,-76.9089953
+Mercado Mensajero de la Paz,-12.2386292,-76.9138453
+Cooperativa Mercado Acho,-12.0406974,-77.0197348
+Mercado La Aurora,-12.0449993,-77.0387851
+Mercado José Olaya,-12.1990179,-76.9527174
+"Mercado N°2 ""Nueva Esperanza""",-12.1788235,-76.9358984
+Cooperativa San Francisco,-12.1628739,-76.9465122
+Mercado San Pedro,-12.21401,-76.9387637
+Mercado Jesús El Salvador de LLanavilla,-12.1891074,-76.9435128
+"Centro Comercial ""Valle Hermoso""",-12.1268914,-76.9754443
+"Mercado ""Virgen del Carmen""",-12.0858101,-76.8918948
+MoliCentro,-12.0827996,-76.9283331
+Plaza Vea,-12.2541662,-76.9280231
+Plaza Vea,-12.0286784,-77.0307321
+Mercado Cuarta Etapa,-12.2198415,-76.9231303
+Mercado Rosa de América,-12.2203945,-76.9229107
+Mercado 19 de Julio,-11.9912256,-77.0505637
+Plaza Vea El Cortijo,-12.1345863,-77.0184182
+Centro Comercial Fortuna,-12.1106298,-77.0254149
+Plaza Vea,-12.0547316,-76.9627082
+Centro Bancario Santa Anita,-12.0562257,-76.9697266
+Mercado Modelo,-11.9468524,-77.0596638
+Plaza Santo Domingo de Carabayllo,-11.871714,-77.0284685
+Metro,-11.9321198,-77.0442188
+Caquetá Perú,-12.0306773,-77.0430701
+Mercado de Flores de Piedra Liza,-12.0403904,-77.017776
+Tottus,-11.9547894,-77.0857948
+Óvalo de Huandoy,-11.9770171,-77.0838435
+Comercial Laura Caller,-11.9703192,-77.0786174
+Mercado Central Fevacel,-12.0066556,-77.0553326
+,-11.9395852,-77.066573
+Ripley,-12.0941448,-77.024608
+Falabella,-12.0950799,-77.0250414
+Mercado de la Unidad Vecinal Matute,-12.0729552,-77.0261372
+Galerías Caquetá,-12.0333787,-77.0444705
+Plaza Vea,-12.097501,-77.0263034
+Mercado Modelo N° 01 Chorrillos,-12.1692977,-77.02602
+Urban Hall,-12.0489354,-77.0317429
+Mercado Belen,-11.8278293,-77.1187175
+Mercado Limoncillo,-12.0376237,-77.031228
+Mercado La Chira,-12.0370924,-77.0316317
+San Pedro de Ichu,-12.0297786,-77.0436026
+Mercado de Flores Santa Rosa de Lima,-12.0396603,-77.0354264
+Metro,-12.1521546,-76.9774727
+Risso,-12.0864005,-77.0348085
+Full Tiendas,-12.0530703,-77.0271432
+Saga Falabella,-12.0483076,-77.0331389
+Plaza Vea Circunvalación,-12.0803471,-76.9860001
+Mercado Número 3,-12.0892574,-77.0269354
+Mercado No. 1 Lobaton,-12.0864127,-77.0326191
+D'Paso Shopping Center,-12.0744252,-77.0795829
+Centro Comerical Tacna,-12.0915491,-77.0719191
+Bella Mar,-12.0916406,-77.0713777
+Sandra,-12.0914864,-77.0713166
+Centro Comercial Polvos de Higuereta,-12.1261485,-77.000476
+Plaza Vea,-12.1272269,-77.0011643
+Centro Comercial Preciados,-12.1284431,-76.9997089
+Alborada,-12.1274812,-76.988386
+Centro Comercial Plaza Micaela,-12.1735511,-76.9485112
+Wong,-12.1118152,-76.9921274
+Ripley,-12.1098661,-77.0011829
+Centro Comercial Chacarilla,-12.1117235,-76.9912675
+Centro Comercial Caminos del Inca,-12.1132803,-76.9915528
+Real Plaza Centro Cívico,-12.0567768,-77.0373307
+Centro Comercial Jessie,-12.0574691,-76.9696463
+Centro Comercial Molina Plaza,-12.0912706,-76.9501685
+Real Plaza Villa María,-12.1804976,-76.9423541
+Mercado Mujer Peruana,-12.1427665,-76.9505176
+Mercado Santa Cruz,-12.2270664,-76.9132108
+Strip Mall Paseo del Inca,-12.130911,-76.9826501
+Wong,-12.130167,-76.9824484
+Tottus,-11.9652053,-77.0666445
+,-11.9587866,-77.0643431
+Centro Comercial Esperanza,-12.1205124,-77.028126
+Metro,-12.123128,-77.0298671
+Centro Comercial El Hueco,-12.0541949,-77.0294855
+Vía Veneno,-12.0504671,-77.0340627
+Galería Boza,-12.0507886,-77.0339665
+La Gran Via,-12.0505491,-77.0346407
+Topitop,-12.0492811,-77.0332583
+Plaza Santa Catalina,-12.0893952,-77.0199128
+"Mercado ""Virgen Inmaculada""",-12.1810835,-76.9263767
+Plaza Vea,-12.1872313,-77.0082107
+Metro,-12.1810245,-77.0136789
+Mercado de muebles La Colonial,-12.0505997,-77.0775547
+Mercado Amancaes,-12.0153135,-77.0264878
+Mercado José Galvez,-12.2200595,-76.9062898
+Cyber Plaza,-12.056921,-77.0388152
+Plaza Tec,-12.0572343,-77.0385349
+CC. Polvos Azules de Paruro,-12.0429956,-77.0467176
+Centro Comercial El Progreso,-12.0430604,-77.0491208
+Centro Comercial Mesa Redonda,-12.0429332,-77.0475128
+Mercado El Sol,-12.1594951,-76.9373686
+Metro,-12.0642441,-77.0287482
+Centro Comercial Señor de Luren,-12.0585827,-77.029648
+Centro Comercial 5 Continentes,-12.0574217,-77.0293319
+Centro Comercial Unicachi,-12.0575069,-77.0303314
+Centro Comercial Montevideo,-12.0580698,-77.0304894
+Mercado Modelo,-12.0643567,-77.0418263
+Centro Comercial Plaza Jesús María,-12.0738297,-77.0504682
+Metro,-12.0738546,-77.0508202
+Mercado San José,-12.0741322,-77.0493032
+Plaza Vea,-12.0753428,-77.0530534
+Mercado de Mirones Bajo,-12.0373301,-77.0725858
+,-12.050215,-77.0221572
+Galeria Nuevo Milenio,-12.0558681,-77.012925
+Metro,-12.1411533,-77.0173717
+,-10.6696806,-76.7730897
+Mercado de artesanos,-12.0656759,-77.0396847
+Real Plaza Guardia Civil,-12.1725018,-76.9927735
+Mercado Las Lomas de Pachacamac,-12.2412861,-76.9238054
+Mercado 13 de Agosto,-12.2438064,-76.9198885
+Mercado Ollantay,-12.1372785,-76.9635679
+"Mercado ""Luis Castañeda""",-12.1409201,-76.9656138
+Mercado Leoncio Prado,-12.1338495,-76.9607219
+Mercado Pacífico 1,-12.1758555,-76.9565289
+Mercado Señor de la Divina Misericordia,-12.1522117,-76.9922097
+Metro,-12.1984498,-77.0118904
+Mercado San José,-12.1943462,-77.0209985
+Mercado Los Pinos,-12.1892997,-77.0146793
+Mercado La Paradita,-12.1690901,-77.0223586
+Mercado Santa Rosita de V.E.S.,-12.2068774,-76.9409035
+Mercado Tacala,-12.1868888,-76.9896571
+Mercado Familias Unidas,-12.1607606,-76.9651717
+Mercado Fray Martín,-12.2191658,-76.9187498
+Mercado Ciudad de Gosen,-12.212101,-76.9210202
+Mercado ATECA,-12.2124497,-76.9077437
+Centro Comercial Venturo,-12.1207185,-76.9964119
+Mercado Los Heraldos,-11.9663436,-76.9870643
+Mercado Primero de Septiembre,-11.9604934,-76.9835535
+Metro,-11.9386646,-76.6959608
+Centro Comercial Plaza Center,-12.202732,-76.9331554
+Falabella,-12.1186561,-77.029572
+Mercado Miguel Grau,-12.0053891,-77.0516528
+Sole,-12.1281503,-77.0075741
+Plaza Vea,-12.1294903,-76.9838052
+Centro Commercial Las Malvinas,-12.0430719,-77.0447797
+Vida,-12.0878316,-77.0844288
+Almacenes Perla,-12.1099396,-77.0498424
+MMK Supermarket,-12.1076509,-77.0182333
+Vivanda,-12.1243749,-77.0280731
+Grocero Mart,-12.3370704,-76.8246141
+Emancipacion,-12.0476656,-77.0360453
+,-12.0469564,-77.0361979
+Mercado Virgen de Carmen,-12.063607,-77.052866
+Centro Comercial Sumac Fashion,-12.0580612,-77.029735
+,-12.0533025,-77.0292084
+MaxiPlaza,-12.054853,-77.0387239
+Romasa,-11.9136512,-77.0731727
+Elektra,-12.0548091,-77.049701
+Mercado Bolívar,-12.221152,-76.944952
+Mercado Las Dunas de VIlla,-12.2360253,-76.9404994
+La Limeñita,-12.0473892,-77.0296644
+Galería Plaza Union,-12.0439869,-77.0423271
+Mercado Moderno,-12.0456153,-77.0403447
+Mercado Santa Luzmila,-11.9422144,-77.0623792
+Galeria Comercial Mega San Felipe,-11.8997918,-77.0387724
+Comercial Faucett,-12.0721809,-77.0985854
+Centro Comercial Maranga,-12.0661544,-77.0970433
+18 de Enero,-12.0636315,-77.004523
+Plaza Vea Super,-12.0796947,-77.1066912
+Tottus,-12.0960186,-77.0254751
+La Cooperativa,-12.0758187,-77.0485102
+Real Plaza Puruchuco,-12.0410016,-76.9321109
+Accu 1,-12.0752236,-77.0491016
+Plaza Vea,-12.0321375,-76.9256833
+Vivanda,-12.0932127,-77.0579121
+Moderno Mercado Magdalena,-12.0858281,-77.0724696
+Centro Artesanal Inti Raymi,-12.0828764,-77.0688363
+Mercado N° 3 de Chorrillos,-12.1682228,-77.0213525
+,-11.9332746,-77.0454545
+Moderno Mercado Rospigliosi,-12.0790085,-77.0320289
+Galeria Arenales,-12.0785061,-77.0362381
+Tottus,-12.048336,-77.0584801
+Organica Peru Market,-12.1171093,-77.0265621
+Santa Natura,-12.089749,-77.0351247
+Gran Mercado Inka,-12.0820255,-77.0693003
+Mercado Las Brisas de Pachacámac,-12.2393127,-76.9198679
+Mercado Atahualpa,-12.223432,-76.9312326
+Plaza Vea,-12.1684731,-77.0256121
+Strip Mall 28 de Julio,-12.1294741,-77.0222621
+Metro Atocongo,-12.1498895,-76.980578
+Mercado Kiwi,-12.1754418,-77.0189506
+Tottus Chorrillos,-12.1760622,-77.0182793
+Mercado Super Mach,-12.1822866,-77.012417
+"Mercado ""Pamplona Baja""",-12.1485078,-76.9742167
+Mercado San Antonio,-12.1690192,-76.9919869
+Mercado Los Jardines de Israel,-12.0165574,-77.0022971
+"Mercado ""Señor de Muruhuay""",-12.1514129,-76.9706134
+Strip Center Matellini,-12.180552,-77.011096
+Mercado Santa Rosa,-12.1827731,-77.0005554
+Plaza Vea,-11.9522627,-76.9878963
+Mercado Cooperativa Plaza San Gabriel,-12.1562063,-76.958219
+Mercado Nuevo San Juan,-12.0257243,-77.0096392
+Holi,-12.11019,-76.9842923
+Mercado Miguel Iglesias,-12.1741241,-76.962118
+Mercado Nuestros Héroes de la Guerra del Pacífico,-12.1644423,-76.9597557
+Edén Primavera,-12.1081646,-76.9701378
+Mercado San Carlos,-11.9845703,-77.0060196
+Totem,-11.9842251,-77.0060085
+C.C. Multiplaza Proceres,-11.9811477,-77.004994
+Centro Comercial El Coloso,-11.9475404,-76.984313
+Multimarket San Fernando,-12.1102753,-76.9726332
+Centro Comercial Pitu,-12.0170912,-76.9837103
+Mercado Primero de Mayo,-12.1663888,-76.9750135
+Plaza Mariscal Cáceres,-11.9490315,-76.9817254
+Metro Express,-12.1247283,-77.0264849
+Centro Comercial FETAVIMT N° 1,-12.1728006,-76.9488686
+Wong,-12.0772399,-76.9176903
+Mercado Benavides,-12.1456533,-76.9879147
+Wong,-12.0856626,-76.9022084
+Mercado Musa,-12.0863522,-76.8898095
+Mercado Juan Velasco Alvarado,-12.2270129,-76.9414666
+Penta Mall Canto Grande,-11.978747,-77.0108233
+Mercado Alameda,-12.198847,-77.0129672
+Apecosur,-12.059216,-77.0269775
+Mercado Andrés Avelino Cáceres,-12.1779972,-76.9599899
+Mercado Las Palmas,-12.2247836,-76.903052
+Mercado Los Pinos,-11.9706778,-76.9983138
+Mercado Valle Sharon,-12.171047,-76.9677377
+Centro Comercial César Canevaro,-12.1705655,-76.967956
+Mercado Santa Rosa de 13 de Octubre,-12.1741579,-76.9670244
+Asociación de Propietarios y Comerciantes de Santa Anita,-12.0496146,-76.966858
+Multi Mercados San Borja,-12.085536,-76.996365
+Mercado Huamanga,-12.0694664,-77.0195791
+Centro Comercial Polvos Grau,-12.0581514,-77.0262953
+Centro Comercial El Nuevo Mundo de La Importación,-12.0592574,-77.0285361
+Galeria Comercial Luna Pizarro,-12.0600099,-77.0280054
+Centro Comercial Consorcio Grau,-12.0582103,-77.0265516
+"Mercado ""Sagrado Corazón de Jesús""",-12.176175,-76.965126
+Mercado Cooperativo Balconcillo,-12.0797066,-77.0231954
+Centro Comercial Corazón de Jesús,-12.0045453,-77.0025751
+Mercado Modelo Inca Pachacutec,-12.1760854,-76.9507756
+Elektra,-12.0589027,-77.0080363
+Total Center,-12.0582736,-76.9721297
+Mercado Miguel Grau,-12.1639551,-76.9518661
+El Parral,-11.9517222,-77.0556395
+Las Tres Marías,-12.0604635,-77.0242241
+Mercado San Eugenio,-12.174209,-77.0056895
+Mercado San Pedro,-11.9903698,-77.1062803
+Mercado Los Precursores,-12.1577548,-76.9886273
+Centro Comercial Polvos Rosados,-12.1270976,-76.9999552
+E.I. Center Domain Plaza,-11.9350156,-76.6952613
+Mercado Señor de Muruhuay,-11.9348539,-76.6942566
+Mercado Vencedores,-11.9980543,-77.0002698
+Mercado La Esperanza,-11.9527237,-77.0649441
+Mercado El Arenal,-12.15382,-76.9655587
+Multimarket San Fernando,-12.1209683,-76.9879739
+Plaza Vea,-12.0984623,-77.0114393
+Fuxion,-12.0051952,-77.0052102
+Mercado El Sol,-12.2004262,-76.9453242
+,-12.058323,-76.9638298
+Mercado Santa Rosa,-12.0692477,-76.9581876
+Mercado Cooperativa de Pro,-11.9354369,-77.0775586
+Hong Kong Market,-12.091382,-77.0047852
+,-12.0600727,-77.0072124
+,-12.0116339,-77.0518671
+Plaza Vea,-12.0652117,-77.0037182
+Casalinda,-12.059699,-77.0071126
+Zona Rigida,-12.0576596,-77.0096252
+Mercado Los Olivos,-11.9953519,-77.0835039
+Ojeda Market,-12.1066697,-76.9583045
+Mercado Modelo,-12.0255995,-76.9196039
+Metro Chaclacayo,-11.9744585,-76.7678078
+Metro,-12.04149,-76.9358165
+Mercado Sarita Colonia,-12.1871723,-77.0073277
+Mercado Santa Elena,-12.0177579,-77.0774339
+Indian Market,-12.116124,-77.0280207
+Peruvian Market,-12.115937,-77.0276136
+Mercado Flora Tristán,-12.189658,-76.9224217
+Mercado Andrés Avelino Cáceres,-11.938684,-76.6969344
+Mercado Moyopampa,-11.9285813,-76.6897825
+Mercado La Arenera Huaycán,-12.0074558,-76.8253992
+,-12.0442263,-77.0381057
+Mercado El Baratillo,-12.0419336,-77.0304881
+Mercado de Limoncillo,-12.0367443,-77.0303484
+,-12.0359732,-77.0353117
+Alfonso Hugarte,-12.0443559,-77.0433938
+Malvitec,-12.0429288,-77.0480978
+Plaza Ferretero Las Malvinas,-12.045816,-77.0444806
+Malvinas Huarochiri,-12.0427327,-77.0446941
+El Nuevo Centro,-12.0418094,-77.0466137
+El Reloj Malvinas Plaza,-12.0437982,-77.0519033
+Centro Comercial ACOPROM,-12.044604,-77.0487084
+Galería de Ferreteros,-12.0446659,-77.0492947
+UDAMPE - Centro Comercial Las Malvinas,-12.0450508,-77.0504306
+Metro,-12.0588751,-77.0469872
+Mercado Central Villa del Norte,-11.9713744,-77.070636
+Mercado Mariano Pastor Sevilla,-12.1874383,-76.963276
+Mercado Vista Alegre,-12.1878434,-76.9935076
+"Mercado ""Progreso""",-12.1406684,-76.9404422
+"Mercado ""José Carlos Mariátegui""",-12.1372258,-76.9461158
+Mercado Modelo de Pamplona Alta,-12.1414902,-76.9640783
+Mercado Sarita Colonia,-12.1394167,-76.9601864
+Mercado Virgen del Carmen,-12.1301765,-76.9582552
+Mercado 01 Imperial,-12.1314554,-76.960066
+Mercado Niño Jesús,-12.1358774,-76.9675514
+Campo Ferial Virgen de Lourdes,-12.1677776,-76.9188393
+Mercado Virgen de Lourdes,-12.1681211,-76.9186538
+Mercado Huáscar,-12.1802083,-76.9466736
+Mercado Villa Indoamérica,-12.2150376,-76.9202869
+Centro Comercial El Zapatón,-12.0571328,-77.0283518
+Centro Comercial Malvinas Paruro,-12.0535047,-77.02557
+Galería Mesa Redonda,-12.0531909,-77.0269245
+Galerias centro,-12.0461629,-77.0385673
+Galeria Chancay,-12.046274,-77.0386188
+,-12.045301,-77.0420347
+,-12.0545427,-77.0333508
+Mercado Santa Rosa,-12.1902555,-76.9821225
+"Mercado ""Nuevo Progreso""",-12.1878586,-76.9774255
+Marina Plaza,-12.0781105,-77.0789245
+Oechsle,-12.1232176,-77.0308289
+C.C. Gol,-12.0659221,-77.0159018
+Mercado Santoyo,-12.0509307,-77.0068924
+,-12.0541945,-77.0033103
+Mercado Arca de Noe,-12.2242269,-76.9574984
+Mercado Mariano Melgar,-12.2169222,-76.9320464
+Centro Plaza Pachacámac,-12.2234535,-76.9267292
+Mercado Santa Rosa de Lima de Edilberto Ramos,-12.2413302,-76.9297663
+Mercado Primero de Mayo,-12.2368624,-76.9183408
+Ripley,-12.1231554,-77.030239
+Mercado Universal,-12.0433787,-76.9793921
+Plaza Unicachi,-12.0329314,-77.0444175
+Hipermercado Caquetá,-12.0332782,-77.0453424
+Juan XII,-12.0332228,-77.0460386
+Pequeños Comerciantes,-12.0333504,-77.0461557
+Caquetá Plaza,-12.0333186,-77.0467165
+Gregorio VII,-12.0333409,-77.0465521
+,-12.0338161,-77.0477132
+Mercado Zarumilla,-12.0341665,-77.0468853
+,-12.1866861,-76.9547117
+APECOLI,-11.9441781,-77.0522084
+Túpac Amaru,-11.929146,-77.0513553
+,-11.9284477,-77.0553441
+LA Alborada,-11.9131139,-77.0448539
+Año Nuevo,-11.9246174,-77.0397923
+Mercado San Felipe,-12.1142824,-77.016734
+Mercado Rio Seco,-12.0695525,-76.7573594
+Mercado Santa Rosa,-12.2269826,-76.8590372
+Mercado Municipal,-12.2289929,-76.8603606
+Megamercado Jumbo,-12.2300081,-76.864007
+Mercado cooperativa Restauración,-12.0588907,-77.055577
+Mercado Venezuela,-12.0589499,-77.0760541
+Primero de Mayo,-12.0639485,-77.0713876
+Tottus,-12.0482037,-77.0378874
+Metro,-12.0496439,-77.0317024
+Mercado Condevilla,-12.0225108,-77.08251
+El Milagro,-12.017577,-77.0767829
+Mercado César Vallejo,-12.014594,-77.0859665
+Mercado San Roque,-12.1479147,-76.9911324
+Santa Rosa,-12.036302,-77.0886281
+Mercado Primavera,-12.0089144,-77.0737059
+Mercado Libertad,-12.0828535,-77.0966268
+Mercado San Miguel,-12.0861678,-77.0904801
+Plaza Vea Express,-12.1061154,-77.04866
+Mercado N° 1 Villa Limatambo,-12.136227,-76.9422323
+Mercado Numero 7 Las Lomas,-12.1337325,-76.9406563
+Mercado Girasol,-12.1433121,-76.9441011
+Mercado El Paraíso,-12.1470748,-76.934836
+Asociación de Comerciantes 30 de Agosto,-12.1442927,-76.9539197
+Mercado Luis Pardo,-12.1470486,-76.9491133
+Mercado San Juan Bosco,-12.1486216,-76.9446783
+San Pedro,-12.082881,-77.0055374
+Mercado América,-12.1830954,-76.9767338
+San Lázaro Center,-11.9886699,-77.0608263
+Mercado Modelo de San Gabriel,-12.1536292,-76.9531719
+Mercado Cooperativo El Progreso,-12.2054256,-76.9514829
+"Campo Ferial ""Señor de La Misericordia""",-12.1505765,-76.9514419
+Asociación de Comerciantes de Santa Rosa No 4,-12.1578855,-76.9518873
+Saga Falabella,-12.0475651,-77.0319427
+Mercado Sesquicentenario de Villa El Salvador,-12.212315,-76.9369475
+Santa Marta,-12.0662797,-77.0196576
+Mercado 3 de Breña,-12.0664292,-77.0489915
+Centro Comercial Los Pinos,-12.1889529,-77.014349
+Mercado Héroes del Pacífico,-12.1887634,-77.0176352
+Compu Wilson,-12.0550208,-77.0386161
+Mercado María Parado de Bellido,-12.1830036,-76.9617829
+Mercado El Hueco Del Cono Sur,-12.1742412,-76.948465
+Centro Comercial Andalucía Via-A,-12.0752991,-77.0640719
+Santa Patricia,-12.0636883,-76.9452581
+"Mercado ""Las Torres""",-12.1795298,-76.9622643
+Accu,-12.0758713,-77.0497302
+El Rey,-12.0755832,-77.0501217
+Horacio,-12.0757567,-77.0496657
+Mercado de Pueblo Libre,-12.0784295,-77.0589879
+Mercado moderno de Jesús María,-12.0788859,-77.050242
+Mass,-12.1594492,-76.9559096
+Mercado Unamarca,-12.1783051,-76.9791168
+Nueva Gamarra Unicachi,-12.2002996,-76.9654342
+Centro Comercial Lurín Center,-12.2777203,-76.8710265
+Mercado 6 de Febrero,-12.248646,-76.8968516
+Mercado Nuevo Horizonte,-12.0256223,-76.9119645
+Mercado Central de San Martin de Porres,-11.9617208,-77.0815478
+Mercado Raucana,-12.0312158,-76.9046639
+Mercado San Gregorio,-12.0247871,-76.9040037
+Centro Comercial La Bailanta,-12.1724573,-76.9488507
+Mercado Señor de Cautivo,-12.2349536,-76.905641
+Gimdawasi,-11.9689963,-77.0887436
+Mercado modelo Los Portales,-11.9344317,-77.0843322
+Mercado La Libertad,-12.0792657,-77.0075097
+San Juan de Azcarrunz Alto,-12.0142284,-76.9991528
+Mercado Las Flores,-12.0041111,-77.0145356
+Mercado 15 de Enero,-12.0097009,-77.016627
+Mercado El Carmen,-12.0176715,-77.0101835
+Mercado Nº 2,-12.0052146,-76.9976181
+Mercado San Hilarión,-11.9997373,-77.0100597
+,-11.9994204,-77.00225
+,-12.1117757,-77.0242965
+Centro Comercial Plaza Josfel,-12.0428272,-76.9372985
+Mercado de Barranco,-12.1420508,-77.0156768
+Plaza Vea,-12.0336444,-76.997895
+,-12.0388048,-76.9927081
+La Melchorita,-12.0516658,-77.0121975
+Mercado Cuaves,-12.2070119,-76.9366681
+Mercado moderno nº1,-12.0724593,-77.0170452
+,-12.0743689,-77.0037064
+,-12.0692659,-77.0024232
+Mercado Jorge Chávez,-12.061099,-77.0077371
+Mercado Las Conchitas,-12.2023964,-76.9258712
+Mercado Ilo,-12.0521723,-77.040475
+,-12.0540058,-77.033467
+Galería Importadores Señor de Luren,-12.0570808,-77.0296781
+El Mundo de las Sandalias,-12.0568164,-77.0289145
+Proveedores Lindios,-12.064656,-77.0591551
+Nuevo Milenio,-12.0643458,-77.0594227
+Mercado Centro Cívico,-12.0283217,-77.0720124
+Mercado Belén,-12.0294196,-77.0719141
+Plaza Vea,-11.8638348,-77.0729264
+,-12.0900168,-77.0346683
+Mercado Señor de los Milagros,-12.0078267,-77.0140068
+Mercado Vara de Oro,-12.0253108,-76.9986907
+Real Plaza Vitarte APROMEC,-12.0264653,-76.9223454
+Centro Comercial Plaza Vitarte,-12.0258214,-76.9211968
+Mercado Huáscar,-12.0434026,-76.9840783
+Mercado Monumental,-11.8663648,-77.0750654
+,-11.8640056,-77.0768733
+Mercado Ventura Rossi - A,-12.0275997,-77.0377113
+,-12.0295854,-76.9470369
+Mercado Tierra Prometida,-12.0339854,-76.9460598
+Walmart Supercenter,40.752634,-84.1523377
+María de los Ángeles,-11.9461035,-77.0877731
+San Diego,-11.9464745,-77.0873385
+Señor de los Milagros,-11.9457835,-77.0872609
+Micromercado Santa Rosa,-12.0426912,-76.9722885
+Mercado modelo de Barranca,-10.7497039,-77.763132
+Megaplaza,-10.7513471,-77.7615538
+Centro Comercial Barranca,-10.7508715,-77.7624182
+Mercado Vírgen del Carmen,-13.0564279,-76.3562517
+,-11.9352491,-77.0454446
+Mercado El Carmen,-11.940053,-77.0429412
+Mercado Flor de Octubre,-11.941119,-77.0456363
+,-11.9476712,-77.0491412
+Cenco La Molina,-12.0918835,-76.9515401
+Santa Teresita,-11.9639309,-77.0581527
+,-11.9639891,-77.0556331
+MegaPlaza Express Villa el Salvador,-12.2310691,-76.9107982
+Galeria Comercial Nueva Fortaleza,-12.054847,-77.0125352
+Mercado Arenas de Villa,-12.2180258,-76.9500973
+Mercado San Martín,-12.2286474,-76.8606433
+Mercado Virgen de Chapi,-12.0191423,-76.8244131
+,-11.9270472,-77.0447702
+Mercado Chacra Cerro,-11.9366702,-77.049351
+Megacentro 3000,-11.933045,-76.6921253
+Mercado 1ro de Mayo - Huascata,-11.9934764,-76.8197082
+Mercado Ñaña,-11.9862206,-76.8195007
+Mercado Monitor Huascar,-11.986384,-76.813051
+Mercado Yuli,-12.0188504,-76.8961251
+Cachina del 12,-11.964454,-77.0030041
+Plaza Vea,-11.9401841,-76.6996612
+,-11.9400019,-76.6992212
+Centro Comercial Virgen de Lourdes,-11.939294,-76.6990425
+Mercado José Carlos Mariategui,-12.2296244,-76.9238788
+ASPROFECH,-11.9403031,-76.6959803
+Centro Comercial La Alameda,-11.9403444,-76.6968801
+Mercado Natural Mayorista,-12.0469985,-77.0375205
+Mercado Modelo Villa Hermosa,-12.1028685,-76.8778077
+Mercado Nuevo Progreso,-12.1192473,-76.8712873
+Mercado Virgen del Carmen,-12.1134392,-76.8706193
+Mercado Divino Corazón de Jesús,-12.1002206,-76.874288
+Mercado Virgen del Carmen,-12.0888248,-76.881169
+Mercado 24 de Enero-Manchay,-12.0919272,-76.8818543
+Mercado José María Arguedas,-12.1321568,-76.9551486
+Mercado Santa Rosa,-12.1296778,-76.9538941
+Mercado Municipal de Chaclacayo,-11.9760734,-76.7729074
+Mercado Primavera,-12.2185145,-76.928831
+Asociación Villa 2000,-12.2120004,-76.9325931
+C.C. Megaplaza Cañete,-13.0755676,-76.3730593
+Mercado El Trebol,-12.1475793,-77.0147571
+Mercado Polvos Celestes,-12.1461669,-77.0131731
+Mercado Central de San Bartolo,-12.3891552,-76.7780834
+Mercado Señor de Los Milagros,-12.1979216,-77.0274023
+Mercado Miguel Ángel,-12.0089768,-77.0543008
+Mercado Naranjal,-11.9856548,-77.061639
+,-12.0577245,-77.0247916
+Mercado Las Flores de Breña,-12.0648731,-77.0475146
+"Mercado ""El Ermitaño""",-11.9970417,-77.0529413
+Mini mercado Amazonas,-12.1529312,-76.9074971
+Mercado San Judas Tadeo,-12.1572942,-76.8880425
+Galaxy Plaza,-12.1768106,-77.0158282
+Centro Comercial Villa María,-12.1636349,-76.9472123
+Centro Comercial La Gran Villa,-12.1640042,-76.9459121
+Relma - Mercado Mayorista,-12.6587858,-76.6376819
+Mercado Cooperativa SM Señor de la Ascención de Cachoy,-12.6563875,-76.636793
+Mercado Santa Anita,-12.1905158,-77.0156302
+Plaza Lima Sur,-12.1469766,-76.9677689
+Galeria Comercial Nueva Generación,-12.1491492,-76.9708461
+Pyme Plaza,-12.1531681,-76.9719893
+Mercado La Encalada,-12.002173,-76.9234395
+Mercado Metro,-11.9845965,-76.9451385
+Mercado Virgen Natividad,-11.9801283,-76.9414728
+Mercado Julio C. Tello,-11.9822501,-76.9469439
+,-11.981185,-76.9139541
+Mercado Comerciantes de Villa,-12.1852058,-76.9982218
+Mercado Buenos Aires de Villa,-12.186377,-76.9998692
+Mercado Los Angeles de La Campiña,-12.1833991,-76.9978679
+Mercado Super Plaza,-12.1832901,-76.9983532
+Mercado Mayorista de Frutas El Huarangal,-11.5097166,-77.2090157
+Mercado Javier Prado de Ceres,-12.0269433,-76.9287158
+Las Brisas,-12.090331,-77.0721123
+Mercadillo de San Vicente,-13.0746996,-76.3835555
+Mercado Señor de los Milagros,-11.9594254,-77.0964286
+Vega,-11.9684178,-77.0958628
+Villa Sol,-11.9589232,-77.0734149
+El Porvenir,-11.9591582,-77.0742278
+Mercado Virgen de Fátima,-11.9766199,-77.0845815
+Tottus,-11.5025045,-77.225883
+Mercado Aviación,-10.7490241,-77.7531458
+Mercado Los Sauces,-12.0687899,-76.9839019
+Mercado Mega Sur,-12.2292711,-76.945643
+Huacho Market,-11.1071371,-77.6045807
+Mercado Modelo y Central,-11.1068013,-77.6055341
+Mercado Los Pazos,-12.1500854,-77.0166306
+,-11.1059356,-77.6084399
+Mercado San Sebastián,-12.1692009,-76.9962344
+Mercado Vírgen de la Familia,-12.1653963,-76.9963977
+Mercado El Pino,-12.162296,-76.9912812
+Tottus,-11.1083871,-77.6044512
+Honduras Center,-11.9521316,-77.053701
+Nuevo Mercado Caquetá,-12.0397785,-77.0457409
+Mercado Los Angeles,-12.0347922,-76.9325186
+Mercado María Parado de Bellido,-11.9864996,-77.016615
+Wallys,40.7690596,-84.128602
+Vírgen de Chapi,-11.9957102,-77.0106864
+,-12.1265319,-77.0006265
+Mercado Virgen del Carmen,-11.9314689,-77.096644
+Mercado N° 1 de La Ensenada,-11.934137,-77.0962758
+Mercado Manuel Gonzales Prada,-12.1209707,-76.9986014
+Mercado 5 de Noviembre,-11.9624139,-76.9898508
+,-12.1531356,-76.9723588
+Mercado Panamericana Norte,-11.9890579,-77.0680014
+Mercado Amazonas,-12.151402,-76.9794935
+Mercado Collanac,-12.1237831,-76.8735791
+Mass,-12.2603207,-76.8840369
+Mercado El Nazareno,-12.1367676,-76.9574783
+Mercado Carmen de Chacarilla de Otero,-12.0198922,-77.0056416
+Mercado de Huandoy,-11.9495231,-77.081059
+Tottus,-11.9931742,-77.0093162
+Mercado Mariano Melgar,-11.9955016,-77.0156328
+Mercado San Gabriel,-11.9905043,-77.0028855
+Canto Grande,-11.9812561,-77.0062928
+Mercado Modelo Municipal,-11.7594094,-76.2994389
+,-12.0374122,-77.0551612
+,-12.0641403,-77.0539965
+Mercado San Antonio,-12.0092133,-76.9058049
+Lima,-1.3678446,-48.2438631
+,-12.0531903,-76.9640956
+Mercado de Abastos de Huaral,-11.4940588,-77.2054688
+Falabella,-12.056966,-76.9713463
+Ripley,-12.0565457,-76.9702976
+Tottus,-12.0567731,-76.9708533
+Aduanas,-12.0574027,-76.9670126
+,-12.0607283,-76.9640675
+,-12.0424801,-76.9873588
+,-12.0379847,-77.0491198
+Mercado Los Chasquis,-11.9913456,-77.0965128
+Sarita Colonia,-11.9877257,-77.1120861
+,-11.8633836,-77.0857438
+Tottus,-12.1475314,-76.9807689
+Mercado Señor de La Justicia,-12.0542077,-77.0191448
+Super Mercado Valle Sharon,-12.170263,-76.9663112
+Mercado Virgen del Morro,-12.1677699,-77.0218738
+Mini Mercado,-12.0419007,-76.9545844
+Mercado La Moderna,-12.0418008,-76.9543601
+Mercado San Martín de Porres,-12.0308037,-77.0129315
+Mercado San José,-12.0351558,-77.0135486
+Megaplaza Huaral,-11.5023929,-77.2254119
+La Ramadita,-11.9611245,-76.9829323
+Galeria San Andrés,-11.9609769,-76.9828231
+Mercado El Triunfo,-12.062105,-76.9966103
+Mercado 18 de Enero,-12.1649108,-76.9841718
+Ebony,-12.0983768,-77.0108298
+Mercado Ciudad de Dios,-12.1527406,-76.9709383
+,-12.1548731,-76.982113
+Mercado Los Próceres de Campoy,-12.0141811,-76.9639619
+Mercado Sol Naciente de Campoy,-12.0195508,-76.9621732
+Mercado Señor de los Milagros,-12.0193736,-76.9618454
+Centro Comercial San Miguel,-12.0190325,-76.9611156
+Kaypi,-12.0201894,-76.954481
+Mercado Túpac Amaru,-12.0218953,-76.9676691
+Mercado Niños de Jesús,-12.0244177,-76.9775607
+Mercado 19 de Enero,-12.0171927,-76.9844692
+Centro Comercial Nuevo Milenio,-12.0240655,-76.9859433
+Mercado Las Palmera,-12.2023404,-77.0208718
+Mercado Unión Santa Rosa,-12.0104432,-77.0126614
+Centro Comercial San Benito,-12.0097985,-77.0120707
+Mercado El Cóndor,-12.0241062,-77.0042226
+Mercado San Juan de Lurigancho,-12.0240489,-77.0027708
+Minimercado Nueva Esperanza,-12.0271138,-77.0116912
+Mercado Modelo de Caja de Agua,-12.026212,-77.0146974
+Mercado Las Camelias,-11.9787297,-77.002609
+Mercado Niño de Belén,-11.9891042,-77.0075116
+Mercado San Ignacio,-11.9920802,-77.0143546
+Mercado 2 de Mayo,-12.0001165,-77.0162684
+Mercado Canto Chico,-12.0039573,-77.0175732
+Mercado San Martín de Porres,-11.9798904,-76.983361
+Mercado San Fernando,-11.9764381,-77.0191927
+Mercado Canto Rey,-11.9770678,-76.9980703
+Mercado Los Molles,-11.9744052,-76.9919293
+Minimercado Santa Rosita de Lima,-11.9772167,-76.9914969
+Mercado Señor de los Milagros,-11.9777913,-76.987214
+Mercado Alto Monte de Israel,-11.9662168,-76.9837667
+Mercado 4 de Agosto,-11.967739,-76.9851367
+Mercado Huancaray,-11.964321,-76.9891145
+Mercado Bayovar,-11.952385,-76.9909376
+Mercado Integral Guadalupe,-11.9514331,-77.0055093
+Mercado José Carlos Mariátegui,-11.9600964,-77.0010998
+Mercado Micaela Bastidas,-11.9623183,-77.0057193
+Mercado Nº 2 José Carlos Mariátegui,-11.9680811,-77.0106847
+Mercado Líder,-11.9698876,-77.0058902
+Mercado Municipal N°1 Canto Grande,-11.9722827,-77.0052382
+Mercado Señor de los Milagros,-11.9746204,-77.0123973
+Mercado 27 de Octubre,-11.9508341,-76.9866895
+Mercado Modelo Constructores,-11.9517934,-76.978387
+Asociación de Comerciantes Israelitas del Perú,-11.9453676,-76.9787309
+Mercado Señor de los Milagros,-11.9433332,-76.9815277
+Mercado Cruz de Motupe,-11.9420492,-76.9741145
+Mercado Señor de los Milagros,-11.938939,-76.9670592
+Mercado Sagrado Corazón de Jesús,-11.9361876,-76.9716207
+Mercado 11 de Enero,-11.9383551,-76.9783697
+Mercado Cáceres,-11.9447023,-76.9834704
+Mercado La Feria,-11.9437564,-76.9867761
+Mercado 10 de Octubre,-11.944335,-76.989392
+Mercado José Carlos Mariátegui,-11.9393143,-76.989279
+Mercado Su Santidad Juan Pablo II,-11.9420457,-76.9968478
+Minimarket La Amistad,-11.9417195,-77.000611
+Mercado El Trébol,-11.9301735,-76.9907813
+Mercado Central del Valle,-11.8990616,-76.9625319
+Mercado Jicamarca Anexo 22,-11.9256512,-76.9597985
+Mercado Santa Rosa,-11.9557039,-76.9810356
+Mercado El Establo,-11.9047885,-77.0303573
+,-11.9049561,-77.0316086
+Mercado San Pedro,-11.8996628,-77.0369776
+,-11.9022274,-77.0389929
+Mercado Modelo Tungasuca,-11.8928996,-77.0438838
+Mercado Virgen de La Reconciliacion,-12.0592301,-76.9426849
+Centro Comercial Megaplaza Express Villa,-12.1967087,-77.0117244
+Plaza Vea Alameda Sur,-12.1966223,-77.0119884
+Metro,-12.0817207,-77.0356829
+Mercado Modelo Villas de Ancón,-11.7363432,-77.1441078
+Mercado Primero de Mayo,-12.0086789,-77.0358215
+,-12.1138652,-76.9727542
+Virgen de La Puerta,-11.9688868,-77.0968242
+Brisas,-11.9759453,-77.1091962
+Pacasmayo,-11.9757668,-77.1057436
+Horizonte II,-11.9730891,-77.1021544
+Centro Comercial La 53,-12.1304022,-76.9813745
+Galerías Comerciales El Parque,-12.1277082,-76.9996755
+Mercado Modelo Villa San Luis,-12.1403951,-76.9747092
+Mercado San Pedro y San Pablo de Villa San Luis,-12.1415204,-76.9727324
+Mercado - Gloria,-12.0117567,-76.8524891
+,-12.0095769,-76.852121
+Mercado Los Cedros,-12.1975049,-77.0107247
+Vía Mix Chorrillos,-12.1840486,-77.0006111
+Centro Comercial Plaza Center Lurín,-12.2744195,-76.873879
+Galería Bambú,-12.2744558,-76.8724623
+Centro Comercial Plaza Hogar Design Center,-12.1114446,-77.0145925
+245,-12.0370307,-77.0303655
+Mercado 6 de abril,-12.096038,-76.9410168
+Megaplaza - Huaral,-11.5024346,-77.2255911
+Mercado Señor de Los Milagros San Genaro II,-12.1923898,-77.0238905
+Mercado Central San Pedro,-12.1975253,-76.9927359
+,-12.045802,-76.9299951
+Mercado Megacentro Caquetá,-12.0336263,-77.048654
+El Trebol,-12.005551,-77.0627075
+Asociación Centro Ferial Caquetá,-12.0342172,-77.0465136
+Mercado Mártir Olaya,-12.033871,-77.0491412
+Centro Comercial Gran Caquetá Plaza,-12.0306721,-77.0504644
+Minimarket La Alborada,-11.9115099,-77.0462678
+Mercado Ingeniería ASPROPA,-12.0253107,-77.0605178
+Mercado Las Mercedes,-12.0320084,-77.0577751
+Centro Comercial Plaza 2 de Mayo,-12.0455295,-77.0421886
+Mercado Sol de San Fernando,-12.1494511,-76.872648
+Campo Ferial Turístico y Ecológico de Ceneguilla,-12.1167982,-76.8148657
+Mercado Jhiré,-12.1121368,-76.8196931
+Mercado Jhon Lyons,-12.1121543,-76.8200861
+Minimercado Carmen,-12.1120854,-76.8195645
+Mercado de Productores Número 5,-12.0528715,-77.0541904
+Mercado de Productores Número 5,-12.053102,-77.0537575
+,-12.0771324,-76.9535578
+,-12.0765818,-77.094511
+Centro Comercial Plaza Sur,-12.276581,-76.8709185
+Mercado Vírgen de La Candelaria,-12.2767298,-76.8707003
+Mercado San Pedro,-12.2770371,-76.8706662
+Mercado Villa Libertad,-12.0956061,-76.964021
+Centro Comercial Qhatu Plaza,-12.0180454,-76.8836664
+Mercado La Marina,-12.0841457,-77.064453
+Mercado Chancay,-11.5661176,-77.2703989
+,-11.9454101,-76.9913367
+Mercado 21 de Julio,-11.7383782,-77.1425801
+Mercado La Variante de Ancón,-11.7359884,-77.1389334
+Mercado Sol de Naranjal,-11.9732647,-77.089917
+Mercado Villa Santa Cruz,-11.9049313,-77.0455065
+Mercado Nº 5 Leoncio Prado,-12.1167565,-77.0170131
+,-11.887927,-77.0354792
+Mercado Santísimo Salvador,-12.2319053,-76.8935145
+Mercado Jorge Lingán,-11.8791801,-77.0179653
+Mercado de Frutas Don Mariano,-13.0654318,-76.3495378
+Mercado San Leonardo,-13.0647273,-76.3478117
+Mercado San Antonio,-11.8575893,-77.0442929
+,-11.8957879,-77.0359272
+Mercado de Lucyana,-11.8958826,-77.0342447
+Boscov's,39.9157223,-75.4342163
+Mercado San Martín de Porres,-12.1786912,-77.0225617
+Mercado Vipol,-11.9667282,-77.0898197
+Campo ferial María Auxiliadora,-12.0542392,-77.0495121
+Chacra Colorada,-12.0532891,-77.0495146
+,-12.0538388,-77.0497386
+Monumental,-12.0542972,-77.0469169
+Metro,-12.0869918,-77.053855
+,-12.0878225,-77.0539085
+"Asoc. Mercado de Frutas N°1 de Huaral ""El Palmo""",-11.4971916,-77.1996184
+Mercado Federico Villarreal,-11.9078656,-77.0368669
+Plaza Vea,-12.039744,-76.9318078
+Mercado Central,-10.6743052,-77.8192581
+Mercado Santa Rosa,-10.6762866,-77.8199427
+Mercado Virgen de la Medalla Milagrosa,-10.6770578,-77.8187276
+Mercado La Parada,-10.6773442,-77.8189982
+Mercado El Álamo,-11.9348128,-77.0679612
+Mercado Santa Rosa de Garagay,-12.012472,-77.0821495
+Mercado Gladys Carrillo,-11.9713211,-77.0703099
+Mercado Cruz de Cano,-11.1032739,-77.6005984
+Mercado 7 de Abril,-11.9781945,-77.0508293
+Mercado N° 1 Tahuantinsuyo,-11.9813432,-77.0531053
+Mercado 8 de Diciembre,-11.9487848,-77.0857557
+Mercado Los Girasoles,-11.9516824,-77.0871983
+Mercado El Horizonte de San Diego,-11.952166,-77.0930962
+Mercado Fatima,-11.9574816,-77.0880048
+Mercado Jesús Nazareno,-11.954214,-77.0979732
+Mercado Tantamayo,-11.9592609,-77.0965947
+Mercado La Capullana,-11.9627115,-77.0939673
+Mercado Paramonga,-11.9641637,-77.1031162
+Mercado Inkamay,-11.9637965,-77.1020682
+Mercado Virgen del Carmen,-11.9680616,-77.0969291
+Mercado El Olivar,-11.9733576,-77.1035548
+Mercado Portales de Chavín,-11.9757381,-77.0937822
+Mercado 2000,-11.976389,-77.098517
+Mercado San José,-11.9772954,-77.0999336
+Mercado Virgen del Carmen,-11.9766958,-77.0855922
+Mercado La Luz Divina,-11.9797706,-77.0887882
+Mercado Los Jazmines,-11.9814991,-77.0899145
+Mercado III Horizontes,-11.980385,-77.1023009
+Mercado Señor de los Milagros,-11.9840303,-77.0932733
+Mercado Santa Rosa,-11.9856318,-77.0945071
+Mercado Virgen de Fátima,-11.9870716,-77.0873033
+Mercado Los Olivos,-11.9881649,-77.0831249
+Mercado Paraíso Florido,-11.986741,-77.0990447
+Centro Comercial ASCAI,-11.9901846,-77.0809479
+Mercado Señor de Huanca,-11.9873126,-77.1123263
+Centro Comercial Las Casuarinas,-11.9894998,-77.1102898
+Mercado Virgen de la Puerta,-11.9930188,-77.1116646
+Mercado Venecia,-11.9950928,-77.1052921
+Mercado El Universo,-11.9936852,-77.1033959
+Mercado Los Cipreses,-11.9998475,-77.1017463
+Mercado Señor de los Milagros,-11.9896101,-77.097573
+Mercado El Puente,-11.989633,-77.0972947
+Mercado Los Nísperos,-11.9898317,-77.09651
+Mercado Puente Camote,-11.9918362,-77.0936367
+Mercado Las Margaritas,-11.9915804,-77.0929165
+Mercado Divina Misericordia,-11.994329,-77.0901002
+Mercado Las Margaritas,-11.9985363,-77.089445
+Mercado 20 de Agosto,-12.0046762,-77.0942778
+Mercado CORPAC,-12.004053,-77.0942203
+El Triunfo,-12.0032312,-77.0837666
+Mercado 6 de Febrero,-12.0052921,-77.0858355
+Inmaculada Concepción,-12.005868,-77.0862986
+Virgen de la Merced,-12.0083482,-77.0908894
+Mercado Iquitos,-12.0294721,-77.0847163
+Mercado Virgen de Fátima,-12.0344709,-77.0809244
+Mercado Virgen de Fátima,-12.0305097,-77.0773993
+Mercado José Granda,-12.0258979,-77.0764558
+Mercado Amakella,-12.0222936,-77.0779691
+Mercado La Unión,-12.0153102,-77.0762192
+Mercado Acosta,-12.0143215,-77.0738231
+Mercado Palao,-12.0168089,-77.0548453
+San Lucas,-12.0167886,-77.0552367
+San Juan Bautista,-12.0181767,-77.059076
+Señor de los Milagros,-12.018815,-77.0613151
+Mercado Santa Rosa de las Américas,-12.0327575,-77.0701952
+Santa Rosa,-12.0241257,-77.067008
+Mercado Virgen del Carmen,-12.029696,-77.0655091
+Mercado de Todos,-12.0306406,-77.0650785
+Mercado El Chaco,-12.0313429,-77.0650605
+Mercado La Alameda,-12.020823,-77.0539295
+Ricardo Palma,-12.0214283,-77.0530146
+Mercado Pedro Paulet,-12.0251369,-77.0536044
+Minimercado Fortaleza,-12.0277716,-77.0561689
+Santa Catalina I,-12.0285776,-77.0555976
+Mercado 10 de Junio,-12.0271112,-77.0481666
+Minimarket Flores,-12.0331293,-77.0532434
+Mercado Martir Olaya,-12.034255,-77.046254
+,-11.934619,-76.9886646
+Mercado Las Delicias de María Reiche,-12.24536,-76.9224427
+Mercado Mega Plaza Las Américas,-12.0343688,-76.9040273
+Mercado Central Las Américas,-12.0380378,-76.9045242
+Qatuna,-11.8904237,-77.0416168
+Mercado Santa Rosa,-11.959338,-77.0434111
+Mercado V Zona Collique,-11.9121487,-77.0076125
+Mercado 12 de Febrero,-11.9115661,-77.0219647
+Mercado Central 1° Zona Collique,-11.9153695,-77.0330272
+Minimercado Trapiche,-11.8990603,-77.0503586
+Mercado Mi Hacienda,-11.9060284,-77.0525707
+,-12.1538561,-76.9520213
+Mercado La Moderna,-12.1543214,-76.9522535
+,-12.0463382,-77.0151345
+,-12.0462512,-77.0148683
+,-12.1088276,-77.010717
+,-12.1085522,-77.011011
+Mercado Morococha,-12.1071445,-77.0197125
+Mercado Santa Rosita de Los Olivos,-11.986748,-77.0727095
+Mercado El Mana,-11.9867786,-77.0726006
+Mercado El Olivar,-11.9868938,-77.071978
+Polvos de La Merced,-12.1122307,-77.0025835
+Mercado Girasol,-12.143375,-76.944461
+Metrito,-12.102289,-76.9434821
+Mercado Divino Niño,-12.1255402,-76.9505663
+Mass,-12.1184591,-77.0180622
+Mercado El Retablo,-11.9363717,-77.0577001
+Boulevard BordeMar,-12.1422868,-77.0269682
+El Príncipe,-12.1172712,-77.0056931
+Mercado Las Mercedarias,-12.0480535,-77.0185499
+,-12.0470373,-77.0179997
+,-12.0468451,-77.0177781
+Mercado Virgen de Asunción,-12.0846852,-77.0044434
+Vulcano Premium Outlet,-12.0606284,-76.9549619
+Mercado Jesús El Salvador,-12.2324757,-76.9226307
+Mercado 8 de Agosto,-12.2322033,-76.9228128
+Mercado Santa Leonor,-12.2320731,-76.9219585
+Mercado Los Angeles de California,-12.2054456,-76.969869
+Mercado Primero de Marzo,-12.2262193,-76.9464607
+Mercado Rímac,-12.0357401,-77.0411739
+Centro Comercial Goyita,-12.153855,-76.9525924
+Centro Comercial Santa Rosa,-12.0087433,-77.0776303
+Mercado Chavarría,-12.0044335,-77.0779016
+Mercado Ramiro Prialé,-11.9774588,-76.7780409
+Mercado Los Girasoles,-11.9782497,-76.7845101
+Mercado 21 de Julio,-12.0124116,-76.809468
+Mercado Pipa,-12.0220908,-76.8366482
+Mercado Pariachi I,-12.005842,-76.8442319
+Mercado Carapongo,-12.0024344,-76.8638873
+Mercado Flor de Oliva,-12.002622,-76.8646284
+Mercado Las Estrellas,-12.0224337,-76.8730551
+Mercado Manylsa,-12.0310154,-76.8905466
+Mercado Corazón de Jesús,-11.9865173,-76.8999544
+Mercado Virgen Inmaculada Concepción,-11.9792108,-76.9087852
+Mercado Santa Rosa,-11.8771815,-77.0103193
+Mercado 12 de Agosto,-11.8768312,-77.0152223
+Mercado Central El Progreso,-11.8780694,-77.0189908
+Mercado El Sol Naciente,-11.8809573,-76.9993235
+Mercado Señor de los Milagros,-11.8800728,-77.0315089
+Mercado Sarita Colonia,-11.8929655,-77.0407901
+Mercado Pachacútec,-12.0763651,-77.0722917
+Santa Rosa,-11.0935978,-77.5946827
+Mercado Municipal de Huaura,-11.070797,-77.6007633
+Mercado Santa Catalina de Palermo,-12.0411759,-77.0674418
+Mercado Modelo Valle,-11.915525,-76.9685231
+Mercado Sol Naciente,-11.888561,-76.9567669
+,-11.8930728,-76.9571055
+,-11.9248742,-76.9621501
+Mercado Central de San Juan,-12.0123152,-76.8693202
+,-12.0135102,-76.8769276
+,-11.8801036,-76.9530735
+,-11.8941348,-76.9651764
+,-11.9450704,-76.9785217
+,-11.897816,-76.9616654
+Mercado Mayorista De Platanos,-12.0763355,-77.0085847
+Mercado Vella Rinconada,-11.9138473,-76.9413914
+Mercado María Parado de Bellido,-12.0437886,-76.9179359
+Mercado Señor de los Milagros,-11.9429838,-77.03786
+Mercado Puente Camote - La Florida,-11.991811,-77.0983083
+Mercado Señor de los Milagros,-11.9577118,-76.9782273
+,-11.9741231,-76.9888304
+Mercado Los Lirios,-11.9823462,-76.9774936
+Mercado San Roque,-11.9491319,-76.9822291
+Mercado Modelo Chillón,-11.922357,-77.0771713
+Mercado Chillón,-11.9232778,-77.0756912
+Mercado Bayalasu,-11.9354213,-77.0889113
+Mercado Francisco Bolognesi,-11.932631,-77.0694851
+Mercado Santa Rosa de la Viña,-12.0727774,-76.9962836
+,-11.8945331,-77.0427027
+Mall del Sur,-12.154884,-76.9820708
+Centro Comercial La Bellota,-12.0446604,-77.046344
+Centro Comercial Nicolini,-12.04454,-77.0452074
+Mercado Micaela Bastidas,-11.967368,-77.0386334
+Galeria Comercial Colectora,-12.0638131,-76.9452299
+Santa Patricia,-12.0639284,-76.9451708
+,-12.0536771,-76.9826121
+Mercado Santa Rosa de Quives,-12.0530131,-76.9812521
+Mercado Túpac Amaru N° 2,-11.9723094,-77.0448718
+Mercado San Pedro y San Pablo,-11.9723938,-77.0437563
+Mercado N° 1 Payet,-11.9750999,-77.0490879
+Mercado San Martín de Porres,-11.9785405,-77.0413585
+Mercado Pequeños Comerciantes,-11.9773466,-77.0470541
+Mercado Central de Tahuantinsuyo,-11.9778674,-77.0463855
+Mercado Modelo,-11.9783859,-77.0464915
+Virgen del Carmen,-11.9994152,-77.0469968
+Mercado Mesa Redonda,-12.001815,-77.0581098
+Mercado María Parado de Bellido,-12.0117062,-77.0494097
+Mercado Villa CLorinda,-11.9658349,-77.0546145
+Mercado Santa Rosa de Lima,-11.9487488,-77.0471876
+Mercado Galería El Bosque,-12.0161336,-77.0339044
+Mercado Flor de Amancaes,-12.0162621,-77.030407
+Mercado Chachi Eduardo Dibós,-12.0174558,-77.0272392
+Micromercado La Florida,-12.0229709,-77.0336028
+Mercado Cooperativa Ciudad y Campo,-12.0248142,-77.0291157
+Mercado San Carlos,-12.0282237,-77.0378018
+Mercado Ventura Rossi - Zona B,-12.0342617,-77.0311362
+Mercado Buen Jesús,-12.0401276,-77.0186786
+Mercado El Pinar,-11.9151274,-77.0559846
+Mercado Santa Rosa,-11.9232249,-77.0536168
+Mercado Cruz de Mayo,-11.9016069,-77.0669085
+Mercado Modelo Cruz de Motupe,-11.8880545,-77.0658859
+Mercado Las Fresas,-11.880972,-77.0629985
+Mercado Tambo Inga,-11.8842742,-77.0698855
+Minimarket Ovalo Infantas,-11.9463745,-77.0716761
+Mercado Eduardo Villasante,-12.0617768,-77.0016203
+Mercado Modelo de Huaycán Nº 1,-12.0115184,-76.823836
+Mercado El Progreso,-11.9441257,-76.9498522
+,-11.5001842,-77.2053661
+Mercado San Martín de Porras,-12.1852255,-77.0062435
+Mercado Unicachi Pro,-11.9384922,-77.0694506
+Mercado 7 de junio,-11.8159995,-77.1373132
+Mercado San Pedro,-11.8244635,-77.1237364
+,-11.814064,-77.1298224
+,-12.0129291,-76.8696011
+Mercado Municipal,-12.0637076,-76.9462315
+Mercado San Pablo,-12.186099,-77.0069128
+Ramón Castilla,-12.0322906,-77.0433972
+,-12.033623,-77.0477743
+Mercado Parada Luis Pardo,-11.1189412,-77.5935006
+Mercado Mariscal Castilla,-12.0162807,-77.0346361
+Mercado 8 de Julio,-11.8044936,-77.1640487
+Tienda Mass,-12.1655532,-76.9840216
+Mercado Los Sensasionales,-12.127981,-76.9334535
+Mercado Monte Sinaí,-12.1282568,-76.9330839
+Mercado Villa Hermosa,-12.042407,-76.9875699
+,-12.0449082,-76.9846525
+Mercado Santa Rosa,-12.2506813,-76.8970998
+,-11.824684,-77.0980577
+Mercado Virgen de Cocharcas,-11.9409452,-76.7010552
+El Edén,-12.1019834,-76.9500508
+Mercado Las Cascadas,-12.1021809,-76.9505067
+Bazar Papito,-12.1018561,-76.9507198
+Mercado El Bosque,-12.0305112,-77.0128294
+Mall Plaza Comas,-11.9363439,-77.0653157
+Mercado Ancieta Alta,-12.0428875,-77.0015815
+Asosación José Carlos Mariátegui,-12.0596619,-77.0130874
+,-12.062368,-77.0173569
+Mercado de Frutas García Alonso,-11.4982086,-77.1957064
+Mercado Huancaray,-11.9666602,-76.9908004
+Mercado Santa Rosa,-12.1670658,-76.9245097
+Mercado Santa Rosa,-12.1611905,-76.9157705
+Mercado Unión Santa Maria,-12.1577404,-76.9123134
+Mercado Centro Comercial San Valentin,-11.8259482,-77.1619163
+,-11.9677846,-77.0045296
+Mercado Valle Sagrado,-11.9668419,-77.0044411
+,-11.9643006,-76.9970966
+Mercado Las Torres,-12.1494317,-77.0179398
+,-11.7459226,-77.1473634
+Asociación de Comerciantes Mega Mercado Ecológico,-11.9010589,-77.0489283
+,-12.0537079,-76.9645702
+,-12.0532799,-76.9643216
+Mercado Marko Jara,-11.813279,-77.1283464
+,-12.0355815,-77.004471
+Metro,-12.0629783,-77.0964032
+Mercado de Nicolás de Pierola,-11.9418827,-76.7110148
+La Esquina de La Planicie,-12.0783088,-76.8991851
+Plaza Center San Martín de Porres,-12.0098772,-77.0622691
+Mercado Malvinas,-12.1379204,-76.9723863
+Mercado del Pueblo Carlos Cueto Fernandini,-11.9824225,-77.0730159
+,-11.8873367,-77.0308012
+Mercado Israel,-11.9739458,-76.9886699
+La Cachina,-11.9579217,-76.9871364
+Rivera Azul,-11.9569101,-77.1024446
+Multicenter,-11.9902919,-77.0621281
+,-11.990705,-77.063239
+Mercado Elio,-12.0552199,-77.0687063
+Mercado Modelo Santa María,-11.9648338,-76.9757277
+,-12.0537359,-76.9638351
+,-12.1533357,-76.971919
+,-12.0535142,-76.964227
+,-12.0333233,-76.9583047
+Tambo,-12.1388692,-77.0176086
+Ecoplaza,-12.0588667,-76.9622404
+Mercado Modelo Los Ficus,-12.048028,-76.9716418
+Los Ficus,-12.0495576,-76.9711622
+,-12.0533499,-76.9559829
+Galería Los Sauces,-12.1211838,-77.0033879
+Mercado Santa Beatriz,-11.9459774,-77.0669367
+Centro Comercial Santa Luisa,-11.9468102,-77.0665879
+Mercado Santa Mónica,-11.9473258,-77.0680081
+Mercado Virgen del Carmen de Infantas,-11.9432568,-77.0671838
+Mass,-12.1212584,-76.993303
+Mercado Pachacamilla,-11.9715694,-77.1139002
+Mega Plaza,-11.5025086,-77.2255024
+Mercado Modelo,-11.5021749,-77.2044942
+Mercado Central,-11.4927087,-77.200946
+Plaza Unicachi,-11.4919054,-77.2020797
+Mercado Central,-11.436349,-77.296213
+La Nacional Plaza,-11.5099531,-77.2066303
+Centro Comercial KM40,-12.3115792,-76.8363676
+Plaza Center Puente Piedra,-11.8635169,-77.0726545
+,-11.8636306,-77.0718318
+,-11.9911064,-77.0632411
+Mercado  Bambú,-12.2754243,-76.8725826
+Mercado Leo,-12.279524,-76.8713399
+Mass,-12.1180698,-77.0438885
+Mercado 2 de Octubre,-11.97736,-77.0561409
+Mega Mercado ACOMESAR,-11.560255,-77.2649864
+Mercado de Abastos,-11.5685429,-77.2664561
+Mercado de Hortalizas,-11.5015101,-77.2023913
+Mercado Carlos Mora,-11.4940851,-77.2008216
+Galeria La Piramide,-11.4946228,-77.2086403
+Galeria Cahuas,-11.4937427,-77.2076601
+Mercado La Calera,-12.1122444,-77.0028595
+Mercado de San Jose,-11.7785592,-77.1608987
+Metro,-12.1037581,-77.0204994
+,-11.9324535,-76.969077
+Centro Comercial El Trigal,-12.1274687,-76.9878835
+Mercado Santa Elvira,-12.0275627,-76.9518035
+Mercado Caquetá,-12.0353003,-77.0430328
+Wong Benavides,-12.1257795,-77.0176402
+Centro Comercial Camino Real,-12.0973794,-77.0367466
+Mallplaza Angamos,-12.1115794,-77.0118946
+Jockey Plaza Shopping Center,-12.0860368,-76.9762559
+Galería Inmaculada Concepción,-12.0448456,-77.0230472
+Expocentro,-12.1239176,-77.0298071
+La Rambla,-12.0662539,-77.0474771
+Mercado San Antonio,-12.1567658,-76.9577439
+,-12.1216392,-77.0285329
+Centro Comercial Centro Lima,-12.0549118,-77.0370531
+Parque La Molina,-12.0760618,-76.9358996

@@ -147,6 +147,7 @@ df_clean["longitud"] = pd.to_numeric(df_clean["longitud"], errors="coerce")
 #%%
 df_clean = df_clean[['nombre_del_establecimiento', 'provincia', 'distrito', 'direccion', 'direccion_ubicacion', 'latitud','longitud']]
 
+df_clean = df_clean.rename(columns={"nombre_del_establecimiento": "nombre"})
 # %% EDIRdición de valores de la columna distrito
 
 df_clean["distrito"] = df_clean["distrito"].replace({"san juan de lurigancho":"sjl",

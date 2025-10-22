@@ -82,7 +82,7 @@ def run():
         """)
 
         tipo_vivienda = st.radio("Seleccione el tipo de vivienda para análisis detallado:",
-                                 options=df["tipo_vivienda"].unique(),
+                                 options=sorted(df["tipo_vivienda"].unique()),
                                  index=0,
                                  key="tipo_vivienda_select")
         
@@ -112,11 +112,12 @@ def run():
         - Precio: S/ {df_median_cluster['precio_pen']:.2f}  
         - Precio por m²: S/ {df_median_cluster['precio_por_m2']:.2f}
         - Área media: {df_median_cluster['area_m2']:.1f} m²  
-        - Dormitorios: {df_median_cluster['num_dorm']:.1f}  
-        - Baños: {df_median_cluster['num_banios']:.1f}  
-        - Estacionamientos: {df_median_cluster['num_estac']:.2f}  
-        - Nivel de criminalidad: {df_median_cluster['num_delitos_aprox']:.2f} (escala codificada)
-        """)
+        - Dormitorios: {df_median_cluster['num_dorm']:.0f}  
+        - Baños: {df_median_cluster['num_banios']:.0f}  
+        - Estacionamientos: {df_median_cluster['num_estac']:.0f}  
+        - Nivel de criminalidad: {df_median_cluster['num_delitos_aprox']:.2f}<br>
+        Rango: {df_cat["num_delitos_aprox"].quantile(0.01):.1f} (mín) - {df_cat["num_delitos_aprox"].quantile(0.99):.1f} (máx))
+        """, unsafe_allow_html=True)
         
         df_cat["superior_promedio"] = np.where(
              (df_cat['total_servicios_prox'] > df_median_cluster['total_servicios_prox']) &
@@ -132,15 +133,52 @@ def run():
 
         col1, col2 = st.columns(2)
 
+        pesos = []
+        
         with col1:
-            peso_precio = st.slider("💰 Precio (alquiler, mantenimiento)", 0.0, 1.0, 0.2)
-            peso_espacio = st.slider("🏠 Espacio (m², ambientes, dormitorios...)", 0.0, 1.0, 0.2)
-            peso_antiguedad = st.slider("📅 Antigüedad (menos es mejor)", 0.0, 1.0, 0.2)
-        with col2:
-            peso_crimen = st.slider("🔒 Seguridad (menos delitos mejor)", 0.0, 1.0, 0.2)
-            peso_servicios = st.slider("🏫 Servicios básicos (colegios, hospitales, comisarías)", 0.0, 1.0, 0.1)
-            peso_transporte = st.slider("🚇 Transporte (metro, tren, metropolitano)", 0.0, 1.0, 0.1)
+            criterios_col1 = ["💰 Precio (alquiler, mantenimiento)","🏠 Espacio (m², ambientes, dormitorios...)","📅 Antigüedad (menos es mejor)"]
+            etiquetas_min_col1 = ["Costo reducido", "Espacio reducido", "Construcción reciente"]
+            etiquetas_max_col1 = ["Costo elevado", "Espacio amplio", "Mayor antigüedad"]
 
+            for i,criterio_col1 in enumerate(criterios_col1):
+                col3, col4, col5 = st.columns([1,3,1])
+                with col3:
+                    st.markdown(f"<p style='text-align:center;'>0.0<br>{etiquetas_min_col1[i]}</p>", unsafe_allow_html=True)
+                with col4:
+                    peso_col1 = st.slider(criterio_col1, 0.0, 1.0, 0.2)
+                    pesos.append(peso_col1)
+                with col5:
+                    st.markdown(f"<p style='text-align:center;'>1.0<br>{etiquetas_max_col1[i]}</p>", unsafe_allow_html=True)
+                st.empty()
+            #peso_precio
+            #peso_espacio = st.slider("🏠 Espacio (m², ambientes, dormitorios...)", 0.0, 1.0, 0.2)
+            #peso_antiguedad = st.slider("📅 Antigüedad (menos es mejor)", 0.0, 1.0, 0.2)
+
+        with col2:
+            # peso_crimen = st.slider("🔒 Seguridad (menos delitos mejor)", 0.0, 1.0, 0.2)
+            # peso_servicios = st.slider("🏫 Servicios básicos (colegios, hospitales, comisarías)", 0.0, 1.0, 0.1)
+            # peso_transporte = st.slider("🚇 Transporte (metro, tren, metropolitano)", 0.0, 1.0, 0.1)
+            criterios_col2 = ["🔒 Seguridad (menos delitos mejor)","🏫 Servicios básicos (colegios, hospitales, comisarías)","🚇 Transporte (metro, tren, metropolitano)"]
+            etiquetas_min_col2 = ["Zona segura", "Servicios escasos", "Transporte escaso"]
+            etiquetas_max_col2 = ["Zona riesgosa", "Servicios abundantes", "Transporte abundante"]
+
+            for j,criterio_col2 in enumerate(criterios_col2):
+                col3, col4, col5 = st.columns([1,3,1])
+                with col3:
+                    st.markdown(f"<p style='text-align:center;'>0.0<br>{etiquetas_min_col2[j]}</p>", unsafe_allow_html=True)
+                with col4:
+                    peso_col2 = st.slider(criterio_col2, 0.0, 1.0, 0.2)
+                    pesos.append(peso_col2)
+                with col5:
+                    st.markdown(f"<p style='text-align:center;'>1.0<br>{etiquetas_max_col2[j]}</p>", unsafe_allow_html=True)
+
+        peso_espacio = pesos[0]
+        peso_precio = pesos[1]
+        peso_antiguedad = pesos[2]
+        peso_crimen = pesos[3]
+        peso_servicios = pesos[4]
+        peso_transporte = pesos[5]
+        
         pesos_df = pd.DataFrame({
                 "dimension": ["Espacio", "Precio", "Antiguedad", "Seguridad", "Servicios", "Transporte"],
                 "peso": [peso_espacio, peso_precio, peso_antiguedad, peso_crimen, peso_servicios, peso_transporte]
