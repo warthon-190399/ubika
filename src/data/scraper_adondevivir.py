@@ -5,8 +5,14 @@ import random
 import os
 
 # Crear carpeta si no existe y cambiar al directorio
-os.makedirs("data/raw", exist_ok=True)
-os.chdir("data/raw")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
+file_location = os.path.join(BASE_DIR, "data", "raw")
+adondevivir_path = os.path.join(file_location, "adondevivir") # New folder
+
+os.makedirs(adondevivir_path, exist_ok=True)
+os.chdir(adondevivir_path)
+#%%
 
 def scrapear_pagina(page_num):
     base_url = f"https://www.adondevivir.com/departamentos-en-alquiler-pagina-{page_num}-q-lima.html"
@@ -68,7 +74,6 @@ def scrapear_pagina(page_num):
 
     return data
 
-
 # Scrapeo de todas las páginas
 all_data = []
 
@@ -91,3 +96,4 @@ if all_data:
     print("📦 Archivo consolidado guardado como 'adondevivir_todas_las_paginas.csv'")
 else:
     print("⚠️ No se obtuvieron datos en ninguna página.")
+

@@ -6,9 +6,6 @@ import folium
 import pandas as pd
 from session_utils import init_session_state # Initial configuration, "session_utils.py"
 
-# --- Inicializar variable de control ---
-# if "pagina_anterior" not in st.session_state:
-#     st.session_state.pagina_anterior = None
 st.session_state.setdefault("pagina_anterior",None)
 
 init_session_state()

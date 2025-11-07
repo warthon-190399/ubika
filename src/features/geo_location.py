@@ -5,8 +5,22 @@ from time import sleep
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
-API_KEY = os.getenv("GOOGLE_GEOENCODING_APIKEY")
+# Read .env.example
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
+ENV_PATH = os.path.join(BASE_DIR, ".env")
+input_path = os.path.join(BASE_DIR, "data", "processed","adondevivir_processed.csv")
+output_path = os.path.join(BASE_DIR, "data", "processed","adondevivir_processed_geo.csv")
+
+load_dotenv(ENV_PATH)
+API_KEY = os.getenv("GOOGLE_GEOENCODING_APIKEY").strip().replace('"','').replace("'",'')
+print(f"API_KEY: {API_KEY}")  # <-- Test is really is reading
+print(input_path)
+print(output_path)
+print(repr(API_KEY))
+print("API_KEY repr:", repr(API_KEY))
+print("API_KEY len:", len(API_KEY))
+#%%
 gmaps = googlemaps.Client(key=API_KEY)
 
 def obtener_coordenadas(direccion, contador=None):
@@ -24,12 +38,9 @@ def obtener_coordenadas(direccion, contador=None):
         print(f"[{contador}] ❌ Error al geocodificar '{direccion}': {e}")
         return None, None
 
-
-
-input_path =  "D:/DS_Portafolio/ubika/data/processed/adondevivir_processed.csv"
-
 df = pd.read_csv(input_path)
 
+#%%
 # Aplicar geocodificación con contador
 latitudes = []
 longitudes = []
@@ -47,4 +58,6 @@ for i, row in enumerate(df.itertuples(), start=1):
 df["latitud"] = latitudes
 df["longitud"] = longitudes
 
-df.to_csv("D:/DS_Portafolio/ubika/data/processed/adondevivir_processed_geo.csv", index = False)
+df.to_csv(output_path, index = False)
+
+# %%

@@ -41,6 +41,8 @@ output_path = os.path.join(BASE_DIR, "data", "processed", "final_dataset_h.csv")
 output_model_path = os.path.join(BASE_DIR,"models","catboost_model_h.pkl")
 output_hyperparams_path = os.path.join(BASE_DIR,"models","catboost_hyperparams_h.pkl")
 
+output_prueba = os.path.join(BASE_DIR, "models")
+
 # %%
 df = pd.read_csv(input_path)
 
@@ -95,7 +97,7 @@ for nombre, modelo in modelos.items():
         y_train,
         eval_set=[(X_val, y_val)]
     )
-    joblib.dump(modelo, f"C:/PC/7. PROYECTOS/Ubika/models/{nombre}_prueba.pkl")
+    joblib.dump(modelo, f"{output_prueba}/{nombre}_prueba.pkl")
     y_pred = modelo.predict(X_test)
     
     mae = mean_absolute_error(y_test, y_pred)

@@ -115,18 +115,6 @@ print("Mejor R²:", study.best_value)
 #%%
 best_params = study.best_params
 
-# final_model = CatBoostRegressor(
-#     iterations=best_params['iterations'],
-#     depth=best_params['depth'],
-#     learning_rate=best_params['learning_rate'],
-#     l2_leaf_reg=best_params['l2_leaf_reg'],
-#     random_strength=best_params['random_strength'],
-#     bagging_temperature=best_params['bagging_temperature'],
-#     border_count=best_params['border_count'],
-#     verbose=0,
-#     random_state=42
-# )
-
 final_model = RandomForestRegressor(
     n_estimators=best_params.get('n_estimators',200),
     max_depth=best_params.get('max_depth',None),
@@ -137,12 +125,6 @@ final_model = RandomForestRegressor(
     random_state=42,
     n_jobs=-1
 )
-
-# final_model.fit(
-#     X_train,y_train,
-#     eval_set=[(X_test, y_test)],
-#     early_stopping_rounds=50
-#     )
 
 # Train (without eval_set)
 final_model.fit(X_train, y_train)

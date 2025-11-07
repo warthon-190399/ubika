@@ -3,12 +3,12 @@ import pandas as pd
 import unicodedata
 import os
 
-
-inputh_path = "D:/DS_Portafolio/ubika/data/raw/adondevivir/adondevivir_final.csv"
-output_path = "D:/DS_Portafolio/ubika/data/processed/adondevivir_processed.csv"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
+inputh_path = os.path.join(BASE_DIR, "data", "raw","adondevivir","adondevivir_todo3_completo.csv")
+output_path = os.path.join(BASE_DIR, "data", "processed","adondevivir_processed.csv")
 
 df_raw = pd.read_csv(inputh_path)
-
 
 def extract_prices(valor):
     if pd.isna(valor):
@@ -231,7 +231,7 @@ df_raw['ubicacion_normalizada'] = df_raw['distrito'].map(mapeo_ubicaciones)
 df_raw['nivel_socioeconomico'] = df_raw['ubicacion_normalizada'].map(mapeo_socioeconomico)
 
 
-df_processed = df_raw[['precio_pen', 'precio_usd', 'mantenimiento_soles', 'direccion_limpia', 'zona', 'distrito', 'area_m2', 'num_dorm', 'num_banios', 'num_estac', 'antiguedad', "num_visualizaciones", "fecha_pub", "ubicacion_normalizada", "nivel_socioeconomico"]]
+df_processed = df_raw[['precio_pen', 'precio_usd', 'mantenimiento_soles', 'direccion_limpia', 'zona', 'distrito', 'area_m2', 'num_dorm', 'num_banios', 'num_estac', 'antiguedad', "num_visualizaciones", "fecha_pub", "ubicacion_normalizada", "nivel_socioeconomico", "URL"]]
 
 df_processed['direccion_limpia'] = df_processed.apply(
     lambda row: row['zona'] if row['direccion_limpia'] == 'direccion no informada' else row['direccion_limpia'],

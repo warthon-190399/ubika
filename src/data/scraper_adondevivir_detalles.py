@@ -7,11 +7,9 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
-csv_path = os.path.join(BASE_DIR, "data", "raw", "adondevivir_todas_las_paginas.csv")
-output_path = os.path.join(BASE_DIR, "data", "processed", "adondevivir_todo3_completo.csv")
-
-#csv_path = "D:/DS_Portafolio/ubika/data/raw//adondevivir/adondevivir_todo3.csv"
-#output_path = "D:/DS_Portafolio/ubika/data/raw/adondevivir/adondevivir_todo3_completo.csv"
+csv_path = os.path.join(BASE_DIR, "data", "raw", "adondevivir","adondevivir_todas_las_paginas.csv")
+output_path = os.path.join(BASE_DIR, "data", "raw", "adondevivir", "adondevivir_todo3_completo.csv")
+print(output_path)
 
 df = pd.read_csv(csv_path)
 
@@ -46,7 +44,7 @@ def convertir_a_fecha_exacta(texto_fecha):
         return None
 
 with sync_playwright() as p:
-    for i in range():  # Desde fila 950 hasta 2806 inclusive
+    for i in range(len(df)):  # Desde fila 950 hasta 2806 inclusive
         row = df.loc[i]
         url = row["URL"]
         if pd.isna(url):
