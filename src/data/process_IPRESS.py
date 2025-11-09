@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 #%% FUNCTION "obtener_lat_lon", API DE GOOGLE
 
-API_KEY = os.getenv("GOOGLE_GEOENCODING_APIKEY").strip('"')  # 👈 reemplaza esto por tu clave real
+API_KEY = os.getenv("GOOGLE_GEOENCODING_APIKEY").strip('"')  
 gmaps = googlemaps.Client(key=API_KEY)
 
 def getting_lat_lon(direccion):

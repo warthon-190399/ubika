@@ -14,7 +14,7 @@ output_path = os.path.join(BASE_DIR, "data", "processed","adondevivir_processed_
 
 load_dotenv(ENV_PATH)
 API_KEY = os.getenv("GOOGLE_GEOENCODING_APIKEY").strip().replace('"','').replace("'",'')
-print(f"API_KEY: {API_KEY}")  # <-- Test is really is reading
+print(f"API_KEY: {API_KEY}")  
 print(input_path)
 print(output_path)
 print(repr(API_KEY))

@@ -1,8 +1,6 @@
 import streamlit as st
 import autoevaluation_V2
-import visualization
 import dashboard
-import folium
 import pandas as pd
 from session_utils import init_session_state # Initial configuration, "session_utils.py"
 
@@ -18,7 +16,7 @@ st.set_page_config(
     )
 
 st.sidebar.title("Menú de navegación")
-page = st.sidebar.selectbox("Selecciona una página:", ["Dashboard", "Autoevaluador", "Visualización"])
+page = st.sidebar.selectbox("Selecciona una página:", ["Dashboard", "Autoevaluador"])
 
 # --- Detectar cambio de página ---
 if st.session_state.pagina_anterior != page:
@@ -31,5 +29,3 @@ if  page == "Dashboard":
     dashboard.run()
 elif page == "Autoevaluador":
     autoevaluation_V2.run()
-elif page == "Visualización":
-    visualization.run()
