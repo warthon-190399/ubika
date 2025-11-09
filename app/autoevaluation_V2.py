@@ -68,7 +68,7 @@ zona_apeim = {
 }
 
 # Functions
-def proximidad_entre(lat, lon, df_servicio, radius_metros = 500):
+def proximidad_entre(lat, lon, df_servicio, radius_metros = 1000):
     # Asegurarse que no hay NaNs
     df_servicio = df_servicio.dropna(subset=['latitud', 'longitud']).reset_index(drop=True)
 
@@ -89,7 +89,7 @@ def proximidad_entre(lat, lon, df_servicio, radius_metros = 500):
 
     return count
 
-def data_servicios_prox(lat, lon, df_servicio, radius_metros=500):
+def data_servicios_prox(lat, lon, df_servicio, radius_metros=1000):
     import numpy as np
     from sklearn.neighbors import BallTree
     import pandas as pd
@@ -225,7 +225,7 @@ def subproceso_num_servicios():
 def subproceso_plot_num_servicios():
     st.write(f"<br>**Servicios en un radio de {st.session_state.radius_metros} metros**", unsafe_allow_html=True)
 
-    servicios = {"**N° Colegios:**":st.session_state.num_colegios_prox, "**N° Mercados:**":st.session_state.num_malls_prox,
+    servicios = {"**N° Colegios:**":st.session_state.num_colegios_prox, "**N° Malls:**":st.session_state.num_malls_prox,
                     "**N° Hospitales:**":st.session_state.num_hospitales_prox,"**N° Estaciones de tren:**":st.session_state.num_est_tren_prox,
                     "**N° Estaciones de metropolitano:**":st.session_state.num_est_metro_prox,"**N° Comisarias:**":st.session_state.num_comisarias_prox}
     
