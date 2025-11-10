@@ -27,11 +27,13 @@ def run():
         """)
         st.markdown("### Configuraciones")
         
-        zona_seleccionada = st.multiselect("Distrito(s) de Interés", options = df["distrito"].unique())
+        zona_seleccionada = st.multiselect("Distrito(s) de Interés", options = df["distrito"].unique(),
+                                           help="Selecciona uno o varios distritos para analizar las propiedades disponibles."
+                                           )
 
         if not zona_seleccionada:
-             st.warning("⚠️ Por favor selecciona al menos un distrito para ver resultados.")
-             return  # detiene la ejecución de la función run()
+            st.markdown("⚠️ Por favor selecciona al menos un distrito para ver resultados.")
+            
 
         rango_precio = st.slider("Rango de Precio (PEN)",
                                  min_value=int(df["precio_pen"].min()),
@@ -40,29 +42,53 @@ def run():
                                  )
         
         with st.expander("Filtros Avanzados"):
-                num_dorm = st.slider("N° dormitorios",
-                                    min_value=int(df["num_dorm"].min()),
-                                    max_value=int(df["num_dorm"].max()),
-                                    value=(int(df['num_dorm'].min()), int(df['num_dorm'].max()))
-                                    )
-                num_banios = st.slider("N° baños",
-                                    min_value=int(df["num_banios"].min()),
-                                    max_value=int(df["num_banios"].max()),
-                                    value=(int(df['num_banios'].min()),
-                                            int(df['num_banios'].max()))
-                                    )
-                area_range = st.slider("Área (m²)",
-                                    min_value=int(df["area_m2"].min()),
-                                    max_value=int(df["area_m2"].max()),
-                                    value=(int(df['area_m2'].min()), 
-                                            int(df['area_m2'].max()))
-                                    )
-                antiguedad_range  = st.slider("Antigüedad (años)",
-                                    min_value=int(df["antiguedad"].min()),
-                                    max_value=int(df["antiguedad"].max()),
-                                    value=(int(df['antiguedad'].min()),
-                                            int(df['antiguedad'].max()))
-                                    )
+            num_dorm = st.slider("N° dormitorios",
+                                min_value=int(df["num_dorm"].min()),
+                                max_value=int(df["num_dorm"].max()),
+                                value=(int(df['num_dorm'].min()), int(df['num_dorm'].max()))
+                                )
+            num_banios = st.slider("N° baños",
+                                min_value=int(df["num_banios"].min()),
+                                max_value=int(df["num_banios"].max()),
+                                value=(int(df['num_banios'].min()),
+                                        int(df['num_banios'].max()))
+                                )
+            area_range = st.slider("Área (m²)",
+                                min_value=int(df["area_m2"].min()),
+                                max_value=int(df["area_m2"].max()),
+                                value=(int(df['area_m2'].min()), 
+                                        int(df['area_m2'].max()))
+                                )
+            antiguedad_range  = st.slider("Antigüedad (años)",
+                                min_value=int(df["antiguedad"].min()),
+                                max_value=int(df["antiguedad"].max()),
+                                value=(int(df['antiguedad'].min()),
+                                        int(df['antiguedad'].max()))
+                                )
+    if not zona_seleccionada:
+        st.markdown(
+            """
+            <div style="text-align: center; padding: 50px 20px;">
+                <h1>🏡 ¡Hola! Bienvenido a <b>Ubika</b></h1>
+                <p style="font-size: 18px; line-height: 1.6;">
+                    <b>Ubika</b> es una plataforma inteligente de recomendación y <b>autoevaluación de viviendas de alquiler</b>. <br><br>
+                    Aquí podrás ajustar tus prioridades según:
+                    <ul style="text-align: left; display: inline-block;">
+                        <li>💰 Precio</li>
+                        <li>📏 Espacio</li>
+                        <li>🏗️ Antigüedad</li>
+                        <li>🚇 Transporte</li>
+                        <li>🛒 Servicios básicos</li>
+                        <li>🚨 Niveles de criminalidad</li>
+                    </ul>
+                    Nuestra IA te recomendará las mejores opciones y te permitirá compararlas fácilmente. <br><br>
+                    👉 Para comenzar, selecciona los <b>distritos de interés</b> en la barra lateral.
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        st.stop()
 
     df_filtered = df[
     (df['distrito'].isin(zona_seleccionada)) &
