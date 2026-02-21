@@ -1,8 +1,13 @@
+# Entornos virtuales
 venv/
 env/
+ENV/
+
+# Python
 __pycache__/
 *.pyc
+
+# Archivos temporales
 .DS_Store
 data/raw/adondevivir/
 .env
-
