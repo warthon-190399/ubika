@@ -1,12 +1,13 @@
-#%%
 import pandas as pd
 import unicodedata
 import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
+BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "..",".."))
 inputh_path = os.path.join(BASE_DIR, "data", "raw","adondevivir","adondevivir_todo3_completo.csv")
 output_path = os.path.join(BASE_DIR, "data", "processed","adondevivir_processed.csv")
+
+#print(output_path)
 
 df_raw = pd.read_csv(inputh_path)
 

@@ -1,10 +1,8 @@
-#%% Import Libraries
+# Import Libraries
 import pandas as pd
 import os 
 from sklearn.model_selection import train_test_split
-#%% FUNCTION 'imputar_nan_por_grupo'
-
-
+# FUNCTION 'imputar_nan_por_grupo'
 def imputar_con_medianas(row):
     for col in cols_a_imputar:
         if pd.isna(row[col]):
@@ -12,16 +10,19 @@ def imputar_con_medianas(row):
                 row[col] = medianas.loc[row['distrito'], col]
     return row
 
-# %% Read df
+# Read df
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
+BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "..",".."))
 input_path = os.path.join(BASE_DIR, "data", "processed", "proximidad_processed.csv")
 output_path = os.path.join(BASE_DIR, "data", "processed", "data_preprocessing.csv")
 
+#print(output_path)
+
+#
 df = pd.read_csv(input_path)
 df_processed = df.copy()
 
-# %% DROP VALUES OUT OF RANGE 
+# DROP VALUES OUT OF RANGE 
 
 q_low = df["precio_pen"].quantile(0.01)
 q_high = df["precio_pen"].quantile(0.95)
@@ -53,14 +54,14 @@ medianas = train_data.groupby('distrito')[cols_a_imputar].median()
 
 df_processed = df_processed.apply(imputar_con_medianas, axis=1)
 
-# %%
+#
 
 conteo_coordenadas = df_processed.groupby(['latitud', 'longitud']).size().reset_index(name='conteo')
 conteo_coordenadas = conteo_coordenadas[conteo_coordenadas['conteo'] > 1].sort_values(by="conteo", ascending=False).reset_index()
 conteo_coordenadas.index = conteo_coordenadas.index+1
 
-# %% EXPORT TO CSV
+# EXPORT TO CSV
 
 df_processed.to_csv(output_path, index=False)
 
-# %%
+#

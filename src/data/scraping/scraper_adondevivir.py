@@ -7,11 +7,9 @@ import os
 # %%
 # Crear carpeta si no existe y cambiar al directorio
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
+BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "..",".."))
 file_location = os.path.join(BASE_DIR, "data", "raw")
 adondevivir_path = os.path.join(file_location, "adondevivir") # New folder
-
-print(adondevivir_path)
 
 os.makedirs(adondevivir_path, exist_ok=True)
 os.chdir(adondevivir_path)
