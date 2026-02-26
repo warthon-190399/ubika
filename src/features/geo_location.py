@@ -1,17 +1,19 @@
-#%%
+# %%
 import pandas as pd
 import googlemaps
 from time import sleep
 from dotenv import load_dotenv
 import os
 
-# Read .env.example
+# %% Read .env.example
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
 ENV_PATH = os.path.join(BASE_DIR, ".env")
 input_path = os.path.join(BASE_DIR, "data", "processed","adondevivir_processed.csv")
 output_path = os.path.join(BASE_DIR, "data", "processed","adondevivir_processed_geo.csv")
 
+#print(input_path)
+# %%
 load_dotenv(ENV_PATH)
 API_KEY = os.getenv("GOOGLE_GEOENCODING_APIKEY").strip().replace('"','').replace("'",'')
 print(f"API_KEY: {API_KEY}")  
@@ -20,7 +22,7 @@ print(output_path)
 print(repr(API_KEY))
 print("API_KEY repr:", repr(API_KEY))
 print("API_KEY len:", len(API_KEY))
-#%%
+#
 gmaps = googlemaps.Client(key=API_KEY)
 
 def obtener_coordenadas(direccion, contador=None):
@@ -40,7 +42,7 @@ def obtener_coordenadas(direccion, contador=None):
 
 df = pd.read_csv(input_path)
 
-#%%
+#
 # Aplicar geocodificación con contador
 latitudes = []
 longitudes = []
@@ -60,4 +62,4 @@ df["longitud"] = longitudes
 
 df.to_csv(output_path, index = False)
 
-# %%
+#

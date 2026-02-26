@@ -21,12 +21,15 @@ def imputar_con_medianas_zona(row):
                     row[col] = valor
     return row
 
-#%%
+# %%
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
 input_path = os.path.join(BASE_DIR, "data", "processed", "data_preprocessing.csv")
 output_path = os.path.join(BASE_DIR, "data", "processed", "data_preprocessing_eng.csv")
- 
+
+input(input_path)
+# %% 
+
 df = pd.read_csv(input_path)
 df_processed = df.copy()
 df.columns
