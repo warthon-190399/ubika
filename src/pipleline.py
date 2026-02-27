@@ -9,14 +9,15 @@ Scraping → Processing → Preprocessing → Load
 # -------------------------
 from data.scraping import scraper_adondevivir
 from data.scraping import scraper_adondevivir_detalles
+
 from data.processing import process_adondevivir
-
-# PROCESS 1
 from data.preprocessing import data_preprocessing
-from features import feature_engineering
 
-# PROCESS 2
+from features import feature_engineering
 from features import geo_location
+from features import proximidad_process
+from modeling import Compracion_de_modelos_l
+from modeling import Compracion_de_modelos_h
 
 # -------------------------
 # PIPELINE
@@ -24,27 +25,39 @@ from features import geo_location
 def run_pipleline():
     print("🚀 Iniciando pipeline Ubika...\n")
     
-    # SCRAPING
-    print("Scraper adondevivir")
-    raw_adondevivir = scraper_adondevivir()
+    print("SCRAPING")
+    scraping_1 = scraper_adondevivir()
+    # OUTPUT: "adondevivir_todas_las_paginas.csv"
 
-    print("Scraper adondevivir detalles")
-    detalles_adondevivir = scraper_adondevivir_detalles()
+    scraping_2 = scraper_adondevivir_detalles()
+    # INPUT: "adondevivir_todas_las_paginas.csv"
+    # OUTPUT: "adondevivir_todo3_completo.csv"
 
-    # PROCESSING
-    print("Processing adondevivir")
-    processing_adondevivir = process_adondevivir()
+    print("PROCESSING")
+    processing_1 = process_adondevivir()
+    # INPUT: "adondevivir_todo3_completo.csv"
+    # OUTPUT: "adondevivir_processed.csv"
 
-    # PROCCES 1
-    print("# 1 Preprocessing adondevivir")
-    preprocessing_adondevivir = data_preprocessing()
+    print("FEATURES")
+    features_1 = geo_location()
+    # INPUT: "adondevivir_processed.csv"
+    # OUTPUT: "adondevivir_processed_geo.csv"
 
-    print("# 1 Feature engineering")
-    feature_engineering_pipleline = feature_engineering()
+    features_2 = proximidad_process()
+    # INPUT: "adondevivir_processed_geo.csv"
+    # OUTPUT: "proximidad_processed.csv"
 
-    # PROCCES 2, directions with google
-    print("# 2 geo location")
-    geo_location_pipleline = geo_location()
+    print("PREPROCESSING")
+    preprocessing_1 = data_preprocessing()
+    # INPUT: "proximidad_processed.csv"
+    # OUTPUT: "data_preprocessing.csv"
+
+    print("FEATURES")
+    features_3 = feature_engineering()
+    # INPUT: "data_preprocessing.csv"
+    # OUTPUT: "data_preprocessing_eng.csv"
+
+    print("MODELING")
 
 
 # -------------------------
