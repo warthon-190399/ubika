@@ -16,6 +16,7 @@ from data.preprocessing import data_preprocessing
 from features import feature_engineering
 from features import geo_location
 from features import proximidad_process
+
 from modeling import Compracion_de_modelos_l
 from modeling import Compracion_de_modelos_h
 
@@ -45,6 +46,8 @@ def run_pipleline():
 
     features_2 = proximidad_process()
     # INPUT: "adondevivir_processed_geo.csv"
+    # INPUT: "colegios_processed.csv"
+    # INPUT: "hospitales_processed.csv"
     # OUTPUT: "proximidad_processed.csv"
 
     print("PREPROCESSING")
@@ -58,7 +61,17 @@ def run_pipleline():
     # OUTPUT: "data_preprocessing_eng.csv"
 
     print("MODELING")
-
+    modeling_1 = Compracion_de_modelos_l()
+    # INPUT: "data_preprocessing_eng.csv"
+    # OUTPUT: "final_dataset_l.csv"
+    # OUTPUT: "randomforest_model_l.pkl"
+    # OUTPUT: "randomforest_hyperparams_l.pkl"
+    
+    modeling_2 = Compracion_de_modelos_h()
+    # INPUT: "data_preprocessing_eng.csv"
+    # OUTPUT: "final_dataset_h.csv"
+    # OUTPUT: "randomforest_model_h.pkl"
+    # OUTPUT: "randomforest_hyperparams_h.pkl"
 
 # -------------------------
 # ENTRY POINT
