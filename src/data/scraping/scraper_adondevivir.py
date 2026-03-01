@@ -1,10 +1,10 @@
-# %%
+#
 from playwright.sync_api import sync_playwright
 import pandas as pd
 import time
 import random
 import os
-# %%
+#
 # Crear carpeta si no existe y cambiar al directorio
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "..",".."))
@@ -13,7 +13,7 @@ adondevivir_path = os.path.join(file_location, "adondevivir") # New folder
 
 os.makedirs(adondevivir_path, exist_ok=True)
 os.chdir(adondevivir_path)
-#%%
+#
 
 def scrapear_pagina(page_num):
     base_url = f"https://www.adondevivir.com/departamentos-en-alquiler-pagina-{page_num}-q-lima.html"
