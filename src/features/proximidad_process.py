@@ -1,9 +1,9 @@
-#%% IMPORT LIBRARIES
+# IMPORT LIBRARIES
 import pandas as pd
 import numpy as np
 from sklearn.neighbors import BallTree
 import os
-# %% 
+#
 def proximidad_entre(df_1, df_2, nombre_columna, radius_metros = 500):
 
     df_2 = df_2.dropna(subset=['latitud', 'longitud']).reset_index(drop=True)
@@ -24,7 +24,7 @@ def proximidad_entre(df_1, df_2, nombre_columna, radius_metros = 500):
     return df_1
 
 
-# %% READ DFs
+# READ DFs
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
 input_path_adondevivir = os.path.join(BASE_DIR, "data", "processed", "adondevivir_processed_geo.csv")
@@ -44,7 +44,7 @@ df_tren = pd.read_csv(input_path_tren)
 df_metropolitano = pd.read_csv(input_path_metropolitano)
 df_comisarias = pd.read_csv(input_path_comisarias)
 df_inpe = pd.read_csv(input_path_inpe)
-#%%
+#
 
 df = proximidad_entre(df_adondevivir, df_colegios, 'num_colegios_aprox')
 df = proximidad_entre(df, df_hospitales, 'num_hospitales_aprox')
@@ -54,8 +54,8 @@ df = proximidad_entre(df, df_comisarias, 'num_comisarias_aprox')
 df = proximidad_entre(df, df_inpe, "num_delitos_aprox")
 
 
-# %% EXPORT TO CSV
+# EXPORT TO CSV
 df.to_csv(output_path, index=False)
 
 
-# %%
+#

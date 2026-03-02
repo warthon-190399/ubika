@@ -1,4 +1,4 @@
-# %%
+#
 import pandas as pd
 import numpy as np
 import os
@@ -8,7 +8,7 @@ from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 
-# %%
+#
 
 # Función para imputar
 def imputar_con_medianas_zona(row):
@@ -21,19 +21,19 @@ def imputar_con_medianas_zona(row):
                     row[col] = valor
     return row
 
-# %%
+#
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
 input_path = os.path.join(BASE_DIR, "data", "processed", "data_preprocessing.csv")
 output_path = os.path.join(BASE_DIR, "data", "processed", "data_preprocessing_eng.csv")
 
 input(input_path)
-# %% 
+#
 
 df = pd.read_csv(input_path)
 df_processed = df.copy()
 df.columns
-# %%
+#
 df_processed['num_estac'] = df_processed['num_estac'].fillna(0)
 
 df_processed['total_ambientes'] = df_processed['num_dorm'] + df_processed['num_banios']
@@ -52,7 +52,7 @@ df_processed["flg_tren"] = (df_processed["num_tren_est_aprox"] > 0).astype(int)
 
 df_processed["flg_metro"] = (df_processed["num_metro_est_aprox"] > 0).astype(int)
 
-#%%
+#
 
 df_processed['precio_por_m2'] = df_processed['precio_pen'] / df_processed['area_m2']
 
@@ -65,7 +65,7 @@ df_processed['categoria_precio'] = pd.cut(df_processed['precio_pen'], bins=5, la
 df_processed['decada_construccion'] = (2025 - df['antiguedad']) // 10 * 10
 
 
-# %% 
+#
 dict_zona_apeim = {
     'puente piedra': 'zona 1', 'comas': 'zona 1', 'carabayllo': 'zona 1',
     'callao': 'zona 1', 'bellavista': 'zona 1', 'la perla': 'zona 1',
@@ -89,15 +89,14 @@ dict_zona_apeim = {
 df_processed['zona_apeim'] = df_processed['distrito'].map(dict_zona_apeim)
 df_processed['zona_apeim_cod'] = df_processed['zona_apeim'].map({f'zona {i}': i for i in range(1, 11)})
 
-#%%
-
+#
 # Imputación por zona
 cols_impute = ['num_dorm', 'num_banios', 'antiguedad']
 df_train = df_processed[df_processed["set"] == "train"]
 medianas_zona = df_train.groupby('zona_apeim')[cols_impute].median()
 df_processed = df_processed.apply(imputar_con_medianas_zona, axis=1)
 
-#%%
+#
 # Variables categóricas
 df_processed["tamano"] = pd.cut(df_processed["area_m2"],
                                 bins=[0, 50, 100, float("inf")],
@@ -115,7 +114,7 @@ df_processed['antiguedad_cod'] = df_processed['antiguedad_categoria'].map({'nuev
                                                                            'seminuevo': 2,
                                                                            'antiguo': 3}).astype(float)
 df_processed['nivel_socioeconomico_cod'] = df_processed['nivel_socioeconomico'].map({'A': 1, 'B': 2, 'C': 3, 'D': 4}).astype(float)
-#%%
+#
 
 df_train_tree = df_train[['num_delitos_aprox', 'zona_apeim_cod']]
 
@@ -133,7 +132,7 @@ labels = [f'nivel_{i+1}' for i in range(len(bins) - 1)]
 df_processed['categoria_crimenes'] = pd.cut(df_processed['num_delitos_aprox'], bins=bins, labels=labels)
 df_processed['categoria_crimenes_cod'] = df_processed['categoria_crimenes'].cat.codes + 1
 
-#%%
+#
 
 # KMeans
 cols_cluster = [
@@ -153,7 +152,7 @@ kmeans = KMeans(n_clusters=3, random_state=42)
 df_processed['tipo_vivienda_cod'] = kmeans.fit_predict(X_scaled)
 
 
-#%%
+#
 pca = PCA(n_components=2)
 X_pca = pca.fit_transform(X_scaled)
 plt.scatter(X_pca[:, 0], X_pca[:, 1], c=df_processed['tipo_vivienda_cod'], cmap='viridis')
@@ -163,8 +162,7 @@ plt.ylabel("Componente 2")
 plt.colorbar(label='Cluster')
 plt.show()
 
-#%%
-
+#
 cols_cluster = cols_cluster + ["precio_pen"]
 
 cluster_summary = df_processed.groupby("tipo_vivienda_cod")[cols_cluster].median().round(2)
@@ -185,7 +183,7 @@ map_tipo_vivienda = {
 
 df_processed["tipo_vivienda"] = df_processed["tipo_vivienda_cod"].map(map_tipo_vivienda)
 
-#%%
+#
 
 df_processed.to_csv(output_path, index = False)
-# %%
+#

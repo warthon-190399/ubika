@@ -1,11 +1,11 @@
-# %%
+#
 import pandas as pd
 import googlemaps
 from time import sleep
 from dotenv import load_dotenv
 import os
 
-# %% Read .env.example
+# Read .env.example
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
 ENV_PATH = os.path.join(BASE_DIR, ".env")
@@ -13,7 +13,7 @@ input_path = os.path.join(BASE_DIR, "data", "processed","adondevivir_processed.c
 output_path = os.path.join(BASE_DIR, "data", "processed","adondevivir_processed_geo.csv")
 
 #print(input_path)
-# %%
+#
 load_dotenv(ENV_PATH)
 API_KEY = os.getenv("GOOGLE_GEOENCODING_APIKEY").strip().replace('"','').replace("'",'')
 print(f"API_KEY: {API_KEY}")  

@@ -239,7 +239,7 @@ df_processed['direccion_limpia'] = df_processed.apply(
     axis=1
 )
 
-#%%
+#
 
 df_processed["direccion_completa"] = df_processed["direccion_limpia"] + ", " + df_processed["distrito"]
 
@@ -247,8 +247,8 @@ df_processed = df_processed.drop(columns={"direccion_limpia", "zona", "distrito"
 
 df_processed = df_processed.rename(columns={"ubicacion_normalizada": "distrito"})
 
-#%%
+#
 
 df_processed.to_csv(output_path, index=False)
 
-# %%
+#

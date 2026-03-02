@@ -1,4 +1,4 @@
-# %% IMPORT LIBRARIES
+# IMPORT LIBRARIES
 import os
 import pandas as pd
 import numpy as np
@@ -15,7 +15,7 @@ from sklearn.preprocessing import StandardScaler
 import optuna
 import joblib
 import shap
-#%%
+#
 def objective(trial):
     params = {"iterations":trial.suggest_int('iterations', 100, 1000),
             "depth": trial.suggest_int('depth', 4, 10),  # Profundidad del árbol
@@ -33,7 +33,7 @@ def objective(trial):
     y_pred = model.predict(X_test)
     return r2_score(y_test, y_pred)
 
-# %% Read data
+# Read data
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
 input_path = os.path.join(BASE_DIR, "data", "processed", "data_preprocessing_eng.csv")
@@ -43,7 +43,7 @@ output_hyperparams_path = os.path.join(BASE_DIR,"models","catboost_hyperparams_h
 
 output_prueba = os.path.join(BASE_DIR, "models")
 
-# %%
+#
 df = pd.read_csv(input_path)
 
 # data without 'miraflores', 'surco', 'san isidro','barranco'
@@ -51,23 +51,23 @@ df_modelling = df.copy()
 df_modelling = df_modelling[df_modelling['distrito'].isin(['miraflores', 'surco', 'san isidro','barranco'])]
 
 zona_apeim={"puente piedra":"1", "coma":"1",}
-# %%
+#
 df_modelling.columns
-# %%
+#
 df_modelling = df_modelling[['precio_pen', 'mantenimiento_soles', 'area_m2', 'num_dorm',
        'num_banios', 'num_estac', 'antiguedad','total_servicios_prox','total_transporte_aprox',
        'zona_apeim_cod','categoria_crimenes_cod']]
 
-#%% Replace NaN in num_estac with zero
+# Replace NaN in num_estac with zero
 df_modelling['num_estac'] = df_modelling['num_estac'].fillna(0)
 
 print(df_modelling.info())
-# %% SPLIT DATA IN X AND Y
+# SPLIT DATA IN X AND Y
 X = df_modelling.drop("precio_pen", axis=1)
 
 y = df_modelling["precio_pen"]
 X.columns
-# %% Calculate the correlation matrix using only numeric columns
+# Calculate the correlation matrix using only numeric columns
 corr_matrix = X.corr(numeric_only=True)
 
 plt.figure(figsize=(12, 8))
@@ -76,11 +76,11 @@ plt.title("Matriz de Correlación")
 plt.tight_layout()
 plt.show()
 
-# %% Split data in train and test
+# Split data in train and test
 X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.4, random_state=42)
 
 X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42)
-# %% Dictionary of models
+# Dictionary of models
 modelos = {
     #"RandomForest": RandomForestRegressor(n_estimators=100, random_state=42),
     "XGBoost": XGBRegressor(n_estimators=100, random_state=42, verbosity=0, early_stopping_rounds=50, eval_metric="rmse"),
@@ -117,7 +117,7 @@ for nombre, modelo in modelos.items():
 
 df_resultados = pd.DataFrame(resultados).sort_values(by="R2", ascending=False).reset_index()
 print(df_resultados)
-#%%
+#
 study = optuna.create_study(direction='maximize')  # Queremos maximizar R²
 study.optimize(objective, n_trials=50)  # Número de iteraciones
 
@@ -125,7 +125,7 @@ study.optimize(objective, n_trials=50)  # Número de iteraciones
 print("Mejores parámetros:", study.best_params)
 print("Mejor R²:", study.best_value)
 
-#%%
+#
 best_params = study.best_params
 
 
@@ -151,7 +151,7 @@ y_pred = final_model.predict(X_test)
 r2 = r2_score(y_test, y_pred)
 print(f"R2 final: {r2:.4f}")
 
-#%%
+#
 feature_importance = pd.DataFrame({
     'Feature': X.columns,
     'Importance': final_model.feature_importances_
@@ -159,7 +159,7 @@ feature_importance = pd.DataFrame({
 
 print(feature_importance)
 
-#%%
+#
 # Entrenar el modelo CatBoost (usa tus mejores hiperparámetros de Optuna)
 final_model = CatBoostRegressor(**best_params, verbose=0, random_state=42)
 final_model.fit(X_train, y_train)
@@ -171,10 +171,10 @@ shap_values = explainer(X_test)
 # Resumen de importancia global (similar a feature_importance pero con dirección)
 shap.summary_plot(shap_values, X_test, feature_names=X.columns)
 
-# %%
+#
 joblib.dump(final_model, output_model_path)
 joblib.dump(best_params, output_hyperparams_path)
-# %%
+#
 df_modelling.to_csv(output_path, index=False)
 
-# %%
+#
