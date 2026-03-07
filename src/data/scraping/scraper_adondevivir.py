@@ -5,15 +5,6 @@ import time
 import random
 import os
 #
-# Crear carpeta si no existe y cambiar al directorio
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "..",".."))
-file_location = os.path.join(BASE_DIR, "data", "raw")
-adondevivir_path = os.path.join(file_location, "adondevivir") # New folder
-
-os.makedirs(adondevivir_path, exist_ok=True)
-os.chdir(adondevivir_path)
-#
 
 def scrapear_pagina(page_num):
     base_url = f"https://www.adondevivir.com/departamentos-en-alquiler-pagina-{page_num}-q-lima.html"
@@ -75,26 +66,39 @@ def scrapear_pagina(page_num):
 
     return data
 
-# Scrapeo de todas las páginas
-all_data = []
+def main():
+    # Crear carpeta si no existe y cambiar al directorio
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "..",".."))
+    file_location = os.path.join(BASE_DIR, "data", "raw")
+    adondevivir_path = os.path.join(file_location, "adondevivir") # New folder
 
-for pagina in range(1, 142):
-    resultados_pagina = scrapear_pagina(pagina)
+    os.makedirs(adondevivir_path, exist_ok=True)
+    os.chdir(adondevivir_path)
+    #
+    
+    # Scrapeo de todas las páginas
+    all_data = []
 
-    # Guardar CSV individual
-    if resultados_pagina:
-        df_temp = pd.DataFrame(resultados_pagina)
-        df_temp.to_csv(f"adondevivir_pagina_{pagina}.csv", index=False)
-        print(f"✅ Página {pagina} guardada.")
-        all_data.extend(resultados_pagina)
+    for pagina in range(1, 142):
+        resultados_pagina = scrapear_pagina(pagina)
+
+        # Guardar CSV individual
+        if resultados_pagina:
+            df_temp = pd.DataFrame(resultados_pagina)
+            df_temp.to_csv(f"adondevivir_pagina_{pagina}.csv", index=False)
+            print(f"✅ Página {pagina} guardada.")
+            all_data.extend(resultados_pagina)
+        else:
+            print(f"⚠️ Sin datos en página {pagina}.")
+
+    # Guardar consolidado
+    if all_data:
+        df_total = pd.DataFrame(all_data)
+        df_total.to_csv("adondevivir_todas_las_paginas.csv", index=False)
+        print("📦 Archivo consolidado guardado como 'adondevivir_todas_las_paginas.csv'")
     else:
-        print(f"⚠️ Sin datos en página {pagina}.")
+        print("⚠️ No se obtuvieron datos en ninguna página.")
 
-# Guardar consolidado
-if all_data:
-    df_total = pd.DataFrame(all_data)
-    df_total.to_csv("adondevivir_todas_las_paginas.csv", index=False)
-    print("📦 Archivo consolidado guardado como 'adondevivir_todas_las_paginas.csv'")
-else:
-    print("⚠️ No se obtuvieron datos en ninguna página.")
-
+if __name__ == "__main__":
+    main()
