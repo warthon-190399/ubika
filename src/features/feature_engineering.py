@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 #
 
 # Función para imputar
-def imputar_con_medianas_zona(row):
+def imputar_con_medianas_zona(cols_impute, medianas_zona, row):
     for col in cols_impute:
         if pd.isna(row[col]):
             zona = row['zona_apeim']
@@ -94,7 +94,10 @@ def main():
     cols_impute = ['num_dorm', 'num_banios', 'antiguedad']
     df_train = df_processed[df_processed["set"] == "train"]
     medianas_zona = df_train.groupby('zona_apeim')[cols_impute].median()
-    df_processed = df_processed.apply(imputar_con_medianas_zona, axis=1)
+    df_processed = df_processed.apply(
+        lambda row: imputar_con_medianas_zona(cols_impute, medianas_zona, row), 
+        axis=1
+        )
 
     #
     # Variables categóricas
@@ -183,9 +186,7 @@ def main():
 
     df_processed["tipo_vivienda"] = df_processed["tipo_vivienda_cod"].map(map_tipo_vivienda)
 
-    #
-
     df_processed.to_csv(output_path, index = False)
-    #
+    
 if __name__ == "__main__":
     main()

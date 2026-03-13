@@ -3,7 +3,7 @@ import pandas as pd
 import os 
 from sklearn.model_selection import train_test_split
 # FUNCTION 'imputar_nan_por_grupo'
-def imputar_con_medianas(row):
+def imputar_con_medianas(cols_a_imputar, medianas, row):
     for col in cols_a_imputar:
         if pd.isna(row[col]):
             if row['distrito'] in medianas.index:
@@ -53,7 +53,10 @@ def main():
 
     medianas = train_data.groupby('distrito')[cols_a_imputar].median()
 
-    df_processed = df_processed.apply(imputar_con_medianas, axis=1)
+    df_processed = df_processed.apply(
+        lambda row: imputar_con_medianas(cols_a_imputar, medianas, row), 
+        axis=1
+        )
 
     #
 

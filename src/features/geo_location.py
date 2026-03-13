@@ -7,7 +7,7 @@ import os
 
 
 
-def obtener_coordenadas(direccion, contador=None):
+def obtener_coordenadas(direccion, gmaps, contador=None):
     try:
         resultado = gmaps.geocode(direccion)
         if resultado:
@@ -54,7 +54,7 @@ def main():
         direccion = row.direccion_completa
         if pd.isna(direccion):
             direccion = row.distrito
-        lat, lon = obtener_coordenadas(direccion, contador=i)
+        lat, lon = obtener_coordenadas(direccion, gmaps, contador=i)
         latitudes.append(lat)
         longitudes.append(lon)
         sleep(1)

@@ -233,14 +233,15 @@ def main():
     df_raw['nivel_socioeconomico'] = df_raw['ubicacion_normalizada'].map(mapeo_socioeconomico)
 
 
-    df_processed = df_raw[['precio_pen', 'precio_usd', 'mantenimiento_soles', 'direccion_limpia', 'zona', 'distrito', 'area_m2', 'num_dorm', 'num_banios', 'num_estac', 'antiguedad', "num_visualizaciones", "fecha_pub", "ubicacion_normalizada", "nivel_socioeconomico", "URL"]]
+    df_processed = df_raw[['precio_pen', 'precio_usd', 'mantenimiento_soles', 'direccion_limpia', 
+                           'zona', 'distrito', 'area_m2', 'num_dorm', 'num_banios', 'num_estac', 
+                           'antiguedad', "num_visualizaciones", "fecha_pub", "ubicacion_normalizada", 
+                           "nivel_socioeconomico", "URL"]].copy()
 
     df_processed['direccion_limpia'] = df_processed.apply(
         lambda row: row['zona'] if row['direccion_limpia'] == 'direccion no informada' else row['direccion_limpia'],
         axis=1
     )
-
-    #
 
     df_processed["direccion_completa"] = df_processed["direccion_limpia"] + ", " + df_processed["distrito"]
 
@@ -248,11 +249,7 @@ def main():
 
     df_processed = df_processed.rename(columns={"ubicacion_normalizada": "distrito"})
 
-    #
-
     df_processed.to_csv(output_path, index=False)
-
-    #
 
 if __name__ == "__main__":
     main()
