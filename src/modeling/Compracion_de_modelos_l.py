@@ -16,7 +16,7 @@ import optuna
 import joblib
 import shap
 #
-def objective(trial):
+def objective(X_train, y_train, X_test, y_test, trial):
     params = {"iterations":trial.suggest_int('iterations', 100, 1000),
             "depth": trial.suggest_int('depth', 4, 10),  # Profundidad del árbol
             'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.3, log=True),
@@ -41,7 +41,6 @@ def main():
     output_model_path = os.path.join(BASE_DIR,"models","randomforest_model_l.pkl")
     output_hyperparams_path = os.path.join(BASE_DIR,"models","randomforest_hyperparams_l.pkl")
 
-    #
     df = pd.read_csv(input_path)
 
     # data without 'miraflores', 'surco', 'san isidro','barranco'
@@ -64,11 +63,11 @@ def main():
     # Calculate the correlation matrix using only numeric columns
     corr_matrix = X.corr(numeric_only=True)
 
-    plt.figure(figsize=(12, 8))
-    sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap='coolwarm', square=True, linewidths=0.5)
-    plt.title("Matriz de Correlación")
-    plt.tight_layout()
-    plt.show()
+    #plt.figure(figsize=(12, 8))
+    #sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap='coolwarm', square=True, linewidths=0.5)
+    #plt.title("Matriz de Correlación")
+    #plt.tight_layout()
+    #plt.show()
 
     # Split data in train and test
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -104,15 +103,17 @@ def main():
 
     df_resultados = pd.DataFrame(resultados).sort_values(by="R2", ascending=False).reset_index()
     print(df_resultados)
-    #
+    
     study = optuna.create_study(direction='maximize')  # Queremos maximizar R²
-    study.optimize(objective, n_trials=50)  # Número de iteraciones
+    study.optimize(
+        lambda trial: objective(X_train, y_train, X_test, y_test, trial), 
+        n_trials=50
+    )  # Número de iteraciones
 
     # Mejores parámetros
     print("Mejores parámetros:", study.best_params)
     print("Mejor R²:", study.best_value)
 
-    #
     best_params = study.best_params
 
     final_model = RandomForestRegressor(
@@ -141,7 +142,6 @@ def main():
 
     print(feature_importance)
 
-    #
     # Fit the CatBoost model with Optuna-optimized hyperparameters
     final_model = CatBoostRegressor(**best_params, verbose=0, random_state=42)
     final_model.fit(X_train, y_train)
@@ -151,15 +151,12 @@ def main():
     shap_values = explainer(X_test)
 
     # Resumen de importancia global (similar a feature_importance pero con dirección)
-    shap.summary_plot(shap_values, X_test, feature_names=X.columns)
+    #shap.summary_plot(shap_values, X_test, feature_names=X.columns)
 
-    #
     joblib.dump(final_model, output_model_path)
     joblib.dump(best_params, output_hyperparams_path)
-    #
+    
     df_modelling.to_csv(output_path, index=False)
-
-    #
 
 if __name__ == "__main__":
     main()

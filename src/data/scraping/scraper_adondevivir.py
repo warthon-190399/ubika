@@ -75,7 +75,6 @@ def main():
 
     os.makedirs(adondevivir_path, exist_ok=True)
     os.chdir(adondevivir_path)
-    #
     
     # Scrapeo de todas las páginas
     all_data = []
