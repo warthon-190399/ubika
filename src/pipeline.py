@@ -20,12 +20,16 @@ from features.proximidad_process import main as proximidad_process
 from modeling.Compracion_de_modelos_l import main as Compracion_de_modelos_l
 from modeling.Compracion_de_modelos_h import main as Compracion_de_modelos_h
 
+import time
+
 # -------------------------
 # PIPELINE
 # -------------------------
 def run_pipleline(run_scraping_1 = True, run_scraping_2 = True, run_processing_1 = True,
                   run_features_1 = True, run_features_2 = True, run_preprocessing_1=True,
                   run_features_3 = True, run_modeling_1 = True, run_modeling_2 = True):
+    inicio = time.perf_counter()
+
     print("🚀 Iniciando pipeline Ubika...\n")
     
     # "SCRAPING"
@@ -77,6 +81,7 @@ def run_pipleline(run_scraping_1 = True, run_scraping_2 = True, run_processing_1
         # INPUT: "data_preprocessing.csv"
         # OUTPUT: "data_preprocessing_eng.csv"
 
+    print("Entrenando modelo...")
     # "MODELING"
     if run_modeling_1:
         print("Ejecutando Compracion_de_modelos_l() ...")
@@ -94,11 +99,16 @@ def run_pipleline(run_scraping_1 = True, run_scraping_2 = True, run_processing_1
         # OUTPUT: "randomforest_model_h.pkl"
         # OUTPUT: "randomforest_hyperparams_h.pkl"
     
+    print("Entrenando modelo...")
     print("Pipeline finalizado.")
+
+    fin = time.perf_counter()
+
+    print(f"Tiempo de ejecución: {fin - inicio:.2f} segundos")
 # -------------------------
 # ENTRY POINT
 # -------------------------
 if __name__ == "__main__":
-    run_pipleline(run_scraping_1 = False, run_scraping_2 = False, run_processing_1 = False,
-                  run_features_1 = False, run_features_2 = False, run_preprocessing_1=False,
-                  run_features_3 = True, run_modeling_1 = False, run_modeling_2 = False)
+    run_pipleline(run_scraping_1 = True, run_scraping_2 = True, run_processing_1 = True,
+                  run_features_1 = True, run_features_2 = True, run_preprocessing_1=True,
+                  run_features_3 = True, run_modeling_1 = True, run_modeling_2 = True)

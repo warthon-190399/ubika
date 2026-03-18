@@ -85,6 +85,7 @@ def main():
     df_raw[["zona", "distrito"]] = df_raw["ubicacion"].apply(extraer_zona_y_distrito)
 
     df_raw["zona"] = (df_raw["zona"]
+        .fillna("")
         .str.lower()
         .str.normalize("NFKD")
         .str.encode("ascii", "ignore")

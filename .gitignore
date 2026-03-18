@@ -11,3 +11,6 @@ __pycache__/
 .DS_Store
 data/raw/adondevivir/
 .env
+
+# Catboost
+catboost_info/
