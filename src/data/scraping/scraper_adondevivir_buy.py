@@ -95,8 +95,8 @@ def main():
     # Guardar consolidado
     if all_data:
         df_total = pd.DataFrame(all_data)
-        df_total.to_csv("adondevivir_all_pages_buy.csv", index=False)
-        print("📦 Archivo consolidado guardado como 'adondevivir_todas_las_paginas.csv'")
+        df_total.to_csv("adondevivir_todas_las_paginas_buy.csv", index=False)
+        print("📦 Archivo consolidado guardado como 'adondevivir_todas_las_paginas_buy.csv'")
     else:
         print("⚠️ No se obtuvieron datos en ninguna página.")
 
