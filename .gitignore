@@ -14,3 +14,4 @@ data/raw/adondevivir/
 
 # Catboost
 catboost_info/
+**/catboost_info/

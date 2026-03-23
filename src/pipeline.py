@@ -17,8 +17,8 @@ from features.feature_engineering import main as feature_engineering
 from features.geo_location import main as geo_location
 from features.proximidad_process import main as proximidad_process
 
-from modeling.Compracion_de_modelos_l import main as Compracion_de_modelos_l
-from modeling.Compracion_de_modelos_h import main as Compracion_de_modelos_h
+from modeling.Comparacion_de_modelos_l import main as Compracion_de_modelos_l
+from modeling.Comparacion_de_modelos_h import main as Compracion_de_modelos_h
 
 import time
 
@@ -109,6 +109,6 @@ def run_pipleline(run_scraping_1 = True, run_scraping_2 = True, run_processing_1
 # ENTRY POINT
 # -------------------------
 if __name__ == "__main__":
-    run_pipleline(run_scraping_1 = True, run_scraping_2 = True, run_processing_1 = True,
-                  run_features_1 = True, run_features_2 = True, run_preprocessing_1=True,
-                  run_features_3 = True, run_modeling_1 = True, run_modeling_2 = True)
+    run_pipleline(run_scraping_1 = False, run_scraping_2 = False, run_processing_1 = False,
+                  run_features_1 = False, run_features_2 = False, run_preprocessing_1=False,
+                  run_features_3 = False, run_modeling_1 = True, run_modeling_2 = False)

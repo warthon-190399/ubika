@@ -34,12 +34,12 @@ def main():
     #
     load_dotenv(ENV_PATH)
     API_KEY = os.getenv("GOOGLE_GEOENCODING_APIKEY").strip().replace('"','').replace("'",'')
-    print(f"API_KEY: {API_KEY}")  
-    print(input_path)
-    print(output_path)
-    print(repr(API_KEY))
-    print("API_KEY repr:", repr(API_KEY))
-    print("API_KEY len:", len(API_KEY))
+    #print(f"API_KEY: {API_KEY}")  
+    #print(input_path)
+    #print(output_path)
+    #print(repr(API_KEY))
+    #print("API_KEY repr:", repr(API_KEY))
+    #print("API_KEY len:", len(API_KEY))
     #
     gmaps = googlemaps.Client(key=API_KEY)
 

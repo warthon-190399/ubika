@@ -153,12 +153,12 @@ def main():
 
     pca = PCA(n_components=2)
     X_pca = pca.fit_transform(X_scaled)
-    #plt.scatter(X_pca[:, 0], X_pca[:, 1], c=df_processed['tipo_vivienda_cod'], cmap='viridis')
-    #plt.title("Segmentación de departamentos")
-    #plt.xlabel("Componente 1")
-    #plt.ylabel("Componente 2")
-    #plt.colorbar(label='Cluster')
-    #plt.show()
+    # plt.scatter(X_pca[:, 0], X_pca[:, 1], c=df_processed['tipo_vivienda_cod'], cmap='viridis')
+    # plt.title("Segmentación de departamentos")
+    # plt.xlabel("Componente 1")
+    # plt.ylabel("Componente 2")
+    # plt.colorbar(label='Cluster')
+    # plt.show()
 
     cols_cluster = cols_cluster + ["precio_pen"]
 

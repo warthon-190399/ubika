@@ -1,3 +1,4 @@
+#%%
 # IMPORT LIBRARIES
 import os
 import pandas as pd
@@ -15,8 +16,8 @@ from sklearn.preprocessing import StandardScaler
 import optuna
 import joblib
 import shap
-#
-def objective(X_train, y_train, X_test, y_test, trial):
+
+def objective(X_train, y_train, X_test, y_test, X_val, y_val, trial):
     params = {"iterations":trial.suggest_int('iterations', 100, 1000),
             "depth": trial.suggest_int('depth', 4, 10),  # Profundidad del árbol
             'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.3, log=True),
@@ -25,10 +26,11 @@ def objective(X_train, y_train, X_test, y_test, trial):
             'bagging_temperature': trial.suggest_float('bagging_temperature', 0.0, 1.0),  # Controla el muestreo de instancias
             'border_count': trial.suggest_int('border_count', 32, 255),  # Número de divisiones para variables numéricas
             'verbose': 0,
-            'random_state': 42
+            'random_state': 42,
+            'early_stopping_rounds':50
                 }
     model = CatBoostRegressor(**params)
-    model.fit(X_train, y_train, eval_set=[(X_test, y_test)], early_stopping_rounds=50, verbose=False)
+    model.fit(X_train, y_train, eval_set=[(X_val, y_val)], verbose=False)
     y_pred = model.predict(X_test)
     return r2_score(y_test, y_pred)
 
@@ -37,15 +39,24 @@ def main():
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
     input_path = os.path.join(BASE_DIR, "data", "processed", "data_preprocessing_eng.csv")
-    output_path = os.path.join(BASE_DIR, "data", "processed", "final_dataset_l.csv")
-    output_model_path = os.path.join(BASE_DIR,"models","randomforest_model_l.pkl")
-    output_hyperparams_path = os.path.join(BASE_DIR,"models","randomforest_hyperparams_l.pkl")
+    output_path = os.path.join(BASE_DIR, "data", "processed", "final_dataset_h.csv")
+    output_model_path = os.path.join(BASE_DIR,"models","catboost_model_h.pkl")
+    output_hyperparams_path = os.path.join(BASE_DIR,"models","catboost_hyperparams_h.pkl")
+
+    output_prueba = os.path.join(BASE_DIR, "models")
 
     df = pd.read_csv(input_path)
 
+    conteo = df['distrito'].value_counts()
+    print(conteo)
+
     # data without 'miraflores', 'surco', 'san isidro','barranco'
     df_modelling = df.copy()
-    df_modelling = df_modelling[~df_modelling['distrito'].isin(['miraflores', 'surco', 'san isidro','barranco'])]
+    df_modelling = df_modelling[df_modelling['distrito'].isin(['miraflores', 'surco', 'san isidro','barranco'])]
+
+    zona_apeim={"puente piedra":"1", "coma":"1",}
+
+    df_modelling.columns
 
     df_modelling = df_modelling[['precio_pen', 'mantenimiento_soles', 'area_m2', 'num_dorm',
         'num_banios', 'num_estac', 'antiguedad','total_servicios_prox','total_transporte_aprox',
@@ -54,7 +65,7 @@ def main():
     # Replace NaN in num_estac with zero
     df_modelling['num_estac'] = df_modelling['num_estac'].fillna(0)
 
-    print(df_modelling.columns)
+    print(df_modelling.info())
     # SPLIT DATA IN X AND Y
     X = df_modelling.drop("precio_pen", axis=1)
 
@@ -63,27 +74,34 @@ def main():
     # Calculate the correlation matrix using only numeric columns
     corr_matrix = X.corr(numeric_only=True)
 
-    #plt.figure(figsize=(12, 8))
-    #sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap='coolwarm', square=True, linewidths=0.5)
-    #plt.title("Matriz de Correlación")
-    #plt.tight_layout()
-    #plt.show()
+    plt.figure(figsize=(12, 8))
+    sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap='coolwarm', square=True, linewidths=0.5)
+    plt.title("Matriz de Correlación")
+    plt.tight_layout()
+    plt.show()
 
     # Split data in train and test
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.4, random_state=42)
+
+    X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42)
     # Dictionary of models
     modelos = {
-        "RandomForest": RandomForestRegressor(n_estimators=100, random_state=42),
-        "XGBoost": XGBRegressor(n_estimators=100, random_state=42, verbosity=0),
-        "LightGBM": LGBMRegressor(n_estimators=100, random_state=42),
-        "CatBoost": CatBoostRegressor(verbose=0, random_state=42)
+        #"RandomForest": RandomForestRegressor(n_estimators=100, random_state=42),
+        "XGBoost": XGBRegressor(n_estimators=100, random_state=42, verbosity=0, early_stopping_rounds=50, eval_metric="rmse"),
+        "LightGBM": LGBMRegressor(n_estimators=100, random_state=42, early_stopping_rounds=50),
+        "CatBoost": CatBoostRegressor(verbose=0, random_state=42, early_stopping_rounds=50)
     }
 
     resultados = []
 
     for nombre, modelo in modelos.items():
 
-        modelo.fit(X_train, y_train)
+        modelo.fit(
+            X_train, 
+            y_train,
+            eval_set=[(X_val, y_val)]
+        )
+        joblib.dump(modelo, f"{output_prueba}/{nombre}_prueba.pkl")
         y_pred = modelo.predict(X_test)
         
         mae = mean_absolute_error(y_test, y_pred)
@@ -103,10 +121,10 @@ def main():
 
     df_resultados = pd.DataFrame(resultados).sort_values(by="R2", ascending=False).reset_index()
     print(df_resultados)
-    
+
     study = optuna.create_study(direction='maximize')  # Queremos maximizar R²
     study.optimize(
-        lambda trial: objective(X_train, y_train, X_test, y_test, trial), 
+        lambda trial: objective(X_train, y_train, X_test, y_test, X_val, y_val, trial), 
         n_trials=50
     )  # Número de iteraciones
 
@@ -116,25 +134,28 @@ def main():
 
     best_params = study.best_params
 
-    final_model = RandomForestRegressor(
-        n_estimators=best_params.get('n_estimators',200),
-        max_depth=best_params.get('max_depth',None),
-        min_samples_split=best_params.get('min_samples_split',2),
-        min_samples_leaf=best_params.get('min_samples_leaf',1),
-        max_features=best_params.get('max_features','sqrt'),
-        bootstrap=best_params.get('boosttrap',True),
+    final_model = CatBoostRegressor(
+        iterations=best_params['iterations'],
+        depth=best_params['depth'],
+        learning_rate=best_params['learning_rate'],
+        l2_leaf_reg=best_params['l2_leaf_reg'],
+        random_strength=best_params['random_strength'],
+        bagging_temperature=best_params['bagging_temperature'],
+        border_count=best_params['border_count'],
+        verbose=0,
         random_state=42,
-        n_jobs=-1
+        early_stopping_rounds = 50
     )
 
-    # Train (without eval_set)
-    final_model.fit(X_train, y_train)
+    final_model.fit(X_train,
+                    y_train,
+                    eval_set=[(X_val, y_val)]
+                    )
 
     y_pred = final_model.predict(X_test)
     r2 = r2_score(y_test, y_pred)
     print(f"R2 final: {r2:.4f}")
 
-    #
     feature_importance = pd.DataFrame({
         'Feature': X.columns,
         'Importance': final_model.feature_importances_
@@ -142,7 +163,7 @@ def main():
 
     print(feature_importance)
 
-    # Fit the CatBoost model with Optuna-optimized hyperparameters
+    # Entrenar el modelo CatBoost (usa tus mejores hiperparámetros de Optuna)
     final_model = CatBoostRegressor(**best_params, verbose=0, random_state=42)
     final_model.fit(X_train, y_train)
 
@@ -151,12 +172,13 @@ def main():
     shap_values = explainer(X_test)
 
     # Resumen de importancia global (similar a feature_importance pero con dirección)
-    #shap.summary_plot(shap_values, X_test, feature_names=X.columns)
+    shap.summary_plot(shap_values, X_test, feature_names=X.columns)
 
     joblib.dump(final_model, output_model_path)
     joblib.dump(best_params, output_hyperparams_path)
-    
+
     df_modelling.to_csv(output_path, index=False)
+
 
 if __name__ == "__main__":
     main()
