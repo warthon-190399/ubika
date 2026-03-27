@@ -34,11 +34,12 @@ def objective(X_train, y_train, X_test, y_test, X_val, y_val, trial):
     y_pred = model.predict(X_test)
     return r2_score(y_test, y_pred)
 
-def main():
+def main(show_graphs = True):
     # Read data
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
-    input_path = os.path.join(BASE_DIR, "data", "processed", "data_preprocessing_eng.csv")
+    #input_path = os.path.join(BASE_DIR, "data", "processed", "data_preprocessing_eng.csv")
+    input_path = os.path.join(BASE_DIR, "data", "processed", "dataset_h.csv")
     output_path = os.path.join(BASE_DIR, "data", "processed", "final_dataset_h.csv")
     output_model_path = os.path.join(BASE_DIR,"models","catboost_model_h.pkl")
     output_hyperparams_path = os.path.join(BASE_DIR,"models","catboost_hyperparams_h.pkl")
@@ -46,17 +47,17 @@ def main():
     output_prueba = os.path.join(BASE_DIR, "models")
 
     df = pd.read_csv(input_path)
-
-    conteo = df['distrito'].value_counts()
-    print(conteo)
-
-    # data without 'miraflores', 'surco', 'san isidro','barranco'
     df_modelling = df.copy()
-    df_modelling = df_modelling[df_modelling['distrito'].isin(['miraflores', 'surco', 'san isidro','barranco'])]
+    # conteo = df['distrito'].value_counts()
+    # print(conteo)
 
-    zona_apeim={"puente piedra":"1", "coma":"1",}
+    # # data without 'miraflores', 'surco', 'san isidro','barranco'
+    # df_modelling = df.copy()
+    # df_modelling = df_modelling[df_modelling['distrito'].isin(['miraflores', 'surco', 'san isidro','barranco'])]
 
-    df_modelling.columns
+    #zona_apeim={"puente piedra":"1", "coma":"1",}
+
+    #df_modelling.columns
 
     df_modelling = df_modelling[['precio_pen', 'mantenimiento_soles', 'area_m2', 'num_dorm',
         'num_banios', 'num_estac', 'antiguedad','total_servicios_prox','total_transporte_aprox',
@@ -67,18 +68,20 @@ def main():
 
     print(df_modelling.info())
     # SPLIT DATA IN X AND Y
-    X = df_modelling.drop("precio_pen", axis=1)
+    # X = df_modelling.drop("precio_pen", axis=1)
+    X = df_modelling.drop(columns=["precio_pen","antiguedad"]) # Entrenamiento sin antiguedad
 
     y = df_modelling["precio_pen"]
     X.columns
     # Calculate the correlation matrix using only numeric columns
     corr_matrix = X.corr(numeric_only=True)
 
-    plt.figure(figsize=(12, 8))
-    sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap='coolwarm', square=True, linewidths=0.5)
-    plt.title("Matriz de Correlación")
-    plt.tight_layout()
-    plt.show()
+    if show_graphs == True:
+        plt.figure(figsize=(12, 8))
+        sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap='coolwarm', square=True, linewidths=0.5)
+        plt.title("Matriz de Correlación")
+        plt.tight_layout()
+        plt.show()
 
     # Split data in train and test
     X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.4, random_state=42)
@@ -171,8 +174,9 @@ def main():
     explainer = shap.Explainer(final_model)
     shap_values = explainer(X_test)
 
-    # Resumen de importancia global (similar a feature_importance pero con dirección)
-    shap.summary_plot(shap_values, X_test, feature_names=X.columns)
+    if show_graphs == True:
+        # Resumen de importancia global (similar a feature_importance pero con dirección)
+        shap.summary_plot(shap_values, X_test, feature_names=X.columns)
 
     joblib.dump(final_model, output_model_path)
     joblib.dump(best_params, output_hyperparams_path)
@@ -181,4 +185,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(show_graphs = True)

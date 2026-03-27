@@ -17,6 +17,8 @@ from features.feature_engineering import main as feature_engineering
 from features.geo_location import main as geo_location
 from features.proximidad_process import main as proximidad_process
 
+from data.separar.data_segmentation import main as data_segmentation
+
 from modeling.Comparacion_de_modelos_l import main as Compracion_de_modelos_l
 from modeling.Comparacion_de_modelos_h import main as Compracion_de_modelos_h
 
@@ -27,7 +29,8 @@ import time
 # -------------------------
 def run_pipleline(run_scraping_1 = True, run_scraping_2 = True, run_processing_1 = True,
                   run_features_1 = True, run_features_2 = True, run_preprocessing_1=True,
-                  run_features_3 = True, run_modeling_1 = True, run_modeling_2 = True):
+                  run_features_3 = True, 
+                  run_separar_1 = True, run_modeling_1 = True, run_modeling_2 = True):
     inicio = time.perf_counter()
 
     print("🚀 Iniciando pipeline Ubika...\n")
@@ -81,6 +84,13 @@ def run_pipleline(run_scraping_1 = True, run_scraping_2 = True, run_processing_1
         # INPUT: "data_preprocessing.csv"
         # OUTPUT: "data_preprocessing_eng.csv"
 
+    if run_separar_1:
+        print("Ejecutando data_segmentation() ...")
+        separar_1 = data_segmentation()
+        # INPUT: "data_preprocessing_eng.csv"
+        # OUTPUT: "dataset_h.csv.csv"
+        # OUTPUT: "dataset_l.csv.csv"
+
     print("Entrenando modelo...")
     # "MODELING"
     if run_modeling_1:
@@ -111,4 +121,5 @@ def run_pipleline(run_scraping_1 = True, run_scraping_2 = True, run_processing_1
 if __name__ == "__main__":
     run_pipleline(run_scraping_1 = False, run_scraping_2 = False, run_processing_1 = False,
                   run_features_1 = False, run_features_2 = False, run_preprocessing_1=False,
-                  run_features_3 = False, run_modeling_1 = True, run_modeling_2 = False)
+                  run_features_3 = False, 
+                  run_separar_1 = False, run_modeling_1 = False, run_modeling_2 = True)

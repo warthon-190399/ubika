@@ -36,7 +36,8 @@ def main(show_graphs = True):
     # Read data
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
-    input_path = os.path.join(BASE_DIR, "data", "processed", "data_preprocessing_eng.csv")
+    #input_path = os.path.join(BASE_DIR, "data", "processed", "data_preprocessing_eng.csv")
+    input_path = os.path.join(BASE_DIR, "data", "processed", "dataset_l.csv")
     output_path = os.path.join(BASE_DIR, "data", "processed", "final_dataset_l.csv")
     output_model_path = os.path.join(BASE_DIR,"models","randomforest_model_l.pkl")
     output_hyperparams_path = os.path.join(BASE_DIR,"models","randomforest_hyperparams_l.pkl")
@@ -45,7 +46,7 @@ def main(show_graphs = True):
 
     # data without 'miraflores', 'surco', 'san isidro','barranco'
     df_modelling = df.copy()
-    df_modelling = df_modelling[~df_modelling['distrito'].isin(['miraflores', 'surco', 'san isidro','barranco'])]
+    #df_modelling = df_modelling[~df_modelling['distrito'].isin(['miraflores', 'surco', 'san isidro','barranco'])]
 
     df_modelling = df_modelling[['precio_pen', 'mantenimiento_soles', 'area_m2', 'num_dorm',
         'num_banios', 'num_estac', 'antiguedad','total_servicios_prox','total_transporte_aprox',
@@ -56,7 +57,8 @@ def main(show_graphs = True):
 
     print(df_modelling.columns)
     # SPLIT DATA IN X AND Y
-    X = df_modelling.drop("precio_pen", axis=1)
+    #X = df_modelling.drop("precio_pen", axis=1)
+    X = df_modelling.drop(columns=["precio_pen", "antiguedad"]) #Entrenamiento sin antiguedad
 
     y = df_modelling["precio_pen"]
     X.columns
