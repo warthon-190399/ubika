@@ -119,7 +119,7 @@ def run_pipleline(run_scraping_1 = True, run_scraping_2 = True, run_processing_1
 # ENTRY POINT
 # -------------------------
 if __name__ == "__main__":
-    run_pipleline(run_scraping_1 = False, run_scraping_2 = False, run_processing_1 = False,
+    run_pipleline(run_scraping_1 = True, run_scraping_2 = False, run_processing_1 = False,
                   run_features_1 = False, run_features_2 = False, run_preprocessing_1=False,
                   run_features_3 = False, 
-                  run_separar_1 = False, run_modeling_1 = False, run_modeling_2 = True)
+                  run_separar_1 = False, run_modeling_1 = False, run_modeling_2 = False)

@@ -32,10 +32,7 @@ def main():
     BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "..",".."))
     csv_path = os.path.join(BASE_DIR, "data", "raw", "adondevivir","adondevivir_todas_las_paginas.csv")
     output_path = os.path.join(BASE_DIR, "data", "raw", "adondevivir", "adondevivir_todo3_completo.csv")
-    #
-    # print(csv_path)
-    # print(output_path)
-    #
+
     df = pd.read_csv(csv_path)
 
     total_registros = len(df)
@@ -48,9 +45,9 @@ def main():
     df["antiguedad_inmueble"] = None
 
     with sync_playwright() as p:
+
         for i in range(len(df)):  # Desde fila 950 hasta 2806 inclusive
-            row = df.loc[i]
-            url = row["URL"]
+            url = df.at[i,"URL"]
             if pd.isna(url):
                 continue
 
@@ -61,6 +58,7 @@ def main():
                     context = browser.new_context()
                     page = context.new_page()
                     page.goto(url, timeout=60000)
+                    
                     page.wait_for_load_state("load")
 
                     fecha_pub = page.query_selector('p.userViews-module__post-antiquity-views___8Zfch')
@@ -89,7 +87,7 @@ def main():
             except Exception as e:
                 print(f"⚠️ Error en {url}: {e}")
                 continue
-
+        
     df.to_csv(output_path, index=False)
     print(f"✅ Scraping finalizado. Archivo guardado en:\n{output_path}")
 
