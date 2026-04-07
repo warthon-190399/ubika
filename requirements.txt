@@ -20,4 +20,3 @@ shap==0.44.1
 streamlit==1.54.0
 streamlit_folium==0.27.1
 xgboost==3.2.0
-streamlit==1.48.1
