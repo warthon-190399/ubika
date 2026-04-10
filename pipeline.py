@@ -7,30 +7,32 @@ Scraping → Processing → Preprocessing → Load
 # -------------------------
 # IMPORTS
 # -------------------------
-from data.scraping.scraper_adondevivir import main as scraper_adondevivir
-from data.scraping.scraper_adondevivir_detalles import main as scraper_adondevivir_detalles
+from config import SCRAPE_ANTIGUEDAD
+scrape_antiguedad = SCRAPE_ANTIGUEDAD
 
-from data.processing.process_adondevivir import main as process_adondevivir
-from data.preprocessing.data_preprocessing import main as data_preprocessing
+from src.data.scraping.scraper_adondevivir import main as scraper_adondevivir
+from src.data.scraping.scraper_adondevivir_buy import main as scraper_adondevivir_buy
+from src.data.scraping.scraper_adondevivir_detalles import main as scraper_adondevivir_detalles
 
-from features.feature_engineering import main as feature_engineering
-from features.geo_location import main as geo_location
-from features.proximidad_process import main as proximidad_process
+from src.data.processing.process_adondevivir import main as process_adondevivir
+from src.data.preprocessing.data_preprocessing import main as data_preprocessing
 
-from data.separar.data_segmentation import main as data_segmentation
+from src.features.feature_engineering import main as feature_engineering
+from src.features.geo_location import main as geo_location
+from src.features.proximidad_process import main as proximidad_process
 
-from modeling.Comparacion_de_modelos_l import main as Compracion_de_modelos_l
-from modeling.Comparacion_de_modelos_h import main as Compracion_de_modelos_h
+from src.modeling.Comparacion_de_modelos_l import main as Compracion_de_modelos_l
+from src.modeling.Comparacion_de_modelos_h import main as Compracion_de_modelos_h
 
 import time
 
 # -------------------------
 # PIPELINE
 # -------------------------
-def run_pipleline(run_scraping_1 = True, run_scraping_2 = True, run_processing_1 = True,
+def run_pipleline(run_scraping_1 = True, run_scraping_2 = True, 
+                  run_scraping_3 = True, run_processing_1 = True,
                   run_features_1 = True, run_features_2 = True, run_preprocessing_1=True,
-                  run_features_3 = True, 
-                  run_separar_1 = True, run_modeling_1 = True, run_modeling_2 = True):
+                  run_features_3 = True, run_modeling_1 = True, run_modeling_2 = True):
     inicio = time.perf_counter()
 
     print("🚀 Iniciando pipeline Ubika...\n")
@@ -42,8 +44,13 @@ def run_pipleline(run_scraping_1 = True, run_scraping_2 = True, run_processing_1
         # OUTPUT: "adondevivir_todas_las_paginas.csv"
 
     if run_scraping_2:
+        print("Ejecutando scraper_adondevivir_buy() ...")
+        scraping_2 = scraper_adondevivir_buy()
+        # OUTPUT: "adondevivir_todas_las_paginas_buy.csv"
+
+    if run_scraping_3 and scrape_antiguedad:
         print("Ejecutando scraper_adondevivir_detalles() ...")
-        scraping_2 = scraper_adondevivir_detalles()
+        scraping_3 = scraper_adondevivir_detalles()
         # INPUT: "adondevivir_todas_las_paginas.csv"
         # OUTPUT: "adondevivir_todo3_completo.csv"
         # Ejecutar en horario de dormir
@@ -84,13 +91,6 @@ def run_pipleline(run_scraping_1 = True, run_scraping_2 = True, run_processing_1
         # INPUT: "data_preprocessing.csv"
         # OUTPUT: "data_preprocessing_eng.csv"
 
-    if run_separar_1:
-        print("Ejecutando data_segmentation() ...")
-        separar_1 = data_segmentation()
-        # INPUT: "data_preprocessing_eng.csv"
-        # OUTPUT: "dataset_h.csv.csv"
-        # OUTPUT: "dataset_l.csv.csv"
-
     print("Entrenando modelo...")
     # "MODELING"
     if run_modeling_1:
@@ -119,7 +119,7 @@ def run_pipleline(run_scraping_1 = True, run_scraping_2 = True, run_processing_1
 # ENTRY POINT
 # -------------------------
 if __name__ == "__main__":
-    run_pipleline(run_scraping_1 = False, run_scraping_2 = False, run_processing_1 = False,
+    run_pipleline(run_scraping_1 = True, run_scraping_2 = True, 
+                  run_scraping_3 = False, run_processing_1 = False,
                   run_features_1 = False, run_features_2 = False, run_preprocessing_1=False,
-                  run_features_3 = False, 
-                  run_separar_1 = False, run_modeling_1 = False, run_modeling_2 = True)
+                  run_features_3 = False, run_modeling_1 = False, run_modeling_2 = False)
