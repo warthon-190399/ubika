@@ -1,6 +1,8 @@
 import pandas as pd
 import unicodedata
 import os
+# Variable antiguedad
+import config
 
 def extract_prices(valor):
     if pd.isna(valor):
@@ -61,7 +63,12 @@ def extraer_zona_y_distrito(ubicacion):
 def main():
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "..",".."))
-    inputh_path = os.path.join(BASE_DIR, "data", "raw","adondevivir","adondevivir_todo3_completo.csv")
+
+    if config.SCRAPE_ANTIGUEDAD:
+        inputh_path = os.path.join(BASE_DIR, "data", "raw","adondevivir","adondevivir_todo3_completo.csv")
+    else:
+        inputh_path = os.path.join(BASE_DIR, "data", "raw","adondevivir","adondevivir_todas_las_paginas.csv")
+
     output_path = os.path.join(BASE_DIR, "data", "processed","adondevivir_processed.csv")
 
     #print(output_path)
@@ -119,15 +126,16 @@ def main():
     df_raw["num_estac"] = df_raw["estac"].apply(lambda x: str(x).split(" ")[0] if pd.notna(x) else None)
     df_raw["num_estac"] = df_raw["num_estac"].astype(float)
 
-    df_raw["antiguedad_inmueble"] = df_raw["antiguedad_inmueble"].replace({"A estrenar": 0})
+    if config.SCRAPE_ANTIGUEDAD:
+        df_raw["antiguedad_inmueble"] = df_raw["antiguedad_inmueble"].replace({"A estrenar": 0})
 
-    df_raw["antiguedad"] = df_raw["antiguedad_inmueble"].apply(lambda x: str(x).split(" ")[0] if pd.notna(x) else None)
-    df_raw["antiguedad"] = df_raw["antiguedad"].astype(float)
+        df_raw["antiguedad"] = df_raw["antiguedad_inmueble"].apply(lambda x: str(x).split(" ")[0] if pd.notna(x) else None)
+        df_raw["antiguedad"] = df_raw["antiguedad"].astype(float)
 
-    df_raw["num_visualizaciones"] = df_raw["visualizaciones"].apply(lambda x: str(x).split(" ")[0] if pd.notna(x) else None)
-    df_raw["num_visualizaciones"] = df_raw["num_visualizaciones"].astype(float)
+        df_raw["num_visualizaciones"] = df_raw["visualizaciones"].apply(lambda x: str(x).split(" ")[0] if pd.notna(x) else None)
+        df_raw["num_visualizaciones"] = df_raw["num_visualizaciones"].astype(float)
 
-    df_raw = df_raw.rename(columns={"fecha_publicacion_exacta":  "fecha_pub"})
+        df_raw = df_raw.rename(columns={"fecha_publicacion_exacta":  "fecha_pub"})
 
     mapeo_ubicaciones = {
         "lima": "lima cercado",
@@ -233,11 +241,16 @@ def main():
     df_raw['ubicacion_normalizada'] = df_raw['distrito'].map(mapeo_ubicaciones)
     df_raw['nivel_socioeconomico'] = df_raw['ubicacion_normalizada'].map(mapeo_socioeconomico)
 
-
-    df_processed = df_raw[['precio_pen', 'precio_usd', 'mantenimiento_soles', 'direccion_limpia', 
-                           'zona', 'distrito', 'area_m2', 'num_dorm', 'num_banios', 'num_estac', 
-                           'antiguedad', "num_visualizaciones", "fecha_pub", "ubicacion_normalizada", 
-                           "nivel_socioeconomico", "URL"]].copy()
+    if config.SCRAPE_ANTIGUEDAD:
+        df_processed = df_raw[['precio_pen', 'precio_usd', 'mantenimiento_soles', 'direccion_limpia', 
+                            'zona', 'distrito', 'area_m2', 'num_dorm', 'num_banios', 'num_estac', 
+                            'antiguedad', "num_visualizaciones", "fecha_pub", "ubicacion_normalizada", 
+                            "nivel_socioeconomico", "URL"]].copy()
+    else:
+        df_processed = df_raw[['precio_pen', 'precio_usd', 'mantenimiento_soles', 'direccion_limpia', 
+                            'zona', 'distrito', 'area_m2', 'num_dorm', 'num_banios', 'num_estac', 
+                            "ubicacion_normalizada", 
+                            "nivel_socioeconomico", "URL"]].copy()
 
     df_processed['direccion_limpia'] = df_processed.apply(
         lambda row: row['zona'] if row['direccion_limpia'] == 'direccion no informada' else row['direccion_limpia'],

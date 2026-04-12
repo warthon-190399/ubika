@@ -1,10 +1,10 @@
-#
+import config
 from playwright.sync_api import sync_playwright
 import pandas as pd
 import time
 import random
 import os
-#
+
 
 def scrapear_pagina(page_num):
     base_url = f"https://www.adondevivir.com/departamentos-en-alquiler-pagina-{page_num}-q-lima.html"

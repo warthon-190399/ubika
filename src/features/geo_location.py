@@ -4,8 +4,8 @@ import googlemaps
 from time import sleep
 from dotenv import load_dotenv
 import os
-
-
+from config import SCRAPE_ANTIGUEDAD
+scrape_antiguedad = SCRAPE_ANTIGUEDAD
 
 def obtener_coordenadas(direccion, gmaps, contador=None):
     try:
@@ -30,22 +30,13 @@ def main():
     input_path = os.path.join(BASE_DIR, "data", "processed","adondevivir_processed.csv")
     output_path = os.path.join(BASE_DIR, "data", "processed","adondevivir_processed_geo.csv")
 
-    #print(input_path)
-    #
     load_dotenv(ENV_PATH)
     API_KEY = os.getenv("GOOGLE_GEOENCODING_APIKEY").strip().replace('"','').replace("'",'')
-    #print(f"API_KEY: {API_KEY}")  
-    #print(input_path)
-    #print(output_path)
-    #print(repr(API_KEY))
-    #print("API_KEY repr:", repr(API_KEY))
-    #print("API_KEY len:", len(API_KEY))
-    #
+
     gmaps = googlemaps.Client(key=API_KEY)
 
     df = pd.read_csv(input_path)
 
-    #
     # Aplicar geocodificación con contador
     latitudes = []
     longitudes = []

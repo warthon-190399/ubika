@@ -2,6 +2,9 @@
 import pandas as pd
 import os 
 from sklearn.model_selection import train_test_split
+from config import SCRAPE_ANTIGUEDAD
+scrape_antiguedad = SCRAPE_ANTIGUEDAD
+
 # FUNCTION 'imputar_nan_por_grupo'
 def imputar_con_medianas(cols_a_imputar, medianas, row):
     for col in cols_a_imputar:
@@ -49,7 +52,11 @@ def main():
 
     df_processed = pd.concat([train_data, eval_data, test_data]).reset_index(drop=True)
 
-    cols_a_imputar = ['num_dorm', 'num_banios', 'antiguedad']
+    #Antiguedad
+    if scrape_antiguedad:
+        cols_a_imputar = ['num_dorm', 'num_banios', 'antiguedad']
+    else:
+        cols_a_imputar = ['num_dorm', 'num_banios']
 
     medianas = train_data.groupby('distrito')[cols_a_imputar].median()
 

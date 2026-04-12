@@ -7,6 +7,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
+from config import SCRAPE_ANTIGUEDAD
+scrape_antiguedad = SCRAPE_ANTIGUEDAD
 
 #
 
@@ -50,7 +52,8 @@ def main():
     }
 
     # KMeans
-    cols_cluster = [
+    if scrape_antiguedad:
+        cols_cluster = [
                     'area_m2',
                     'num_dorm',
                     'num_banios',
@@ -58,6 +61,15 @@ def main():
                     'categoria_crimenes_cod',
                     'zona_apeim_cod',
                     'antiguedad_cod',
+                    'tamano_cod']
+    else:
+        cols_cluster = [
+                    'area_m2',
+                    'num_dorm',
+                    'num_banios',
+                    'num_estac',
+                    'categoria_crimenes_cod',
+                    'zona_apeim_cod',
                     'tamano_cod']
 
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -97,13 +109,18 @@ def main():
 
     df_processed['categoria_precio'] = pd.cut(df_processed['precio_pen'], bins=5, labels=['Muy Bajo', 'Bajo', 'Medio', 'Alto', 'Muy Alto'])
 
-    df_processed['decada_construccion'] = (2025 - df['antiguedad']) // 10 * 10
+    if scrape_antiguedad:
+        df_processed['decada_construccion'] = (2025 - df['antiguedad']) // 10 * 10
 
     df_processed['zona_apeim'] = df_processed['distrito'].map(dict_zona_apeim)
     df_processed['zona_apeim_cod'] = df_processed['zona_apeim'].map({f'zona {i}': i for i in range(1, 11)})
 
     # Imputación por zona
-    cols_impute = ['num_dorm', 'num_banios', 'antiguedad']
+    if scrape_antiguedad:
+        cols_impute = ['num_dorm', 'num_banios', 'antiguedad']
+    else:
+        cols_impute = ['num_dorm', 'num_banios']
+
     df_train = df_processed[df_processed["set"] == "train"]
     medianas_zona = df_train.groupby('zona_apeim')[cols_impute].median()
     df_processed = df_processed.apply(
@@ -117,16 +134,20 @@ def main():
                                     labels=["pequeno", "mediano", "grande"]
                                     )
 
-    df_processed['antiguedad_categoria'] = pd.cut(df_processed['antiguedad'],
-                                                bins=[-1, 5, 20, float('inf')],
-                                                labels=['nuevo', 'seminuevo', 'antiguo']
+    if scrape_antiguedad:
+        df_processed['antiguedad_categoria'] = pd.cut(df_processed['antiguedad'],
+                                                    bins=[-1, 5, 20, float('inf')],
+                                                    labels=['nuevo', 'seminuevo', 'antiguo']
                                                 )
     df_processed['tamano_cod'] = df_processed['tamano'].map({'pequeno': 1,
                                                             'mediano': 2,
                                                             'grande': 3}).astype(float)
-    df_processed['antiguedad_cod'] = df_processed['antiguedad_categoria'].map({'nuevo': 1,
-                                                                            'seminuevo': 2,
-                                                                            'antiguo': 3}).astype(float)
+    
+    if scrape_antiguedad:
+        df_processed['antiguedad_cod'] = df_processed['antiguedad_categoria'].map({'nuevo': 1,
+                                                                                'seminuevo': 2,
+                                                                                'antiguo': 3}).astype(float)
+    
     df_processed['nivel_socioeconomico_cod'] = df_processed['nivel_socioeconomico'].map({'A': 1, 'B': 2, 'C': 3, 'D': 4}).astype(float)
 
     df_train_tree = df_train[['num_delitos_aprox', 'zona_apeim_cod']]

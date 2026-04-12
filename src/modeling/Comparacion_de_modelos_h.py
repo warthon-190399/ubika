@@ -1,5 +1,7 @@
 #%%
 # IMPORT LIBRARIES
+import config
+
 import os
 import pandas as pd
 import numpy as np
@@ -34,7 +36,7 @@ def objective(X_train, y_train, X_test, y_test, X_val, y_val, trial):
     y_pred = model.predict(X_test)
     return r2_score(y_test, y_pred)
 
-def main(show_graphs = True):
+def main():
     # Read data
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
@@ -59,24 +61,29 @@ def main(show_graphs = True):
 
     #df_modelling.columns
 
-    df_modelling = df_modelling[['precio_pen', 'mantenimiento_soles', 'area_m2', 'num_dorm',
-        'num_banios', 'num_estac', 'antiguedad','total_servicios_prox','total_transporte_aprox',
-        'zona_apeim_cod','categoria_crimenes_cod']]
+    if config.SCRAPE_ANTIGUEDAD:
+        df_modelling = df_modelling[['precio_pen', 'mantenimiento_soles', 'area_m2', 'num_dorm',
+            'num_banios', 'num_estac', 'antiguedad','total_servicios_prox','total_transporte_aprox',
+            'zona_apeim_cod','categoria_crimenes_cod']]
+    else:
+        df_modelling = df_modelling[['precio_pen', 'mantenimiento_soles', 'area_m2', 'num_dorm',
+            'num_banios', 'num_estac','total_servicios_prox','total_transporte_aprox',
+            'zona_apeim_cod','categoria_crimenes_cod']]
 
     # Replace NaN in num_estac with zero
     df_modelling['num_estac'] = df_modelling['num_estac'].fillna(0)
 
     print(df_modelling.info())
     # SPLIT DATA IN X AND Y
-    # X = df_modelling.drop("precio_pen", axis=1)
-    X = df_modelling.drop(columns=["precio_pen","antiguedad"]) # Entrenamiento sin antiguedad
+    X = df_modelling.drop("precio_pen", axis=1)
+    #X = df_modelling.drop(columns=["precio_pen","antiguedad"]) # Entrenamiento sin antiguedad
 
     y = df_modelling["precio_pen"]
     X.columns
     # Calculate the correlation matrix using only numeric columns
     corr_matrix = X.corr(numeric_only=True)
 
-    if show_graphs == True:
+    if config.ENABLE_PLOTS:
         plt.figure(figsize=(12, 8))
         sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap='coolwarm', square=True, linewidths=0.5)
         plt.title("Matriz de Correlación")
@@ -174,7 +181,7 @@ def main(show_graphs = True):
     explainer = shap.Explainer(final_model)
     shap_values = explainer(X_test)
 
-    if show_graphs == True:
+    if config.ENABLE_PLOTS:
         # Resumen de importancia global (similar a feature_importance pero con dirección)
         shap.summary_plot(shap_values, X_test, feature_names=X.columns)
 
@@ -185,4 +192,4 @@ def main(show_graphs = True):
 
 
 if __name__ == "__main__":
-    main(show_graphs = True)
+    main()
