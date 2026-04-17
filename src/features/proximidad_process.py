@@ -3,7 +3,8 @@ import pandas as pd
 import numpy as np
 from sklearn.neighbors import BallTree
 import os
-#
+import config
+
 def proximidad_entre(df_1, df_2, nombre_columna, radius_metros = 500):
 
     df_2 = df_2.dropna(subset=['latitud', 'longitud']).reset_index(drop=True)
@@ -24,38 +25,42 @@ def proximidad_entre(df_1, df_2, nombre_columna, radius_metros = 500):
     return df_1
 
 def main():
-    # READ DFs
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
-    input_path_adondevivir = os.path.join(BASE_DIR, "data", "processed", "adondevivir_processed_geo.csv")
-    input_path_colegios = os.path.join(BASE_DIR, "data", "processed", "colegios_processed.csv")
-    input_path_hospitales = os.path.join(BASE_DIR, "data", "processed", "hospitales_processed.csv")
-    input_path_tren = os.path.join(BASE_DIR, "data", "processed", "tren_processed.csv")
-    input_path_metropolitano = os.path.join(BASE_DIR, "data", "processed", "metropolitano_processed.csv")
-    input_path_comisarias = os.path.join(BASE_DIR, "data", "processed", "comisarias_processed.csv")
-    input_path_inpe = os.path.join(BASE_DIR, "data", "processed", "inpe_processed.csv")
+    for source, properaty_type in config.SCRAPING_CONFIG.items():
+        for property_type, settings in properaty_type.items():
+            new_folder = settings["folder"]
+            
+            # READ DFs
+            BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+            BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
+            input_path_adondevivir = os.path.join(BASE_DIR, "data", "processed", new_folder,"adondevivir_processed_geo.csv")
+            input_path_colegios = os.path.join(BASE_DIR, "data", "processed", "colegios_processed.csv")
+            input_path_hospitales = os.path.join(BASE_DIR, "data", "processed", "hospitales_processed.csv")
+            input_path_tren = os.path.join(BASE_DIR, "data", "processed", "tren_processed.csv")
+            input_path_metropolitano = os.path.join(BASE_DIR, "data", "processed", "metropolitano_processed.csv")
+            input_path_comisarias = os.path.join(BASE_DIR, "data", "processed", "comisarias_processed.csv")
+            input_path_inpe = os.path.join(BASE_DIR, "data", "processed", "inpe_processed.csv")
 
-    output_path = os.path.join(BASE_DIR, "data", "processed", "proximidad_processed.csv")
+            output_path = os.path.join(BASE_DIR, "data", "processed", new_folder,"proximidad_processed.csv")
 
-    df_adondevivir = pd.read_csv(input_path_adondevivir)
-    df_colegios = pd.read_csv(input_path_colegios)
-    df_hospitales = pd.read_csv(input_path_hospitales)
-    df_tren = pd.read_csv(input_path_tren)
-    df_metropolitano = pd.read_csv(input_path_metropolitano)
-    df_comisarias = pd.read_csv(input_path_comisarias)
-    df_inpe = pd.read_csv(input_path_inpe)
-    #
+            df_adondevivir = pd.read_csv(input_path_adondevivir)
+            df_colegios = pd.read_csv(input_path_colegios)
+            df_hospitales = pd.read_csv(input_path_hospitales)
+            df_tren = pd.read_csv(input_path_tren)
+            df_metropolitano = pd.read_csv(input_path_metropolitano)
+            df_comisarias = pd.read_csv(input_path_comisarias)
+            df_inpe = pd.read_csv(input_path_inpe)
+            #
 
-    df = proximidad_entre(df_adondevivir, df_colegios, 'num_colegios_aprox')
-    df = proximidad_entre(df, df_hospitales, 'num_hospitales_aprox')
-    df = proximidad_entre(df, df_tren, 'num_tren_est_aprox')
-    df = proximidad_entre(df, df_metropolitano, 'num_metro_est_aprox')
-    df = proximidad_entre(df, df_comisarias, 'num_comisarias_aprox')
-    df = proximidad_entre(df, df_inpe, "num_delitos_aprox")
+            df = proximidad_entre(df_adondevivir, df_colegios, 'num_colegios_aprox')
+            df = proximidad_entre(df, df_hospitales, 'num_hospitales_aprox')
+            df = proximidad_entre(df, df_tren, 'num_tren_est_aprox')
+            df = proximidad_entre(df, df_metropolitano, 'num_metro_est_aprox')
+            df = proximidad_entre(df, df_comisarias, 'num_comisarias_aprox')
+            df = proximidad_entre(df, df_inpe, "num_delitos_aprox")
 
 
-    # EXPORT TO CSV
-    df.to_csv(output_path, index=False)
+            # EXPORT TO CSV
+            df.to_csv(output_path, index=False)
 
 if __name__ == "__main__":
     main()

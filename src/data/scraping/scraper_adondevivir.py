@@ -6,8 +6,11 @@ import random
 import os
 
 
-def scrapear_pagina(page_num):
-    base_url = f"https://www.adondevivir.com/departamentos-en-alquiler-pagina-{page_num}-q-lima.html"
+def scrapear_pagina(page_num, url_template):
+    base_url = url_template.format(page_num = page_num)
+    #base_url = f"https://www.adondevivir.com/departamentos-en-alquiler-pagina-{page_num}-q-lima.html"
+    
+    
     data = []
 
     with sync_playwright() as p:
@@ -67,37 +70,45 @@ def scrapear_pagina(page_num):
     return data
 
 def main():
-    # Crear carpeta si no existe y cambiar al directorio
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "..",".."))
-    file_location = os.path.join(BASE_DIR, "data", "raw")
-    adondevivir_path = os.path.join(file_location, "adondevivir") # New folder
+    for source, properaty_type in config.SCRAPING_CONFIG.items():
+        for property_type, settings in properaty_type.items():
+            url_template = settings["url_template"]
+            pages = settings["page"]
+            new_folder = settings["folder"]
+            
+            # Crear carpeta si no existe y cambiar al directorio
+            BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+            BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "..",".."))
+            file_location = os.path.join(BASE_DIR, "data", "raw")
+            #adondevivir_path = os.path.join(file_location, "adondevivir") # New folder
+            adondevivir_path = os.path.join(file_location, new_folder) # New folder
 
-    os.makedirs(adondevivir_path, exist_ok=True)
-    os.chdir(adondevivir_path)
-    
-    # Scrapeo de todas las páginas
-    all_data = []
+            os.makedirs(adondevivir_path, exist_ok=True)
+            os.chdir(adondevivir_path)
+            
+            # Scrapeo de todas las páginas
+            all_data = []
 
-    for pagina in range(1, 2): # Original pages 142
-        resultados_pagina = scrapear_pagina(pagina)
+            for pagina in range(1, 2): # Original pages 142
+                #resultados_pagina = scrapear_pagina(pagina)
+                resultados_pagina = scrapear_pagina(pagina, url_template)
 
-        # Guardar CSV individual
-        if resultados_pagina:
-            df_temp = pd.DataFrame(resultados_pagina)
-            df_temp.to_csv(f"adondevivir_pagina_{pagina}.csv", index=False)
-            print(f"✅ Página {pagina} guardada.")
-            all_data.extend(resultados_pagina)
-        else:
-            print(f"⚠️ Sin datos en página {pagina}.")
+                # Guardar CSV individual
+                if resultados_pagina:
+                    df_temp = pd.DataFrame(resultados_pagina)
+                    df_temp.to_csv(f"adondevivir_pagina_{pagina}.csv", index=False)
+                    print(f"✅ Página {pagina} guardada.")
+                    all_data.extend(resultados_pagina)
+                else:
+                    print(f"⚠️ Sin datos en página {pagina}.")
 
-    # Guardar consolidado
-    if all_data:
-        df_total = pd.DataFrame(all_data)
-        df_total.to_csv("adondevivir_todas_las_paginas.csv", index=False)
-        print("📦 Archivo consolidado guardado como 'adondevivir_todas_las_paginas.csv'")
-    else:
-        print("⚠️ No se obtuvieron datos en ninguna página.")
+            # Guardar consolidado
+            if all_data:
+                df_total = pd.DataFrame(all_data)
+                df_total.to_csv("adondevivir_todas_las_paginas.csv", index=False)
+                print("📦 Archivo consolidado guardado como 'adondevivir_todas_las_paginas.csv'")
+            else:
+                print("⚠️ No se obtuvieron datos en ninguna página.")
 
 if __name__ == "__main__":
     main()

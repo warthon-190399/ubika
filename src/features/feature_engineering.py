@@ -7,10 +7,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
-from config import SCRAPE_ANTIGUEDAD
-scrape_antiguedad = SCRAPE_ANTIGUEDAD
-
-#
+import config
 
 # Función para imputar
 def imputar_con_medianas_zona(cols_impute, medianas_zona, row):
@@ -51,151 +48,155 @@ def main():
         2: "Económico"
     }
 
-    # KMeans
-    if scrape_antiguedad:
-        cols_cluster = [
-                    'area_m2',
-                    'num_dorm',
-                    'num_banios',
-                    'num_estac',
-                    'categoria_crimenes_cod',
-                    'zona_apeim_cod',
-                    'antiguedad_cod',
-                    'tamano_cod']
-    else:
-        cols_cluster = [
-                    'area_m2',
-                    'num_dorm',
-                    'num_banios',
-                    'num_estac',
-                    'categoria_crimenes_cod',
-                    'zona_apeim_cod',
-                    'tamano_cod']
-
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
-    input_path = os.path.join(BASE_DIR, "data", "processed", "data_preprocessing.csv")
-    output_path = os.path.join(BASE_DIR, "data", "processed", "data_preprocessing_eng.csv")
-
-    #input(input_path)
+    for source, properaty_type in config.SCRAPING_CONFIG.items():
+        for property_type, settings in properaty_type.items():
+            new_folder = settings["folder"]
     
-    df = pd.read_csv(input_path)
-    df_processed = df.copy()
-    #df.columns
-    
-    df_processed['num_estac'] = df_processed['num_estac'].fillna(0)
+            # KMeans
+            if config.SCRAPE_ANTIGUEDAD:
+                cols_cluster = [
+                            'area_m2',
+                            'num_dorm',
+                            'num_banios',
+                            'num_estac',
+                            'categoria_crimenes_cod',
+                            'zona_apeim_cod',
+                            'antiguedad_cod',
+                            'tamano_cod']
+            else:
+                cols_cluster = [
+                            'area_m2',
+                            'num_dorm',
+                            'num_banios',
+                            'num_estac',
+                            'categoria_crimenes_cod',
+                            'zona_apeim_cod',
+                            'tamano_cod']
 
-    df_processed['total_ambientes'] = df_processed['num_dorm'] + df_processed['num_banios']
+            BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+            BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
+            input_path = os.path.join(BASE_DIR, "data", "processed", new_folder, "data_preprocessing.csv")
+            output_path = os.path.join(BASE_DIR, "data", "processed", new_folder, "data_preprocessing_eng.csv")
 
-    df_processed['total_servicios_prox'] = (
-        df_processed['num_colegios_aprox'] + df_processed['num_hospitales_aprox'] +
-        df_processed['num_tren_est_aprox'] + df_processed['num_metro_est_aprox'] +
-        df_processed['num_comisarias_aprox']
-    )
+            #input(input_path)
+            
+            df = pd.read_csv(input_path)
+            df_processed = df.copy()
+            #df.columns
+            
+            df_processed['num_estac'] = df_processed['num_estac'].fillna(0)
 
-    df_processed['total_transporte_aprox'] = df_processed['num_tren_est_aprox'] + df_processed['num_metro_est_aprox']
+            df_processed['total_ambientes'] = df_processed['num_dorm'] + df_processed['num_banios']
 
-    df_processed['flg_estac'] = (df_processed['num_estac'] > 0).astype(int)
+            df_processed['total_servicios_prox'] = (
+                df_processed['num_colegios_aprox'] + df_processed['num_hospitales_aprox'] +
+                df_processed['num_tren_est_aprox'] + df_processed['num_metro_est_aprox'] +
+                df_processed['num_comisarias_aprox']
+            )
 
-    df_processed["flg_tren"] = (df_processed["num_tren_est_aprox"] > 0).astype(int)
+            df_processed['total_transporte_aprox'] = df_processed['num_tren_est_aprox'] + df_processed['num_metro_est_aprox']
 
-    df_processed["flg_metro"] = (df_processed["num_metro_est_aprox"] > 0).astype(int)
+            df_processed['flg_estac'] = (df_processed['num_estac'] > 0).astype(int)
 
-    df_processed['precio_por_m2'] = df_processed['precio_pen'] / df_processed['area_m2']
+            df_processed["flg_tren"] = (df_processed["num_tren_est_aprox"] > 0).astype(int)
 
-    df_processed['costo_total_mensual'] = df_processed['precio_pen'] + df_processed['mantenimiento_soles']  # Asumiendo 0.8% mensual
+            df_processed["flg_metro"] = (df_processed["num_metro_est_aprox"] > 0).astype(int)
 
-    df_processed['score_ubicacion'] = (df_processed['total_servicios_prox'] * 0.6 + df_processed['total_transporte_aprox'] * 0.4)
+            df_processed['precio_por_m2'] = df_processed['precio_pen'] / df_processed['area_m2']
 
-    df_processed['categoria_precio'] = pd.cut(df_processed['precio_pen'], bins=5, labels=['Muy Bajo', 'Bajo', 'Medio', 'Alto', 'Muy Alto'])
+            df_processed['costo_total_mensual'] = df_processed['precio_pen'] + df_processed['mantenimiento_soles']  # Asumiendo 0.8% mensual
 
-    if scrape_antiguedad:
-        df_processed['decada_construccion'] = (2025 - df['antiguedad']) // 10 * 10
+            df_processed['score_ubicacion'] = (df_processed['total_servicios_prox'] * 0.6 + df_processed['total_transporte_aprox'] * 0.4)
 
-    df_processed['zona_apeim'] = df_processed['distrito'].map(dict_zona_apeim)
-    df_processed['zona_apeim_cod'] = df_processed['zona_apeim'].map({f'zona {i}': i for i in range(1, 11)})
+            df_processed['categoria_precio'] = pd.cut(df_processed['precio_pen'], bins=5, labels=['Muy Bajo', 'Bajo', 'Medio', 'Alto', 'Muy Alto'])
 
-    # Imputación por zona
-    if scrape_antiguedad:
-        cols_impute = ['num_dorm', 'num_banios', 'antiguedad']
-    else:
-        cols_impute = ['num_dorm', 'num_banios']
+            if config.SCRAPE_ANTIGUEDAD:
+                df_processed['decada_construccion'] = (2025 - df['antiguedad']) // 10 * 10
 
-    df_train = df_processed[df_processed["set"] == "train"]
-    medianas_zona = df_train.groupby('zona_apeim')[cols_impute].median()
-    df_processed = df_processed.apply(
-        lambda row: imputar_con_medianas_zona(cols_impute, medianas_zona, row), 
-        axis=1
-        )
+            df_processed['zona_apeim'] = df_processed['distrito'].map(dict_zona_apeim)
+            df_processed['zona_apeim_cod'] = df_processed['zona_apeim'].map({f'zona {i}': i for i in range(1, 11)})
 
-    # Variables categóricas
-    df_processed["tamano"] = pd.cut(df_processed["area_m2"],
-                                    bins=[0, 50, 100, float("inf")],
-                                    labels=["pequeno", "mediano", "grande"]
-                                    )
+            # Imputación por zona
+            if config.SCRAPE_ANTIGUEDAD:
+                cols_impute = ['num_dorm', 'num_banios', 'antiguedad']
+            else:
+                cols_impute = ['num_dorm', 'num_banios']
 
-    if scrape_antiguedad:
-        df_processed['antiguedad_categoria'] = pd.cut(df_processed['antiguedad'],
-                                                    bins=[-1, 5, 20, float('inf')],
-                                                    labels=['nuevo', 'seminuevo', 'antiguo']
-                                                )
-    df_processed['tamano_cod'] = df_processed['tamano'].map({'pequeno': 1,
-                                                            'mediano': 2,
-                                                            'grande': 3}).astype(float)
-    
-    if scrape_antiguedad:
-        df_processed['antiguedad_cod'] = df_processed['antiguedad_categoria'].map({'nuevo': 1,
-                                                                                'seminuevo': 2,
-                                                                                'antiguo': 3}).astype(float)
-    
-    df_processed['nivel_socioeconomico_cod'] = df_processed['nivel_socioeconomico'].map({'A': 1, 'B': 2, 'C': 3, 'D': 4}).astype(float)
+            df_train = df_processed[df_processed["set"] == "train"]
+            medianas_zona = df_train.groupby('zona_apeim')[cols_impute].median()
+            df_processed = df_processed.apply(
+                lambda row: imputar_con_medianas_zona(cols_impute, medianas_zona, row), 
+                axis=1
+                )
 
-    df_train_tree = df_train[['num_delitos_aprox', 'zona_apeim_cod']]
+            # Variables categóricas
+            df_processed["tamano"] = pd.cut(df_processed["area_m2"],
+                                            bins=[0, 50, 100, float("inf")],
+                                            labels=["pequeno", "mediano", "grande"]
+                                            )
 
-    X = df_train_tree[['num_delitos_aprox']]
-    y = df_train_tree['zona_apeim_cod']
+            if config.SCRAPE_ANTIGUEDAD:
+                df_processed['antiguedad_categoria'] = pd.cut(df_processed['antiguedad'],
+                                                            bins=[-1, 5, 20, float('inf')],
+                                                            labels=['nuevo', 'seminuevo', 'antiguo']
+                                                        )
+            df_processed['tamano_cod'] = df_processed['tamano'].map({'pequeno': 1,
+                                                                    'mediano': 2,
+                                                                    'grande': 3}).astype(float)
+            
+            if config.SCRAPE_ANTIGUEDAD:
+                df_processed['antiguedad_cod'] = df_processed['antiguedad_categoria'].map({'nuevo': 1,
+                                                                                        'seminuevo': 2,
+                                                                                        'antiguo': 3}).astype(float)
+            
+            df_processed['nivel_socioeconomico_cod'] = df_processed['nivel_socioeconomico'].map({'A': 1, 'B': 2, 'C': 3, 'D': 4}).astype(float)
 
-    tree = DecisionTreeClassifier(max_leaf_nodes=4, random_state=42)
-    tree.fit(X, y)
-    thresholds = np.sort(tree.tree_.threshold[tree.tree_.threshold != -2])
+            df_train_tree = df_train[['num_delitos_aprox', 'zona_apeim_cod']]
 
-    bins = [-1] + list(thresholds) + [float("inf")]
+            X = df_train_tree[['num_delitos_aprox']]
+            y = df_train_tree['zona_apeim_cod']
 
-    labels = [f'nivel_{i+1}' for i in range(len(bins) - 1)]
+            tree = DecisionTreeClassifier(max_leaf_nodes=4, random_state=42)
+            tree.fit(X, y)
+            thresholds = np.sort(tree.tree_.threshold[tree.tree_.threshold != -2])
 
-    df_processed['categoria_crimenes'] = pd.cut(df_processed['num_delitos_aprox'], bins=bins, labels=labels)
-    df_processed['categoria_crimenes_cod'] = df_processed['categoria_crimenes'].cat.codes + 1
+            bins = [-1] + list(thresholds) + [float("inf")]
 
-    scaler = StandardScaler()
-    X_cluster = df_processed[cols_cluster].fillna(0)  # aseguramos que no haya NaN
-    X_scaled = scaler.fit_transform(X_cluster)
-    kmeans = KMeans(n_clusters=3, random_state=42)
-    df_processed['tipo_vivienda_cod'] = kmeans.fit_predict(X_scaled)
+            labels = [f'nivel_{i+1}' for i in range(len(bins) - 1)]
 
-    pca = PCA(n_components=2)
-    X_pca = pca.fit_transform(X_scaled)
-    # plt.scatter(X_pca[:, 0], X_pca[:, 1], c=df_processed['tipo_vivienda_cod'], cmap='viridis')
-    # plt.title("Segmentación de departamentos")
-    # plt.xlabel("Componente 1")
-    # plt.ylabel("Componente 2")
-    # plt.colorbar(label='Cluster')
-    # plt.show()
+            df_processed['categoria_crimenes'] = pd.cut(df_processed['num_delitos_aprox'], bins=bins, labels=labels)
+            df_processed['categoria_crimenes_cod'] = df_processed['categoria_crimenes'].cat.codes + 1
 
-    cols_cluster = cols_cluster + ["precio_pen"]
+            scaler = StandardScaler()
+            X_cluster = df_processed[cols_cluster].fillna(0)  # aseguramos que no haya NaN
+            X_scaled = scaler.fit_transform(X_cluster)
+            kmeans = KMeans(n_clusters=3, random_state=42)
+            df_processed['tipo_vivienda_cod'] = kmeans.fit_predict(X_scaled)
 
-    cluster_summary = df_processed.groupby("tipo_vivienda_cod")[cols_cluster].median().round(2)
+            pca = PCA(n_components=2)
+            X_pca = pca.fit_transform(X_scaled)
+            # plt.scatter(X_pca[:, 0], X_pca[:, 1], c=df_processed['tipo_vivienda_cod'], cmap='viridis')
+            # plt.title("Segmentación de departamentos")
+            # plt.xlabel("Componente 1")
+            # plt.ylabel("Componente 2")
+            # plt.colorbar(label='Cluster')
+            # plt.show()
 
-    print(cluster_summary)
+            cols_cluster = cols_cluster + ["precio_pen"]
 
-    # También puedes contar cuántos elementos hay en cada cluster
-    cluster_counts = df_processed['tipo_vivienda_cod'].value_counts()
+            cluster_summary = df_processed.groupby("tipo_vivienda_cod")[cols_cluster].median().round(2)
 
-    print("\nCantidad de viviendas por cluster:")
-    print(cluster_counts)
+            print(cluster_summary)
 
-    df_processed["tipo_vivienda"] = df_processed["tipo_vivienda_cod"].map(map_tipo_vivienda)
+            # También puedes contar cuántos elementos hay en cada cluster
+            cluster_counts = df_processed['tipo_vivienda_cod'].value_counts()
 
-    df_processed.to_csv(output_path, index = False)
+            print("\nCantidad de viviendas por cluster:")
+            print(cluster_counts)
+
+            df_processed["tipo_vivienda"] = df_processed["tipo_vivienda_cod"].map(map_tipo_vivienda)
+
+            df_processed.to_csv(output_path, index = False)
     
 if __name__ == "__main__":
     main()
