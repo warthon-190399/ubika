@@ -11,7 +11,6 @@ from config import SCRAPE_ANTIGUEDAD
 scrape_antiguedad = SCRAPE_ANTIGUEDAD
 
 from src.data.scraping.scraper_adondevivir import main as scraper_adondevivir
-from src.data.scraping.scraper_adondevivir_buy import main as scraper_adondevivir_buy
 from src.data.scraping.scraper_adondevivir_detalles import main as scraper_adondevivir_detalles
 
 from src.data.processing.process_adondevivir import main as process_adondevivir
@@ -129,7 +128,7 @@ def run_pipleline(run_scraping_1 = True, run_scraping_2 = True, run_processing_1
 # ENTRY POINT
 # -------------------------
 if __name__ == "__main__":
-    run_pipleline(run_scraping_1 = False, run_scraping_2 = False, run_processing_1 = False,
+    run_pipleline(run_scraping_1 = False, run_scraping_2 = True, run_processing_1 = False,
                   run_features_1 = False, run_features_2 = False, run_preprocessing_1=False,
-                  run_features_3 = False, run_splitting = True,
+                  run_features_3 = False, run_splitting = False,
                   run_modeling_1 = False, run_modeling_2 = False)

@@ -74,14 +74,14 @@ def main():
         for property_type, settings in properaty_type.items():
             url_template = settings["url_template"]
             pages = settings["page"]
-            new_folder = settings["folder"]
+            folder_name = settings["folder"]
             
             # Crear carpeta si no existe y cambiar al directorio
             BASE_DIR = os.path.dirname(os.path.abspath(__file__))
             BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "..",".."))
             file_location = os.path.join(BASE_DIR, "data", "raw")
             #adondevivir_path = os.path.join(file_location, "adondevivir") # New folder
-            adondevivir_path = os.path.join(file_location, new_folder) # New folder
+            adondevivir_path = os.path.join(file_location, folder_name) # New folder
 
             os.makedirs(adondevivir_path, exist_ok=True)
             os.chdir(adondevivir_path)
@@ -96,7 +96,7 @@ def main():
                 # Guardar CSV individual
                 if resultados_pagina:
                     df_temp = pd.DataFrame(resultados_pagina)
-                    df_temp.to_csv(f"adondevivir_pagina_{pagina}.csv", index=False)
+                    df_temp.to_csv(f"{folder_name}_pagina_{pagina}.csv", index=False)
                     print(f"✅ Página {pagina} guardada.")
                     all_data.extend(resultados_pagina)
                 else:
@@ -105,8 +105,8 @@ def main():
             # Guardar consolidado
             if all_data:
                 df_total = pd.DataFrame(all_data)
-                df_total.to_csv("adondevivir_todas_las_paginas.csv", index=False)
-                print("📦 Archivo consolidado guardado como 'adondevivir_todas_las_paginas.csv'")
+                df_total.to_csv(f"{folder_name}_todas_las_paginas.csv", index=False)
+                print(f"📦 Archivo consolidado guardado como '{folder_name}_todas_las_paginas.csv'")
             else:
                 print("⚠️ No se obtuvieron datos en ninguna página.")
 

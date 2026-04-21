@@ -17,20 +17,83 @@ from sklearn.preprocessing import StandardScaler
 import optuna
 import joblib
 import shap
-#
-def objective(X_train, y_train, X_test, y_test, trial):
-    params = {"iterations":trial.suggest_int('iterations', 100, 1000),
-            "depth": trial.suggest_int('depth', 4, 10),  # Profundidad del árbol
-            'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.3, log=True),
-            'l2_leaf_reg': trial.suggest_float('l2_leaf_reg', 1e-3, 10, log=True),  # Regularización L2
-            'random_strength': trial.suggest_float('random_strength', 1e-3, 10),  # Ruido para evitar overfitting
-            'bagging_temperature': trial.suggest_float('bagging_temperature', 0.0, 1.0),  # Controla el muestreo de instancias
-            'border_count': trial.suggest_int('border_count', 32, 255),  # Número de divisiones para variables numéricas
-            'verbose': 0,
-            'random_state': 42
-                }
+
+def objective_rf(trial, X_train, y_train, X_test, y_test):
+    params = {
+        "n_estimators": trial.suggest_int("n_estimators", 100, 500),
+        "max_depth": trial.suggest_int("max_depth", 5, 30),
+        "min_samples_split": trial.suggest_int("min_samples_split", 2, 10),
+        "min_samples_leaf": trial.suggest_int("min_samples_leaf", 1, 5),
+        "max_features": trial.suggest_categorical("max_features", ["sqrt", "log2"])
+    }
+
+    model = RandomForestRegressor(**params)
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+
+    return r2_score(y_test, y_pred)
+
+def objective_lgbm(trial, X_train, y_train, X_test, y_test):
+    params = {
+        "n_estimators": trial.suggest_int("n_estimators", 100, 500),
+        "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.2),
+        "num_leaves": trial.suggest_int("num_leaves", 20, 150),
+        "max_depth": trial.suggest_int("max_depth", 5, 20)
+    }
+
+    model = LGBMRegressor(**params)
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+
+    return r2_score(y_test, y_pred)
+
+def objective_xgb(trial, X_train, y_train, X_test, y_test):
+    params = {
+        "n_estimators": trial.suggest_int("n_estimators", 100, 500),
+        "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.3, log=True),
+        "max_depth": trial.suggest_int("max_depth", 3, 10),
+        "subsample": trial.suggest_float("subsample", 0.5, 1.0),
+        "colsample_bytree": trial.suggest_float("colsample_bytree", 0.5, 1.0),
+        "gamma": trial.suggest_float("gamma", 0, 5),
+        "reg_alpha": trial.suggest_float("reg_alpha", 1e-3, 10, log=True),
+        "reg_lambda": trial.suggest_float("reg_lambda", 1e-3, 10, log=True),
+        "random_state": 42,
+        "verbosity": 0
+    }
+
+    model = XGBRegressor(**params)
+
+    model.fit(
+        X_train, y_train,
+        eval_set=[(X_test, y_test)],
+        verbose=False
+    )
+
+    y_pred = model.predict(X_test)
+    return r2_score(y_test, y_pred)
+
+def objective_catboost(trial, X_train, y_train, X_test, y_test):
+    params = {
+        "iterations": trial.suggest_int("iterations", 300, 1000),
+        "depth": trial.suggest_int("depth", 4, 10),
+        "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.3, log=True),
+        "l2_leaf_reg": trial.suggest_float("l2_leaf_reg", 1e-3, 10, log=True),
+        "random_strength": trial.suggest_float("random_strength", 1e-3, 10),
+        "bagging_temperature": trial.suggest_float("bagging_temperature", 0.0, 1.0),
+        "border_count": trial.suggest_int("border_count", 32, 255),
+        "random_state": 42,
+        "verbose": 0
+    }
+
     model = CatBoostRegressor(**params)
-    model.fit(X_train, y_train, eval_set=[(X_test, y_test)], early_stopping_rounds=50, verbose=False)
+
+    model.fit(
+        X_train, y_train,
+        eval_set=[(X_test, y_test)],
+        early_stopping_rounds=50,
+        verbose=False
+    )
+
     y_pred = model.predict(X_test)
     return r2_score(y_test, y_pred)
 
@@ -41,14 +104,12 @@ def main():
     #input_path = os.path.join(BASE_DIR, "data", "processed", "data_preprocessing_eng.csv")
     input_path = os.path.join(BASE_DIR, "data", "processed", "dataset_l.csv")
     output_path = os.path.join(BASE_DIR, "data", "processed", "final_dataset_l.csv")
-    output_model_path = os.path.join(BASE_DIR,"models","randomforest_model_l.pkl")
-    output_hyperparams_path = os.path.join(BASE_DIR,"models","randomforest_hyperparams_l.pkl")
+    output_model_path = os.path.join(BASE_DIR,"models","best_model_l.pkl")
+    output_hyperparams_path = os.path.join(BASE_DIR,"models","best_hyperparams_l.pkl")
 
     df = pd.read_csv(input_path)
 
-    # data without 'miraflores', 'surco', 'san isidro','barranco'
     df_modelling = df.copy()
-    #df_modelling = df_modelling[~df_modelling['distrito'].isin(['miraflores', 'surco', 'san isidro','barranco'])]
 
     if config.SCRAPE_ANTIGUEDAD:
         df_modelling = df_modelling[['precio_pen', 'mantenimiento_soles', 'area_m2', 'num_dorm',
@@ -111,52 +172,80 @@ def main():
             "R2": round(r2, 4)
         })
 
-    df_resultados = pd.DataFrame(resultados).sort_values(by="R2", ascending=False).reset_index()
+    #df_resultados = pd.DataFrame(resultados).sort_values(by="R2", ascending=False).reset_index()
+    df_resultados = pd.DataFrame(resultados).sort_values(by="R2", ascending=False).reset_index(drop=True)
     print(df_resultados)
     
-    study = optuna.create_study(direction='maximize')  # Queremos maximizar R²
-    study.optimize(
-        lambda trial: objective(X_train, y_train, X_test, y_test, trial), 
-        n_trials=50
-    )  # Número de iteraciones
+    best_model_name = df_resultados.iloc[0]["Modelo"]
 
-    # Mejores parámetros
-    print("Mejores parámetros:", study.best_params)
-    print("Mejor R²:", study.best_value)
+    print(f"Mejor modelo base: {best_model_name}")
 
-    best_params = study.best_params
+    if best_model_name == "RandomForest":
+        study = optuna.create_study(direction='maximize')  # Queremos maximizar R²
+        study.optimize(
+            lambda trial: objective_rf(trial, X_train, y_train, X_test, y_test),
+            n_trials=50
+            )
+        
+        print(f"Modelo optimizado: {best_model_name}")
+        print("Best params:", study.best_params)
+        print("Best R2:", study.best_value)
+        
+        best_params = study.best_params
+        final_model = RandomForestRegressor(**best_params, random_state=42)
+        
+    elif best_model_name == "XGBoost":
+        study = optuna.create_study(direction='maximize')  # Queremos maximizar R²
+        study.optimize(
+            lambda trial: objective_xgb(trial, X_train, y_train, X_test, y_test),
+            n_trials=50
+            )
+        
+        print(f"Modelo optimizado: {best_model_name}")
+        print("Best params:", study.best_params)
+        print("Best R2:", study.best_value)
 
-    final_model = RandomForestRegressor(
-        n_estimators=best_params.get('n_estimators',200),
-        max_depth=best_params.get('max_depth',None),
-        min_samples_split=best_params.get('min_samples_split',2),
-        min_samples_leaf=best_params.get('min_samples_leaf',1),
-        max_features=best_params.get('max_features','sqrt'),
-        bootstrap=best_params.get('boosttrap',True),
-        random_state=42,
-        n_jobs=-1
-    )
+        best_params = study.best_params
+        final_model = XGBRegressor(**best_params, random_state=42, verbosity=0)
 
-    # Train (without eval_set)
-    final_model.fit(X_train, y_train)
+    elif best_model_name == "LightGBM":
+        study = optuna.create_study(direction='maximize')  # Queremos maximizar R²
+        study.optimize(
+            lambda trial: objective_lgbm(trial, X_train, y_train, X_test, y_test),
+            n_trials=50
+            )
+        
+        print(f"Modelo optimizado: {best_model_name}")
+        print("Best params:", study.best_params)
+        print("Best R2:", study.best_value)
 
-    y_pred = final_model.predict(X_test)
-    r2 = r2_score(y_test, y_pred)
-    print(f"R2 final: {r2:.4f}")
+        best_params = study.best_params
+        final_model = LGBMRegressor(**best_params, random_state=42)
 
-    feature_importance = pd.DataFrame({
-        'Feature': X.columns,
-        'Importance': final_model.feature_importances_
-    }).sort_values(by='Importance', ascending=False)
+    elif best_model_name == "CatBoost":
+        study = optuna.create_study(direction='maximize')  # Queremos maximizar R²
+        study.optimize(
+            lambda trial: objective_catboost(trial, X_train, y_train, X_test, y_test),
+            n_trials=50
+            )
+        
+        print(f"Modelo optimizado: {best_model_name}")
+        print("Best params:", study.best_params)
+        print("Best R2:", study.best_value)
 
-    print(feature_importance)
+        best_params = study.best_params
+        final_model = CatBoostRegressor(**best_params, verbose=0, random_state=42)
 
-    # Fit the CatBoost model with Optuna-optimized hyperparameters
-    final_model = CatBoostRegressor(**best_params, verbose=0, random_state=42)
+    # # Fit the CatBoost model with Optuna-optimized hyperparameters
+    # final_model = CatBoostRegressor(**best_params, verbose=0, random_state=42)
     final_model.fit(X_train, y_train)
 
     # Calcula SHAP values para el conjunto de test
-    explainer = shap.Explainer(final_model)
+    #explainer = shap.Explainer(final_model)
+    if best_model_name in ["RandomForest", "XGBoost", "LightGBM", "CatBoost"]:
+        explainer = shap.TreeExplainer(final_model)
+    else:
+        explainer = shap.Explainer(final_model)
     shap_values = explainer(X_test)
 
     if config.ENABLE_PLOTS:

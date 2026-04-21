@@ -63,23 +63,25 @@ def extraer_zona_y_distrito(ubicacion):
 def main():
     for source, properaty_type in config.SCRAPING_CONFIG.items():
         for property_type, settings in properaty_type.items():
-            new_folder = settings["folder"]
+            folder_name = settings["folder"]
             
             BASE_DIR = os.path.dirname(os.path.abspath(__file__))
             BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "..",".."))
 
             if config.SCRAPE_ANTIGUEDAD:
-                inputh_path = os.path.join(BASE_DIR, "data", "raw",new_folder,"adondevivir_todo3_completo.csv")
+                inputh_path = os.path.join(BASE_DIR, "data", "raw",folder_name,"adondevivir_todo3_completo.csv")
             else:
-                inputh_path = os.path.join(BASE_DIR, "data", "raw",new_folder,"adondevivir_todas_las_paginas.csv")
-
-            output_folder = os.path.join(BASE_DIR, "data", "processed",new_folder)
+                inputh_path = os.path.join(BASE_DIR, "data", "raw",folder_name,f"{folder_name}_todas_las_paginas.csv")
+                
+            print(inputh_path)
+            output_folder = os.path.join(BASE_DIR, "data", "processed",folder_name)
 
             os.makedirs(output_folder, exist_ok=True)
             os.chdir(output_folder)
 
-            output_path = os.path.join(BASE_DIR, "data", "processed",new_folder,"adondevivir_processed.csv")
-            #print(output_path)
+            #output_path = os.path.join(BASE_DIR, "data", "processed",folder_name,f"{folder_name}_processed.csv")
+            output_path = os.path.join(output_path,f"{folder_name}_processed.csv")
+            print(output_path)
 
             df_raw = pd.read_csv(inputh_path)
 
