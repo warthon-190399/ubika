@@ -1,3 +1,5 @@
+data/
+
 # Entornos virtuales
 venv/
 env/
@@ -14,9 +16,6 @@ data/raw/adondevivir/
 .env
 
 # Catboost
-<<<<<<< HEAD
 catboost_info/
 **/catboost_info/
-=======
-catboost_info/
->>>>>>> c30c47b7224ce788a7fcd0069515ac463160473f
+
