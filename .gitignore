@@ -19,3 +19,6 @@ data/raw/adondevivir/
 catboost_info/
 **/catboost_info/
 
+models/
+*.pkl
+
