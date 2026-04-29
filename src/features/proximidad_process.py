@@ -32,7 +32,7 @@ def main():
             # READ DFs
             BASE_DIR = os.path.dirname(os.path.abspath(__file__))
             BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
-            input_path_adondevivir = os.path.join(BASE_DIR, "data", "processed", new_folder,"adondevivir_processed_geo.csv")
+            input_path_adondevivir = os.path.join(BASE_DIR, "data", "processed", new_folder,f"{new_folder}_processed_geo.csv")
             input_path_colegios = os.path.join(BASE_DIR, "data", "processed", "colegios_processed.csv")
             input_path_hospitales = os.path.join(BASE_DIR, "data", "processed", "hospitales_processed.csv")
             input_path_tren = os.path.join(BASE_DIR, "data", "processed", "tren_processed.csv")
@@ -40,7 +40,7 @@ def main():
             input_path_comisarias = os.path.join(BASE_DIR, "data", "processed", "comisarias_processed.csv")
             input_path_inpe = os.path.join(BASE_DIR, "data", "processed", "inpe_processed.csv")
 
-            output_path = os.path.join(BASE_DIR, "data", "processed", new_folder,"proximidad_processed.csv")
+            output_path = os.path.join(BASE_DIR, "data", "processed", new_folder,f"{new_folder}_proximidad_processed.csv")
 
             df_adondevivir = pd.read_csv(input_path_adondevivir)
             df_colegios = pd.read_csv(input_path_colegios)

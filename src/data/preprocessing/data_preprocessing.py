@@ -20,8 +20,8 @@ def main():
             # Read df
             BASE_DIR = os.path.dirname(os.path.abspath(__file__))
             BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "..",".."))
-            input_path = os.path.join(BASE_DIR, "data", "processed", new_folder,"proximidad_processed.csv")
-            output_path = os.path.join(BASE_DIR, "data", "processed", new_folder,"data_preprocessing.csv")
+            input_path = os.path.join(BASE_DIR, "data", "processed", new_folder,f"{new_folder}_proximidad_processed.csv")
+            output_path = os.path.join(BASE_DIR, "data", "processed", new_folder,f"{new_folder}_data_preprocessing.csv")
 
             #print(output_path)
 

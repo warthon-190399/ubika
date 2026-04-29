@@ -69,7 +69,7 @@ def main():
             BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "..",".."))
 
             if config.SCRAPE_ANTIGUEDAD:
-                inputh_path = os.path.join(BASE_DIR, "data", "raw",folder_name,"adondevivir_todo3_completo.csv")
+                inputh_path = os.path.join(BASE_DIR, "data", "raw",folder_name,f"{folder_name}_todo3_completo.csv")
             else:
                 inputh_path = os.path.join(BASE_DIR, "data", "raw",folder_name,f"{folder_name}_todas_las_paginas.csv")
                 
@@ -80,7 +80,7 @@ def main():
             os.chdir(output_folder)
 
             #output_path = os.path.join(BASE_DIR, "data", "processed",folder_name,f"{folder_name}_processed.csv")
-            output_path = os.path.join(output_path,f"{folder_name}_processed.csv")
+            output_path = os.path.join(output_folder,f"{folder_name}_processed.csv")
             print(output_path)
 
             df_raw = pd.read_csv(inputh_path)

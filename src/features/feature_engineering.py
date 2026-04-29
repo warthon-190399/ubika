@@ -75,8 +75,8 @@ def main():
 
             BASE_DIR = os.path.dirname(os.path.abspath(__file__))
             BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
-            input_path = os.path.join(BASE_DIR, "data", "processed", new_folder, "data_preprocessing.csv")
-            output_path = os.path.join(BASE_DIR, "data", "processed", new_folder, "data_preprocessing_eng.csv")
+            input_path = os.path.join(BASE_DIR, "data", "processed", new_folder, f"{new_folder}_data_preprocessing.csv")
+            output_path = os.path.join(BASE_DIR, "data", "processed", new_folder, f"{new_folder}_data_preprocessing_eng.csv")
 
             #input(input_path)
             

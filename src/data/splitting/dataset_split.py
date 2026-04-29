@@ -10,9 +10,9 @@ def main():
 
             BASE_DIR = os.path.dirname(os.path.abspath(__file__))
             BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "..",".."))
-            input_path = os.path.join(BASE_DIR, "data", "processed",new_folder, "data_preprocessing_eng.csv")
-            output_path_h = os.path.join(BASE_DIR, "data", "processed", new_folder,"dataset_h.csv")
-            output_path_l = os.path.join(BASE_DIR, "data", "processed", new_folder,"dataset_l.csv")
+            input_path = os.path.join(BASE_DIR, "data", "processed",new_folder, f"{new_folder}_data_preprocessing_eng.csv")
+            output_path_h = os.path.join(BASE_DIR, "data", "processed", new_folder,f"{new_folder}_dataset_h.csv")
+            output_path_l = os.path.join(BASE_DIR, "data", "processed", new_folder,f"{new_folder}_dataset_l.csv")
 
             df = pd.read_csv(input_path)
 

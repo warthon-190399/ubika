@@ -31,8 +31,8 @@ def main():
             BASE_DIR = os.path.dirname(os.path.abspath(__file__))
             BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
             ENV_PATH = os.path.join(BASE_DIR, ".env")
-            input_path = os.path.join(BASE_DIR, "data", "processed",new_folder,"adondevivir_processed.csv")
-            output_path = os.path.join(BASE_DIR, "data", "processed",new_folder,"adondevivir_processed_geo.csv")
+            input_path = os.path.join(BASE_DIR, "data", "processed",new_folder,f"{new_folder}_processed.csv")
+            output_path = os.path.join(BASE_DIR, "data", "processed",new_folder,f"{new_folder}_processed_geo.csv")
 
             load_dotenv(ENV_PATH)
             API_KEY = os.getenv("GOOGLE_GEOENCODING_APIKEY").strip().replace('"','').replace("'",'')

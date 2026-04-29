@@ -1,5 +1,5 @@
 # config.py
-SCRAPE_ANTIGUEDAD = False
+SCRAPE_ANTIGUEDAD = True
 
 # Properati
 PROPERTY_TYPES = ["rent", "sale"]
