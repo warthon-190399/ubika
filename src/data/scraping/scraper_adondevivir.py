@@ -89,7 +89,7 @@ def main():
             # Scrapeo de todas las páginas
             all_data = []
 
-            for pagina in range(1, 2): # Original pages 142
+            for pagina in range(1, 142): # Original pages 142
                 #resultados_pagina = scrapear_pagina(pagina)
                 resultados_pagina = scrapear_pagina(pagina, url_template)
 

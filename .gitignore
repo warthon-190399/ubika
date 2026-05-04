@@ -1,5 +1,3 @@
-/data/
-
 # Entornos virtuales
 venv/
 env/
@@ -12,7 +10,6 @@ __pycache__/
 
 # Archivos temporales
 .DS_Store
-data/raw/adondevivir/
 .env
 
 # Catboost
@@ -22,3 +19,5 @@ catboost_info/
 models/
 *.pkl
 
+catboost_info/
+catboost_info_backup/
