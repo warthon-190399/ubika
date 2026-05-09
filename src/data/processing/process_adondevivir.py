@@ -140,7 +140,8 @@ def main():
                 df_raw["antiguedad_inmueble"] = df_raw["antiguedad_inmueble"].replace({"A estrenar": 0})
 
                 df_raw["antiguedad"] = df_raw["antiguedad_inmueble"].apply(lambda x: str(x).split(" ")[0] if pd.notna(x) else None)
-                df_raw["antiguedad"] = df_raw["antiguedad"].astype(float)
+                #df_raw["antiguedad"] = df_raw["antiguedad"].astype(float)
+                df_raw["antiguedad"] = pd.to_numeric(df_raw["antiguedad"], errors="coerce")
 
                 df_raw["num_visualizaciones"] = df_raw["visualizaciones"].apply(lambda x: str(x).split(" ")[0] if pd.notna(x) else None)
                 df_raw["num_visualizaciones"] = df_raw["num_visualizaciones"].astype(float)
