@@ -33,7 +33,7 @@ OUTPUT_CSV = "urbania_alquiler.csv"
 MAX_PAGES  = 1
 DELAY_PAGE = (2, 4)
 
-FIELDNAMES = ["url", "precio", "m2_total", "dorms", "banos", "estac", "direccion", "distrito"]
+FIELDNAMES = ["url", "precio", "mantenimiento", "m2_total", "dorms", "banos", "estac", "direccion", "distrito"]
 
 
 # ---------------------------------------------------------------------------
@@ -100,6 +100,9 @@ def parse_listings(html: str) -> list[dict]:
 
         price_tag = card.select_one("[class='postingPrices-module__price']")
         data["precio"] = price_tag.get_text(strip=True) if price_tag else ""
+
+        mantenimiento_tag = card.select_one("[class='postingPrices-module__expenses postingPrices-module__expenses-property-listing']")
+        data["mantenimiento"] = mantenimiento_tag.get_text(strip=True) if mantenimiento_tag else ""
 
         feat_spans = card.select(
             "[data-qa='POSTING_CARD_FEATURES'] span, "
