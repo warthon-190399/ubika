@@ -2,7 +2,6 @@
 import pandas as pd
 import os 
 from sklearn.model_selection import train_test_split
-import config
 
 # FUNCTION 'imputar_nan_por_grupo'
 def imputar_con_medianas(cols_a_imputar, medianas, row):
@@ -12,71 +11,63 @@ def imputar_con_medianas(cols_a_imputar, medianas, row):
                 row[col] = medianas.loc[row['distrito'], col]
     return row
 
-def main():
-    for source, properaty_type in config.SCRAPING_CONFIG.items():
-        for property_type, settings in properaty_type.items():
-            new_folder = settings["folder"]
-            
-            # Read df
-            BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-            BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "..",".."))
-            input_path = os.path.join(BASE_DIR, "data", "processed", new_folder,f"{new_folder}_proximidad_processed.csv")
-            output_path = os.path.join(BASE_DIR, "data", "processed", new_folder,f"{new_folder}_data_preprocessing.csv")
+def main(folder_name):
+    # Read df
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "..",".."))
+    input_path = os.path.join(BASE_DIR, "data", "processed", folder_name,f"{folder_name}_proximidad_processed.csv")
+    output_path = os.path.join(BASE_DIR, "data", "processed", folder_name,f"{folder_name}_data_preprocessing.csv")
 
-            #print(output_path)
+    #print(output_path)
 
-            #
-            df = pd.read_csv(input_path)
-            df_processed = df.copy()
+    #
+    df = pd.read_csv(input_path)
+    df_processed = df.copy()
 
-            # DROP VALUES OUT OF RANGE 
+    # DROP VALUES OUT OF RANGE 
 
-            q_low = df["precio_pen"].quantile(0.01)
-            q_high = df["precio_pen"].quantile(0.95)
-            df_processed = df_processed[(df_processed["precio_pen"] >= q_low) & (df_processed["precio_pen"] <= q_high)]
+    q_low = df["precio_pen"].quantile(0.01)
+    q_high = df["precio_pen"].quantile(0.95)
+    df_processed = df_processed[(df_processed["precio_pen"] >= q_low) & (df_processed["precio_pen"] <= q_high)]
 
-            df_processed = df_processed.drop_duplicates(subset = ['latitud', 'longitud', 'area_m2', 'num_dorm', 'num_banios', 'num_estac', "distrito", "nivel_socioeconomico", "mantenimiento_soles"])
+    df_processed = df_processed.drop_duplicates(subset = ['latitud', 'longitud', 'area_m2', 'num_dorm', 'num_banios', 'num_estac', "distrito", "nivel_socioeconomico", "mantenimiento_soles"])
 
-            df_processed["num_estac"] = df_processed["num_estac"].fillna(0)
-            df_processed = df_processed.dropna(subset=["area_m2", "distrito"])
+    df_processed["num_estac"] = df_processed["num_estac"].fillna(0)
+    df_processed = df_processed.dropna(subset=["area_m2", "distrito"])
 
 
-            df_temp = df_processed.copy()
-            df_temp = df_temp.sample(frac=1, random_state=42).reset_index(drop=True)  # shuffle
+    df_temp = df_processed.copy()
+    df_temp = df_temp.sample(frac=1, random_state=42).reset_index(drop=True)  # shuffle
 
-            df_temp['set'] = 'train'
-            train_data, temp_data = train_test_split(df_temp, test_size=0.4, random_state=42)
+    df_temp['set'] = 'train'
+    train_data, temp_data = train_test_split(df_temp, test_size=0.4, random_state=42)
 
-            eval_data, test_data = train_test_split(temp_data, test_size=0.5, random_state=42)
+    eval_data, test_data = train_test_split(temp_data, test_size=0.5, random_state=42)
 
-            train_data['set'] = 'train'
-            eval_data['set'] = 'eval'
-            test_data['set'] = 'test'
+    train_data['set'] = 'train'
+    eval_data['set'] = 'eval'
+    test_data['set'] = 'test'
 
-            df_processed = pd.concat([train_data, eval_data, test_data]).reset_index(drop=True)
+    df_processed = pd.concat([train_data, eval_data, test_data]).reset_index(drop=True)
 
-            #Antiguedad
-            if config.SCRAPE_ANTIGUEDAD:
-                cols_a_imputar = ['num_dorm', 'num_banios', 'antiguedad']
-            else:
-                cols_a_imputar = ['num_dorm', 'num_banios']
+    cols_a_imputar = ['num_dorm', 'num_banios', 'antiguedad']
 
-            medianas = train_data.groupby('distrito')[cols_a_imputar].median()
+    medianas = train_data.groupby('distrito')[cols_a_imputar].median()
 
-            df_processed = df_processed.apply(
-                lambda row: imputar_con_medianas(cols_a_imputar, medianas, row), 
-                axis=1
-                )
+    df_processed = df_processed.apply(
+        lambda row: imputar_con_medianas(cols_a_imputar, medianas, row), 
+        axis=1
+        )
 
-            #
+    #
 
-            conteo_coordenadas = df_processed.groupby(['latitud', 'longitud']).size().reset_index(name='conteo')
-            conteo_coordenadas = conteo_coordenadas[conteo_coordenadas['conteo'] > 1].sort_values(by="conteo", ascending=False).reset_index()
-            conteo_coordenadas.index = conteo_coordenadas.index+1
+    conteo_coordenadas = df_processed.groupby(['latitud', 'longitud']).size().reset_index(name='conteo')
+    conteo_coordenadas = conteo_coordenadas[conteo_coordenadas['conteo'] > 1].sort_values(by="conteo", ascending=False).reset_index()
+    conteo_coordenadas.index = conteo_coordenadas.index+1
 
-            # EXPORT TO CSV
+    # EXPORT TO CSV
 
-            df_processed.to_csv(output_path, index=False)
+    df_processed.to_csv(output_path, index=False)
 
 if __name__ == "__main__":
     main()

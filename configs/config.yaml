@@ -1,0 +1,69 @@
+paths:
+  raw_data: "data/raw"
+  processed_data: "data/processed"
+
+defaults:
+
+  files:
+    raw: "{folder}_todas_las_paginas.csv"
+    processed: "{folder}_completo.csv"
+    geo: "{folder}_geo.csv"
+    features: "{folder}_features.csv"
+    train: "{folder}_train.csv"
+    test: "{folder}_test.csv"
+
+datasets:
+  adondevivir:
+    rent:
+      folder: "adondevivir_rent"
+
+      scraping:
+        pages: 2
+        url_template: "https://www.adondevivir.com/departamentos-en-alquiler-pagina-{page_num}-q-lima.html"
+
+    sale:
+      folder: "adondevivir_sale"
+
+      scraping:
+        pages: 2
+        url_template: "https://www.adondevivir.com/departamentos-en-venta-pagina-{page_num}-q-lima.html"
+
+modeling:
+
+  target: precio_pen
+
+  features:
+    - mantenimiento_soles
+    - area_m2
+    - num_dorm
+    - num_banios
+    - num_estac
+    - antiguedad
+    - total_servicios_prox
+    - total_transporte_aprox
+    - zona_apeim_cod
+    - categoria_crimenes_cod
+
+  test_size: 0.2
+  random_state: 42
+  n_trials: 50
+
+  enabled_models:
+    RandomForest: true
+    XGBoost: true
+    LightGBM: false
+    CatBoost: false
+
+pipeline:
+  run_scraping: true
+  run_scraping_details: false
+  run_processing: false
+
+  run_geo: false
+  run_proximidad: false
+  run_preprocessing: false
+  run_feature_engineering: false
+  run_splitting: false
+
+  run_modeling_l: false
+  run_modeling_h: false

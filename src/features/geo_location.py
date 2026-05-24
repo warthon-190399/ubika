@@ -4,7 +4,6 @@ import googlemaps
 from time import sleep
 from dotenv import load_dotenv
 import os
-import config
 
 def obtener_coordenadas(direccion, gmaps, contador=None):
     try:
@@ -21,44 +20,39 @@ def obtener_coordenadas(direccion, gmaps, contador=None):
         print(f"[{contador}] ❌ Error al geocodificar '{direccion}': {e}")
         return None, None
 
-def main():
-    for source, properaty_type in config.SCRAPING_CONFIG.items():
-        for property_type, settings in properaty_type.items():
-            new_folder = settings["folder"]
+def main(folder_name):
+    # Read .env.example
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
+    ENV_PATH = os.path.join(BASE_DIR, ".env")
+    input_path = os.path.join(BASE_DIR, "data", "processed",folder_name,f"{folder_name}_processed.csv")
+    output_path = os.path.join(BASE_DIR, "data", "processed",folder_name,f"{folder_name}_processed_geo.csv")
 
+    load_dotenv(ENV_PATH)
+    API_KEY = os.getenv("GOOGLE_GEOENCODING_APIKEY").strip().replace('"','').replace("'",'')
 
-            # Read .env.example
-            BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-            BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
-            ENV_PATH = os.path.join(BASE_DIR, ".env")
-            input_path = os.path.join(BASE_DIR, "data", "processed",new_folder,f"{new_folder}_processed.csv")
-            output_path = os.path.join(BASE_DIR, "data", "processed",new_folder,f"{new_folder}_processed_geo.csv")
+    gmaps = googlemaps.Client(key=API_KEY)
 
-            load_dotenv(ENV_PATH)
-            API_KEY = os.getenv("GOOGLE_GEOENCODING_APIKEY").strip().replace('"','').replace("'",'')
+    df = pd.read_csv(input_path)
 
-            gmaps = googlemaps.Client(key=API_KEY)
+    # Aplicar geocodificación con contador
+    latitudes = []
+    longitudes = []
 
-            df = pd.read_csv(input_path)
+    for i, row in enumerate(df.itertuples(), start=1):
+        direccion = row.direccion_completa
+        if pd.isna(direccion):
+            direccion = row.distrito
+        lat, lon = obtener_coordenadas(direccion, gmaps, contador=i)
+        latitudes.append(lat)
+        longitudes.append(lon)
+        sleep(1)
 
-            # Aplicar geocodificación con contador
-            latitudes = []
-            longitudes = []
+    # Asignar al DataFrame
+    df["latitud"] = latitudes
+    df["longitud"] = longitudes
 
-            for i, row in enumerate(df.itertuples(), start=1):
-                direccion = row.direccion_completa
-                if pd.isna(direccion):
-                    direccion = row.distrito
-                lat, lon = obtener_coordenadas(direccion, gmaps, contador=i)
-                latitudes.append(lat)
-                longitudes.append(lon)
-                sleep(1)
-
-            # Asignar al DataFrame
-            df["latitud"] = latitudes
-            df["longitud"] = longitudes
-
-            df.to_csv(output_path, index = False)
+    df.to_csv(output_path, index = False)
 
 if __name__ == "__main__":
     main()

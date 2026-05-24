@@ -1,14 +1,8 @@
-"""
-Pipeline principal del proyecto Ubika
-Flujo:
-Scraping → Processing → Preprocessing → Load
-"""
-
 # -------------------------
 # IMPORTS
 # -------------------------
-from config import SCRAPE_ANTIGUEDAD
-scrape_antiguedad = SCRAPE_ANTIGUEDAD
+import yaml
+import time
 
 from src.data.scraping.scraper_adondevivir import main as scraper_adondevivir
 from src.data.scraping.scraper_adondevivir_detalles import main as scraper_adondevivir_detalles
@@ -22,113 +16,116 @@ from src.features.proximidad_process import main as proximidad_process
 
 from src.data.splitting.dataset_split import main as dataset_split
 
-from src.modeling.Comparacion_de_modelos_l import main as Compracion_de_modelos_l
-from src.modeling.Comparacion_de_modelos_h import main as Compracion_de_modelos_h
+from src.modeling.Comparacion_de_modelos_l import main as Comparacion_modelos_l
+from src.modeling.Comparacion_de_modelos_h import main as Comparacion_modelos_h
 
-import time
+# =========================
+# LOAD YAML
+# =========================
+with open("configs/config.yaml", "r", encoding="utf-8") as f:
+    config = yaml.safe_load(f)
+
 
 # -------------------------
 # PIPELINE
 # -------------------------
-def run_pipleline(run_scraping_1 = True, run_scraping_2 = True, run_processing_1 = True,
-                  run_features_1 = True, run_features_2 = True, run_preprocessing_1=True,
-                  run_features_3 = True, run_splitting = True,
-                  run_modeling_1 = True, run_modeling_2 = True):
+def run_pipeline():    
     inicio = time.perf_counter()
 
     print("🚀 Iniciando pipeline Ubika...\n")
     
-    # "SCRAPING"
-    if run_scraping_1:
-        print("Ejecutando scraper_adondevivir() ...")
-        scraping_1 = scraper_adondevivir()
-        # OUTPUT: "adondevivir_todas_las_paginas.csv"
+    datasets_config = config["datasets"]
+    pipeline_config = config["pipeline"]
+    modeling_config = config["modeling"]
 
-    if run_scraping_2 and scrape_antiguedad:
-        print("Ejecutando scraper_adondevivir_detalles() ...")
-        scraping_3 = scraper_adondevivir_detalles()
-        # INPUT: "adondevivir_todas_las_paginas.csv"
-        # OUTPUT: "adondevivir_todo3_completo.csv"
-        # Ejecutar en horario de dormir
+    for source, property_types in datasets_config.items():
+        for property_type, settings in property_types.items():
 
-    # "PROCESSING"
-    if run_processing_1:
-        print("Ejecutando process_adondevivir() ...")
-        processing_1 = process_adondevivir()
-        # scrape_antiguedad = True
-        # INPUT: "adondevivir_todo3_completo.csv"
-        # OUTPUT: "adondevivir_processed.csv"
+            dataset_cfg = settings
 
-        # scrape_antiguedad = False
-        # INPUT: "adondevivir_todas_las_paginas.csv"
-        # OUTPUT: "adondevivir_processed.csv"
+            folder_name = dataset_cfg["folder"]
 
-    # "FEATURES"
-    if  run_features_1:
-        print("Ejecutando geo_location() ...")
-        features_1 = geo_location()
-        # INPUT: "adondevivir_processed.csv"
-        # OUTPUT: "adondevivir_processed_geo.csv"
-        
-    if run_features_2:
-        print("Ejecutando proximidad_process() ...")
-        features_2 = proximidad_process()
-        # INPUT: "adondevivir_processed_geo.csv"
-        # INPUT: "colegios_processed.csv"
-        # INPUT: "hospitales_processed.csv"
-        # OUTPUT: "proximidad_processed.csv"
+            scraping_cfg = dataset_cfg["scraping"]
 
-    # "PREPROCESSING"
-    if run_preprocessing_1:
-        print("Ejecutando data_preprocessing() ...")
-        preprocessing_1 = data_preprocessing()
-        # INPUT: "proximidad_processed.csv"
-        # OUTPUT: "data_preprocessing.csv"
+            pages = scraping_cfg["pages"]
+            url_template = scraping_cfg["url_template"]
 
-    # "FEATURES"
-    if run_features_3:
-        print("Ejecutando feature_engineering() ...")
-        features_3 = feature_engineering()
-        # INPUT: "data_preprocessing.csv"
-        # OUTPUT: "data_preprocessing_eng.csv"
+            print(f"\n📦 Procesando: {folder_name}")
 
-    # "SPLIT"
-    if run_splitting:
-        print("Ejecutando Compracion_de_modelos_l() ...")
-        splitting_1 = dataset_split()
-        # INPUT: "data_preprocessing_eng.csv"
-        # OUTPUT: "dataset_top.csv"
-        # OUTPUT: "dataset_rest.csv"
+            # -------------------------
+            # SCRAPING
+            # -------------------------
+            if pipeline_config["run_scraping"]:
+                scraper_adondevivir(
+                    pages=pages,
+                    url_template=url_template,
+                    output_file=paths["raw_file"]
+                )
 
-    # "MODELING"
-    if run_modeling_1:
-        print("Entrenando modelo...")
-        print("Ejecutando Compracion_de_modelos_l() ...")
-        modeling_1 = Compracion_de_modelos_l()
-        # INPUT: "dataset_rest.csv"
-        # OUTPUT: "final_dataset_l.csv"
-        # OUTPUT: "randomforest_model_l.pkl"
-        # OUTPUT: "randomforest_hyperparams_l.pkl"
-    
-    if run_modeling_2:
-        print("Ejecutando Compracion_de_modelos_h() ...")
-        modeling_2 = Compracion_de_modelos_h()
-        # INPUT: "dataset_top.csv"
-        # OUTPUT: "final_dataset_h.csv"
-        # OUTPUT: "randomforest_model_h.pkl"
-        # OUTPUT: "randomforest_hyperparams_h.pkl"
-    
-    print("Entrenando modelo...")
-    print("Pipeline finalizado.")
+            if pipeline_config["run_scraping_details"]:
+                scraper_adondevivir_detalles(
+                    folder_name=folder_name,
+                    input_path=config["paths"]["raw_data"],
+                    output_path=config["paths"]["processed_data"]
+                    )
+
+            # -------------------------
+            # PROCESSING
+            # -------------------------
+            if pipeline_config["run_processing"]:
+                process_adondevivir(
+                    folder_name=folder_name
+                )
+
+            # -------------------------
+            # FEATURES
+            # -------------------------
+            if pipeline_config["run_geo"]:
+                geo_location(folder_name=folder_name)
+
+            if pipeline_config["run_proximidad"]:
+                proximidad_process(folder_name=folder_name)
+
+            if pipeline_config["run_preprocessing"]:
+                data_preprocessing(folder_name=folder_name)
+
+            if pipeline_config["run_feature_engineering"]:
+                feature_engineering(folder_name=folder_name)
+
+            if pipeline_config["run_splitting"]:
+                dataset_split(folder_name=folder_name)
+
+            # -------------------------
+            # MODELING
+            # -------------------------
+            if pipeline_config["run_modeling_l"]:
+                Comparacion_modelos_l(
+                    folder_name=folder_name,
+                    target=modeling_config["target"],
+                    features=modeling_config["features"],
+                    test_size=modeling_config["test_size"],
+                    random_state=modeling_config["random_state"],
+                    n_trials=modeling_config["n_trials"],
+                    enabled_models=modeling_config["enabled_models"]
+                )
+
+            if pipeline_config["run_modeling_h"]:
+                Comparacion_modelos_h(
+                    folder_name=folder_name,
+                    target=modeling_config["target"],
+                    features=modeling_config["features"],
+                    test_size=modeling_config["test_size"],
+                    random_state=modeling_config["random_state"],
+                    n_trials=modeling_config["n_trials"],
+                    enabled_models=modeling_config["enabled_models"]
+                )
 
     fin = time.perf_counter()
 
+    print("Pipeline finalizado.")
     print(f"Tiempo de ejecución: {fin - inicio:.2f} segundos")
 # -------------------------
 # ENTRY POINT
 # -------------------------
 if __name__ == "__main__":
-    run_pipleline(run_scraping_1 = False, run_scraping_2 = False, run_processing_1 = False,
-                  run_features_1 = True, run_features_2 = False, run_preprocessing_1=False,
-                  run_features_3 = False, run_splitting = False,
-                  run_modeling_1 = False, run_modeling_2 = False)
+    run_pipeline()

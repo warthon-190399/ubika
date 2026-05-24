@@ -1,4 +1,3 @@
-import config
 from playwright.sync_api import sync_playwright
 import pandas as pd
 import time
@@ -69,46 +68,40 @@ def scrapear_pagina(page_num, url_template):
 
     return data
 
-def main():
-    for source, properaty_type in config.SCRAPING_CONFIG.items():
-        for property_type, settings in properaty_type.items():
-            url_template = settings["url_template"]
-            pages = settings["page"]
-            folder_name = settings["folder"]
-            
-            # Crear carpeta si no existe y cambiar al directorio
-            BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-            BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "..",".."))
-            file_location = os.path.join(BASE_DIR, "data", "raw")
-            #adondevivir_path = os.path.join(file_location, "adondevivir") # New folder
-            adondevivir_path = os.path.join(file_location, folder_name) # New folder
+def main(folder_name, pages, url_template, output_path):
 
-            os.makedirs(adondevivir_path, exist_ok=True)
-            os.chdir(adondevivir_path)
-            
-            # Scrapeo de todas las páginas
-            all_data = []
+    output_folder = os.path.join(output_path, folder_name)
+    os.makedirs(output_folder, exist_ok=True)
 
-            for pagina in range(1, 142): # Original pages 142
-                #resultados_pagina = scrapear_pagina(pagina)
-                resultados_pagina = scrapear_pagina(pagina, url_template)
+    all_data = []
 
-                # Guardar CSV individual
-                if resultados_pagina:
-                    df_temp = pd.DataFrame(resultados_pagina)
-                    df_temp.to_csv(f"{folder_name}_pagina_{pagina}.csv", index=False)
-                    print(f"✅ Página {pagina} guardada.")
-                    all_data.extend(resultados_pagina)
-                else:
-                    print(f"⚠️ Sin datos en página {pagina}.")
+    for pagina in range(1, pages): # Original pages 142
+        resultados_pagina = scrapear_pagina(pagina, url_template)
 
-            # Guardar consolidado
-            if all_data:
-                df_total = pd.DataFrame(all_data)
-                df_total.to_csv(f"{folder_name}_todas_las_paginas.csv", index=False)
-                print(f"📦 Archivo consolidado guardado como '{folder_name}_todas_las_paginas.csv'")
-            else:
-                print("⚠️ No se obtuvieron datos en ninguna página.")
+        # Guardar CSV individual
+        if resultados_pagina:
+            df_temp = pd.DataFrame(resultados_pagina)
+
+            df_temp.to_csv(
+                os.path.join(output_folder, f"{folder_name}_pagina_{pagina}.csv"),
+                index=False
+            )
+            print(f"✅ Página {pagina} guardada.")
+            all_data.extend(resultados_pagina)
+        else:
+            print(f"⚠️ Sin datos en página {pagina}.")
+
+    # Guardar consolidado
+    if all_data:
+        df_total = pd.DataFrame(all_data)
+        df_total.to_csv(
+            os.path.join(output_folder,f"{folder_name}_todas_las_paginas.csv"), 
+            index=False
+            )
+        
+        print(f"📦 Archivo consolidado guardado como '{folder_name}_todas_las_paginas.csv'")
+    else:
+        print("⚠️ No se obtuvieron datos en ninguna página.")
 
 if __name__ == "__main__":
     main()
