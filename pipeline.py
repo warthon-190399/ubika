@@ -4,6 +4,8 @@
 import yaml
 import time
 
+from src.utils.path_manager import build_paths
+
 from src.data.scraping.scraper_adondevivir import main as scraper_adondevivir
 from src.data.scraping.scraper_adondevivir_detalles import main as scraper_adondevivir_detalles
 
@@ -39,9 +41,7 @@ def run_pipeline():
     modeling_config = config["modeling"]
 
     for source, property_types in datasets_config.items():
-        for property_type, settings in property_types.items():
-
-            dataset_cfg = settings
+        for property_type, dataset_cfg in property_types.items():
 
             folder_name = dataset_cfg["folder"]
 
@@ -49,6 +49,13 @@ def run_pipeline():
 
             pages = scraping_cfg["pages"]
             url_template = scraping_cfg["url_template"]
+
+            paths = build_paths(
+                config,
+                source,
+                property_type
+            )
+
 
             print(f"\n📦 Procesando: {folder_name}")
 
@@ -59,7 +66,7 @@ def run_pipeline():
                 scraper_adondevivir(
                     pages=pages,
                     url_template=url_template,
-                    output_file=paths["raw_file"]
+                    output_file=paths["paths"]["raw_file"]
                 )
 
             if pipeline_config["run_scraping_details"]:
