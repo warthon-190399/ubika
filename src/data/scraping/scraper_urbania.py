@@ -1,44 +1,51 @@
 """
-scraper_urbania_venta.py
-========================
-Scraper de inmuebles en venta en Urbania.pe usando Playwright (stealth).
-Paginación: ?page=N — cada página abre un browser fresco para evitar detección.
-
-Instalación:
-    pip install playwright beautifulsoup4 lxml
-    playwright install chromium
+scraper_urbania.py
+==================
+Scraper de listings de Urbania.pe.
+Escribe directamente a Supabase (tabla urbania_listings).
+Ya no genera CSV.
 
 Uso:
-    python scraper_urbania_venta.py
-    python scraper_urbania_venta.py --url "https://urbania.pe/buscar/venta-de-departamentos-en-miraflores" --pages 3
-    python scraper_urbania_venta.py --show
+    python scraper_urbania.py
+    python scraper_urbania.py --url "https://urbania.pe/buscar/venta-de-departamentos-en-miraflores" --pages 3
+    python scraper_urbania.py --show
 """
 
 import re
-import csv
 import time
 import random
+import datetime
 import argparse
-from pathlib import Path
+import logging
+
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 from bs4 import BeautifulSoup
 
+from service.urbania_service import upsert_listings, make_prop_id
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s  %(levelname)-8s  %(message)s",
+    datefmt="%H:%M:%S",
+)
+logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
 
-BASE_URL   = "https://urbania.pe/buscar/alquiler-de-propiedades-en-lima"
-OUTPUT_CSV = "urbania_alquiler.csv"
-MAX_PAGES  = 1
+# URLs y páginas vienen del config.yaml
+_CFG      = _CFG["scraping"]["sources"]["urbania"]
+BASE_URL  = _CFG["rent"]["url_template"]
+MAX_PAGES = _CFG["rent"]["pages"]
 DELAY_PAGE = (2, 4)
 
-FIELDNAMES = ["url", "precio", "mantenimiento", "m2_total", "dorms", "banos", "estac", "direccion", "distrito"]
-
-
-# ---------------------------------------------------------------------------
-# Anti-ban helpers
-# ---------------------------------------------------------------------------
+FIELDNAMES = [
+    "url", "scrape_date",
+    "precio", "mantenimiento", "m2_total",
+    "dorms", "banos", "estac",
+    "direccion", "distrito",
+]
 
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
@@ -46,6 +53,11 @@ USER_AGENTS = [
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0",
 ]
+
+
+# ---------------------------------------------------------------------------
+# Anti-ban helpers
+# ---------------------------------------------------------------------------
 
 def random_ua():
     return random.choice(USER_AGENTS)
@@ -73,7 +85,6 @@ def dismiss_popup(page):
             if btn:
                 btn.dispatch_event("click")
                 time.sleep(0.7)
-                print("  🗙 Popup cerrado")
                 return
         except PWTimeout:
             continue
@@ -87,7 +98,7 @@ def build_url(base: str, page_num: int) -> str:
 # Parsing
 # ---------------------------------------------------------------------------
 
-def parse_listings(html: str) -> list[dict]:
+def parse_listings(html: str, scrape_date: str) -> list[dict]:
     soup = BeautifulSoup(html, "lxml")
     posting_tops = (
         soup.select("div.postingCard-module__posting-top") or
@@ -96,13 +107,15 @@ def parse_listings(html: str) -> list[dict]:
 
     results = []
     for card in posting_tops:
-        data = {}
+        data: dict = {"scrape_date": scrape_date}
 
         price_tag = card.select_one("[class='postingPrices-module__price']")
         data["precio"] = price_tag.get_text(strip=True) if price_tag else ""
 
-        mantenimiento_tag = card.select_one("[class='postingPrices-module__expenses postingPrices-module__expenses-property-listing']")
-        data["mantenimiento"] = mantenimiento_tag.get_text(strip=True) if mantenimiento_tag else ""
+        mant_tag = card.select_one(
+            "[class='postingPrices-module__expenses postingPrices-module__expenses-property-listing']"
+        )
+        data["mantenimiento"] = mant_tag.get_text(strip=True) if mant_tag else ""
 
         feat_spans = card.select(
             "[data-qa='POSTING_CARD_FEATURES'] span, "
@@ -111,9 +124,9 @@ def parse_listings(html: str) -> list[dict]:
         feat_text = " | ".join(s.get_text(strip=True) for s in feat_spans)
 
         m2    = re.search(r"([\d,\.]+)\s*m²", feat_text)
-        dorms = re.search(r"(\d+)\s*dorm", feat_text, re.I)
-        banos = re.search(r"(\d+)\s*ba[ñn]", feat_text, re.I)
-        estac = re.search(r"(\d+)\s*estac", feat_text, re.I)
+        dorms = re.search(r"(\d+)\s*dorm",    feat_text, re.I)
+        banos = re.search(r"(\d+)\s*ba[ñn]",  feat_text, re.I)
+        estac = re.search(r"(\d+)\s*estac",   feat_text, re.I)
         data["m2_total"] = m2.group(1)    if m2    else ""
         data["dorms"]    = dorms.group(1) if dorms else ""
         data["banos"]    = banos.group(1) if banos else ""
@@ -148,8 +161,7 @@ def parse_listings(html: str) -> list[dict]:
 # Scraping — browser fresco por página
 # ---------------------------------------------------------------------------
 
-def scrape_page(page_url: str, headless: bool) -> list[dict]:
-    """Abre un browser limpio, scrapea una página, lo cierra y retorna los listings."""
+def scrape_page(page_url: str, scrape_date: str, headless: bool) -> list[dict]:
     with sync_playwright() as p:
         browser = p.chromium.launch(
             headless=headless,
@@ -168,7 +180,7 @@ def scrape_page(page_url: str, headless: bool) -> list[dict]:
             java_script_enabled=True,
             extra_http_headers={
                 "Accept-Language": "es-PE,es;q=0.9,en;q=0.8",
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,/;q=0.8",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                 "sec-ch-ua": '"Chromium";v="124", "Google Chrome";v="124"',
                 "sec-ch-ua-platform": '"Windows"',
             },
@@ -179,11 +191,11 @@ def scrape_page(page_url: str, headless: bool) -> list[dict]:
             Object.defineProperty(navigator, 'languages', { get: () => ['es-PE', 'es', 'en'] });
             window.chrome = { runtime: {} };
         """)
-
         page = context.new_page()
-        page.route("*/.{png,jpg,jpeg,gif,svg,woff,woff2,ttf,mp4,webp}", lambda r: r.abort())
-        page.route("*/{ads,analytics,gtm,pixel,tracking}*", lambda r: r.abort())
+        page.route("**/*.{png,jpg,jpeg,gif,svg,woff,woff2,ttf,mp4,webp}", lambda r: r.abort())
+        page.route("**/{ads,analytics,gtm,pixel,tracking}**", lambda r: r.abort())
 
+        listings = []
         try:
             page.goto(page_url, wait_until="domcontentloaded", timeout=30_000)
             dismiss_popup(page)
@@ -193,10 +205,9 @@ def scrape_page(page_url: str, headless: bool) -> list[dict]:
             )
             random_scroll(page)
             time.sleep(random.uniform(1, 2))
-            listings = parse_listings(page.content())
+            listings = parse_listings(page.content(), scrape_date)
         except PWTimeout:
-            print(f"  ⚠️  Timeout — saltando esta página")
-            listings = []
+            logger.warning(f"  Timeout — saltando página {page_url}")
         finally:
             context.close()
             browser.close()
@@ -204,38 +215,39 @@ def scrape_page(page_url: str, headless: bool) -> list[dict]:
     return listings
 
 
-def scrape_urbania(url=BASE_URL, max_pages=MAX_PAGES, output_csv=OUTPUT_CSV, headless=True):
-    csv_path = Path(output_csv)
+# ---------------------------------------------------------------------------
+# Orquestador principal
+# ---------------------------------------------------------------------------
 
-    with open(csv_path, "w", newline="", encoding="utf-8") as f:
-        csv.DictWriter(f, fieldnames=FIELDNAMES).writeheader()
-
+def scrape_urbania(url=BASE_URL, max_pages=MAX_PAGES, headless=True):
+    scrape_date  = str(datetime.date.today())
     all_listings = []
+
+    logger.info(f"Iniciando scraping: {max_pages} página(s) desde {url}")
 
     for page_num in range(1, max_pages + 1):
         page_url = build_url(url, page_num)
-        print(f"\n📄 Página {page_num}/{max_pages}: {page_url}")
+        logger.info(f"Página {page_num}/{max_pages}: {page_url}")
 
-        listings = scrape_page(page_url, headless)
-        print(f"  → {len(listings)} propiedades encontradas")
+        listings = scrape_page(page_url, scrape_date, headless)
+        logger.info(f"  {len(listings)} propiedades encontradas")
 
         if not listings:
-            print("  ⚠️  Sin resultados — última página o bloqueo.")
+            logger.warning("  Sin resultados — posible última página o bloqueo.")
             break
 
-        with open(csv_path, "a", newline="", encoding="utf-8") as f:
-            writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
-            for row in listings:
-                writer.writerow({k: row.get(k, "") for k in FIELDNAMES})
-                print(f"    {row.get('direccion') or row.get('distrito')} | {row.get('precio')}")
-                all_listings.append(row)
+        # ── Guardar directo a Supabase ──────────────────────────────
+        stats = upsert_listings(listings)
+        logger.info(f"  Supabase → upserted: {stats['upserted']}  errores: {stats['errors']}")
+
+        all_listings.extend(listings)
 
         if page_num < max_pages:
             wait = random.uniform(*DELAY_PAGE)
-            print(f"  ⏳ Esperando {wait:.1f}s antes de siguiente página...")
+            logger.info(f"  Esperando {wait:.1f}s...")
             time.sleep(wait)
 
-    print(f"\n✅ {len(all_listings)} propiedades guardadas en {csv_path}")
+    logger.info(f"Scraping finalizado: {len(all_listings)} propiedades procesadas")
     return all_listings
 
 
@@ -244,16 +256,10 @@ def scrape_urbania(url=BASE_URL, max_pages=MAX_PAGES, output_csv=OUTPUT_CSV, hea
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Scraper Urbania.pe")
-    parser.add_argument("--url",    default=BASE_URL,   help="URL base de búsqueda")
-    parser.add_argument("--pages",  default=MAX_PAGES,  type=int, help="Páginas a scrapear")
-    parser.add_argument("--output", default=OUTPUT_CSV, help="Archivo CSV de salida")
-    parser.add_argument("--show",   action="store_true", help="Mostrar navegador (no headless)")
+    parser = argparse.ArgumentParser(description="Scraper Urbania.pe → Supabase")
+    parser.add_argument("--url",   default=BASE_URL,  help="URL base de búsqueda")
+    parser.add_argument("--pages", default=MAX_PAGES, type=int, help="Páginas a scrapear")
+    parser.add_argument("--show",  action="store_true", help="Mostrar navegador")
     args = parser.parse_args()
 
-    scrape_urbania(
-        url        = args.url,
-        max_pages  = args.pages,
-        output_csv = args.output,
-        headless   = not args.show,
-    )
+    scrape_urbania(url=args.url, max_pages=args.pages, headless=not args.show)

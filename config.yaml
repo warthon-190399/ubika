@@ -1,0 +1,24 @@
+scraping:
+  sources:
+ 
+    urbania:
+      rent:
+        url_template: "https://urbania.pe/buscar/alquiler-de-propiedades-en-lima"
+        pages: 10
+        workers: 4
+      sale:
+        url_template: "https://urbania.pe/buscar/venta-de-propiedades-en-lima"
+        pages: 10
+        workers: 4
+ 
+    adondevivir:
+      rent:
+        url_template: "https://www.adondevivir.com/departamentos-en-alquiler-pagina-{page_num}-q-lima.html"
+        pages: 1
+        workers: 8
+        delay_between: [1, 3]
+      sale:
+        url_template: "https://www.adondevivir.com/inmuebles-en-venta-pagina-{page_num}-q-lima.html"
+        pages: 5
+        workers: 4
+        delay_between: [1, 3]

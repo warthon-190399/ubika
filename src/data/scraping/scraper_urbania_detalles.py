@@ -1,47 +1,50 @@
 """
 scraper_urbania_detalles.py
 ===========================
-Lee URLs desde urbania_alquiler.csv y scrapea detalles en paralelo.
-Usa N workers simultáneos, cada uno con su propio browser Playwright.
+Lee la cola de URLs pendientes desde Supabase (detalle_status = 'pending')
+y scrapea los detalles en paralelo con N browsers.
 
-Instalación:
-    pip install playwright beautifulsoup4 pandas lxml
-    playwright install chromium
+Escribe directamente a urbania_detalles y actualiza detalle_status
+en urbania_listings por cada propiedad procesada.
 
 Uso:
     python scraper_urbania_detalles.py
     python scraper_urbania_detalles.py --workers 5
     python scraper_urbania_detalles.py --show
+    python scraper_urbania_detalles.py --retry-errors   # reintenta los 'error' también
 """
-
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))  # llega a la raíz
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 import re
-import csv
 import time
 import random
+import datetime
 import argparse
-from pathlib import Path
+import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from threading import Lock
 
-import pandas as pd
-from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
+from bs4 import BeautifulSoup
 
+from service.urbania_service          import get_pending_urls, get_stats
+from service.urbania_detalles_service import save_detalle, mark_gone, mark_error
 
-# -------------------------------------------------------------------
-# CONFIG
-# -------------------------------------------------------------------
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s  %(levelname)-8s  %(message)s",
+    datefmt="%H:%M:%S",
+)
+logger = logging.getLogger(__name__)
 
-INPUT_CSV  = r"D:\projects\ubika\urbania_alquiler.csv"
-OUTPUT_CSV = r"D:\projects\ubika\urbania_alquiler_detalles.csv"
+# ---------------------------------------------------------------------------
+# Config
+# ---------------------------------------------------------------------------
 
-WORKERS       = 4     # browsers en paralelo — sube a 6-8 si tu máquina aguanta
+WORKERS       = 4
 DELAY_BETWEEN = (1, 3)
-
-FIELDNAMES = [
-    "url", "antiguedad", "descripcion",
-    "publicado_por", "codigo_urbania", "fecha_publicacion",
-]
 
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
@@ -50,14 +53,13 @@ USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0",
 ]
 
-# Lock para escribir al CSV y al contador de progreso de forma thread-safe
-_write_lock = Lock()
+_print_lock = Lock()
 _counter    = {"done": 0, "total": 0}
 
 
-# -------------------------------------------------------------------
-# HELPERS
-# -------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
 
 def random_ua():
     return random.choice(USER_AGENTS)
@@ -77,35 +79,45 @@ def dismiss_popup(page):
         except PWTimeout:
             continue
 
+def _is_gone(page) -> bool:
+    """Detecta si la publicación fue dada de baja."""
+    url = page.url
+    if any(x in url for x in ["404", "not-found"]):
+        return True
+    try:
+        page.wait_for_selector(
+            "div[class*='not-found'], div[class*='error-page'], h1[class*='404']",
+            timeout=2_000,
+        )
+        return True
+    except PWTimeout:
+        return False
 
-# -------------------------------------------------------------------
-# PARSER
-# -------------------------------------------------------------------
 
-def parse_property(html: str, url: str) -> dict:
+# ---------------------------------------------------------------------------
+# Parser
+# ---------------------------------------------------------------------------
+
+def parse_property(html: str) -> dict:
     soup = BeautifulSoup(html, "lxml")
-    data = dict.fromkeys(FIELDNAMES, "")
-    data["url"] = url
+    data: dict = {}
 
-    # Antigüedad
     icon = soup.select_one("i.icon-antiguedad")
     if icon:
         raw = icon.parent.get_text(" ", strip=True)
         data["antiguedad"] = re.sub(r"\s+", " ", raw).strip()
 
-    # Descripción — selector con fallback genérico
     desc = (
         soup.select_one("div.description-module__wrapper-description___2rEoY") or
         soup.select_one("div[class*='wrapper-description']") or
         soup.select_one("div[class*='description']")
     )
     if desc:
-        text = desc.get_text(" ", strip=True)          # saltos → espacio
-        text = re.sub(r"\*+", "", text)                 # quitar **
-        text = re.sub(r"\s{2,}", " ", text)             # espacios múltiples → uno
+        text = desc.get_text(" ", strip=True)
+        text = re.sub(r"\*+", "", text)
+        text = re.sub(r"\s{2,}", " ", text)
         data["descripcion"] = text.strip()
 
-    # Publicado por
     pub = (
         soup.select_one("h3.publisherData-module__publisher-name___6HD5R") or
         soup.select_one("[class*='publisher-name']")
@@ -113,7 +125,6 @@ def parse_property(html: str, url: str) -> dict:
     if pub:
         data["publicado_por"] = pub.get_text(strip=True)
 
-    # Código Urbania
     code = (
         soup.select_one("li.publiserCodes-module__publisher-codes-item___1MPT4") or
         soup.select_one("[class*='publisher-codes-item']")
@@ -123,7 +134,6 @@ def parse_property(html: str, url: str) -> dict:
         if m:
             data["codigo_urbania"] = m.group(1)
 
-    # Fecha publicación
     fecha = (
         soup.select_one("p.userViews-module__post-antiquity-views___8Zfch") or
         soup.select_one("[class*='post-antiquity']")
@@ -134,14 +144,18 @@ def parse_property(html: str, url: str) -> dict:
     return data
 
 
-# -------------------------------------------------------------------
-# WORKER — cada thread corre su propio browser
-# -------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Worker — un browser por hilo
+# ---------------------------------------------------------------------------
 
-def scrape_url(url: str, headless: bool, csv_writer, csv_file) -> dict:
-    """Abre un browser limpio, scrapea la URL, escribe al CSV, cierra."""
-    empty = dict.fromkeys(FIELDNAMES, "")
-    empty["url"] = url
+def scrape_one(item: dict, headless: bool) -> str:
+    """
+    Scrapea una URL, guarda en Supabase y devuelve el status resultante.
+    item = {"prop_id": "...", "url": "..."}
+    """
+    prop_id = item["prop_id"]
+    url     = item["url"]
+    status  = "error"
 
     with sync_playwright() as p:
         browser = p.chromium.launch(
@@ -176,73 +190,112 @@ def scrape_url(url: str, headless: bool, csv_writer, csv_file) -> dict:
         try:
             page.goto(url, wait_until="domcontentloaded", timeout=30_000)
             dismiss_popup(page)
-            page.wait_for_selector(
-                "div[class*='wrapper-description'], div[class*='description']",
-                timeout=15_000,
-            )
-            time.sleep(random.uniform(*DELAY_BETWEEN))
-            data = parse_property(page.content(), url)
+
+            if _is_gone(page):
+                mark_gone(prop_id)
+                status = "gone"
+            else:
+                page.wait_for_selector(
+                    "div[class*='wrapper-description'], div[class*='description']",
+                    timeout=15_000,
+                )
+                time.sleep(random.uniform(*DELAY_BETWEEN))
+                data = parse_property(page.content())
+                data["scrape_date"] = str(datetime.date.today())
+
+                if save_detalle(prop_id, data):
+                    status = "ok"
+                else:
+                    status = "error"
+
         except PWTimeout:
-            data = empty
-        except Exception as e:
-            data = empty
+            mark_error(prop_id)
+            status = "error"
+        except Exception as exc:
+            logger.error(f"  Excepción inesperada en {url}: {exc}")
+            mark_error(prop_id)
+            status = "error"
         finally:
             context.close()
             browser.close()
 
-    # Progreso + escritura thread-safe
-    with _write_lock:
+    # Log de progreso thread-safe
+    with _print_lock:
         _counter["done"] += 1
         n, total = _counter["done"], _counter["total"]
-        status = data.get("publicado_por") or "⚠️ sin datos"
-        print(f"  [{n}/{total}] {status}  —  {url.split('/')[-1]}")
-        csv_writer.writerow(data)
-        csv_file.flush()
+        icon = {"ok": "✓", "gone": "✗", "error": "⚠"}.get(status, "?")
+        logger.info(f"  [{n}/{total}] {icon} {status:<6}  {url.split('/')[-1][:60]}")
 
-    return data
+    return status
 
 
-# -------------------------------------------------------------------
-# MAIN
-# -------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Orquestador principal
+# ---------------------------------------------------------------------------
 
-def scrape_details(headless=True, workers=WORKERS):
-    df   = pd.read_csv(INPUT_CSV)
-    urls = df["url"].dropna().astype(str).unique().tolist()
+def scrape_details(headless=True, workers=WORKERS, retry_errors=False):
+    # Obtener cola desde Supabase
+    pending = get_pending_urls()
+    if retry_errors:
+        from service.supabase_client import get_client
+        sb = get_client()
+        errors = sb.table("urbania_listings").select("prop_id, url").eq(
+            "detalle_status", "error"
+        ).execute()
+        # evitar duplicados
+        pending_ids = {r["prop_id"] for r in pending}
+        for r in (errors.data or []):
+            if r["prop_id"] not in pending_ids:
+                pending.append(r)
 
-    _counter["total"] = len(urls)
-    print(f"\n📦 {len(urls)} URLs  |  {workers} workers en paralelo\n")
+    if not pending:
+        logger.info("No hay URLs pendientes en Supabase.")
+        stats = get_stats()
+        logger.info(f"Estado actual: {stats}")
+        return
 
-    csv_path = Path(OUTPUT_CSV)
-    results  = []
+    _counter["total"] = len(pending)
+    _counter["done"]  = 0
 
-    with open(csv_path, "w", newline="", encoding="utf-8-sig") as csv_file:
-        writer = csv.DictWriter(csv_file, fieldnames=FIELDNAMES)
-        writer.writeheader()
+    logger.info(f"\nCola: {len(pending)} URLs  |  {workers} workers\n")
 
-        with ThreadPoolExecutor(max_workers=workers) as pool:
-            futures = {
-                pool.submit(scrape_url, url, headless, writer, csv_file): url
-                for url in urls
-            }
-            for future in as_completed(futures):
-                try:
-                    results.append(future.result())
-                except Exception as e:
-                    print(f"  ❌ Error inesperado: {e}")
+    results = {"ok": 0, "gone": 0, "error": 0}
 
-    print(f"\n✅ {len(results)} registros → {csv_path}")
-    return pd.DataFrame(results)
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        futures = {
+            pool.submit(scrape_one, item, headless): item
+            for item in pending
+        }
+        for future in as_completed(futures):
+            try:
+                status = future.result()
+                results[status] = results.get(status, 0) + 1
+            except Exception as exc:
+                logger.error(f"  Error en future: {exc}")
+                results["error"] += 1
+
+    logger.info(
+        f"\nFinalizado → ok: {results['ok']}  "
+        f"gone: {results['gone']}  "
+        f"error: {results['error']}"
+    )
+    logger.info(f"Estado Supabase: {get_stats()}")
 
 
-# -------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 # CLI
-# -------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--show",    action="store_true", help="Mostrar navegadores")
-    parser.add_argument("--workers", type=int, default=WORKERS, help="Browsers en paralelo")
+    parser = argparse.ArgumentParser(description="Scraper detalles Urbania → Supabase")
+    parser.add_argument("--show",         action="store_true", help="Mostrar navegadores")
+    parser.add_argument("--workers",      type=int, default=WORKERS)
+    parser.add_argument("--retry-errors", action="store_true",
+                        help="Reintentar también los que quedaron en status='error'")
     args = parser.parse_args()
 
-    scrape_details(headless=not args.show, workers=args.workers)
+    scrape_details(
+        headless=not args.show,
+        workers=args.workers,
+        retry_errors=args.retry_errors,
+    )
