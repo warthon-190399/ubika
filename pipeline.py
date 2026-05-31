@@ -50,6 +50,7 @@ def run_pipeline():
             pages = scraping_cfg["pages"]
             url_template = scraping_cfg["url_template"]
 
+            # Path manager
             paths = build_paths(
                 config,
                 source,
@@ -66,14 +67,14 @@ def run_pipeline():
                 scraper_adondevivir(
                     pages=pages,
                     url_template=url_template,
-                    output_file=paths["paths"]["raw_file"]
+                    output_file=paths["raw_file"]
                 )
 
             if pipeline_config["run_scraping_details"]:
                 scraper_adondevivir_detalles(
                     folder_name=folder_name,
-                    input_path=config["paths"]["raw_data"],
-                    output_path=config["paths"]["processed_data"]
+                    input_path=paths["raw_data"],
+                    output_path=paths["processed_data"]
                     )
 
             # -------------------------
@@ -81,7 +82,7 @@ def run_pipeline():
             # -------------------------
             if pipeline_config["run_processing"]:
                 process_adondevivir(
-                    folder_name=folder_name
+                    folder_name=folder_name,
                 )
 
             # -------------------------

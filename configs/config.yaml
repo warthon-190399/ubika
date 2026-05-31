@@ -55,11 +55,11 @@ modeling:
     CatBoost: false
 
 pipeline:
-  run_scraping: true
+  run_scraping: false
   run_scraping_details: false
   run_processing: false
 
-  run_geo: false
+  run_geo: true
   run_proximidad: false
   run_preprocessing: false
   run_feature_engineering: false

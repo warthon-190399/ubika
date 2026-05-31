@@ -1,41 +1,40 @@
-#
 import pandas as pd
-import googlemaps
+from geopy.geocoders import Nominatim
+from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 from time import sleep
-from dotenv import load_dotenv
 import os
 
-def obtener_coordenadas(direccion, gmaps, contador=None):
+
+def obtener_coordenadas(direccion, geolocator, contador=None):
     try:
-        resultado = gmaps.geocode(direccion)
+        resultado = geolocator.geocode(direccion)
         if resultado:
-            latitud = resultado[0]["geometry"]["location"]["lat"]
-            longitud = resultado[0]["geometry"]["location"]["lng"]
+            latitud = resultado.latitude
+            longitud = resultado.longitude
             print(f"[{contador}] ✅ Coordenadas encontradas para: {direccion}")
             return latitud, longitud
         else:
             print(f"[{contador}] ⚠️ No se encontraron coordenadas para: {direccion}")
             return None, None
-    except Exception as e:
+    except (GeocoderTimedOut, GeocoderServiceError) as e:
         print(f"[{contador}] ❌ Error al geocodificar '{direccion}': {e}")
         return None, None
+    except Exception as e:
+        print(f"[{contador}] ❌ Error inesperado '{direccion}': {e}")
+        return None, None
+
 
 def main(folder_name):
-    # Read .env.example
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
-    ENV_PATH = os.path.join(BASE_DIR, ".env")
-    input_path = os.path.join(BASE_DIR, "data", "processed",folder_name,f"{folder_name}_processed.csv")
-    output_path = os.path.join(BASE_DIR, "data", "processed",folder_name,f"{folder_name}_processed_geo.csv")
+    input_path = os.path.join(BASE_DIR, "data", "processed", folder_name, f"{folder_name}_processed.csv")
+    output_path = os.path.join(BASE_DIR, "data", "processed", folder_name, f"{folder_name}_processed_geo.csv")
 
-    load_dotenv(ENV_PATH)
-    API_KEY = os.getenv("GOOGLE_GEOENCODING_APIKEY").strip().replace('"','').replace("'",'')
-
-    gmaps = googlemaps.Client(key=API_KEY)
+    # Nominatim requiere un user_agent único para identificar tu app
+    geolocator = Nominatim(user_agent="ubika_geo_app")
 
     df = pd.read_csv(input_path)
 
-    # Aplicar geocodificación con contador
     latitudes = []
     longitudes = []
 
@@ -43,16 +42,18 @@ def main(folder_name):
         direccion = row.direccion_completa
         if pd.isna(direccion):
             direccion = row.distrito
-        lat, lon = obtener_coordenadas(direccion, gmaps, contador=i)
+
+        lat, lon = obtener_coordenadas(direccion, geolocator, contador=i)
         latitudes.append(lat)
         longitudes.append(lon)
-        sleep(1)
+        sleep(1)  # Nominatim exige máximo 1 request/segundo
 
-    # Asignar al DataFrame
     df["latitud"] = latitudes
     df["longitud"] = longitudes
 
-    df.to_csv(output_path, index = False)
+    df.to_csv(output_path, index=False)
+    print(f"✅ Geocodificación finalizada. Archivo guardado en:\n{output_path}")
+
 
 if __name__ == "__main__":
     main()
