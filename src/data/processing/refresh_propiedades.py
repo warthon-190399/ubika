@@ -27,43 +27,10 @@ print("✅ Vista refrescada\n")
 
 #%%
 # Resumen general
-rows = execute("""
-    SELECT
-        fuente,
-        COUNT(*)                        AS total,
-        COUNT(descripcion)              AS con_descripcion,
-        COUNT(antiguedad)               AS con_antiguedad,
-        COUNT(publicado_por)            AS con_publicado_por
-    FROM propiedades_union
-    GROUP BY fuente
-    ORDER BY fuente
-""")
+rows = execute("""SELECT * FROM propiedades_union""")
 
-print(f"{'Fuente':<15} {'Total':>7} {'Descripcion':>13} {'Antiguedad':>12} {'Publicado por':>14}")
-print("-" * 65)
-total_general = 0
-for r in rows:
-    print(
-        f"{r['fuente']:<15} {r['total']:>7} "
-        f"{r['con_descripcion']:>13} "
-        f"{r['con_antiguedad']:>12} "
-        f"{r['con_publicado_por']:>14}"
-    )
-    total_general += r['total']
 
-print("-" * 65)
-print(f"{'TOTAL':<15} {total_general:>7}\n")
+# %%
+rows
 
-# Top distritos
-print("Top 10 distritos:")
-distritos = execute("""
-    SELECT distrito, COUNT(*) AS n
-    FROM propiedades_union
-    WHERE distrito IS NOT NULL
-    GROUP BY distrito
-    ORDER BY n DESC
-    LIMIT 10
-""")
-for r in distritos:
-    print(f"  {r['distrito']:<35} {r['n']:>5}")
 # %%

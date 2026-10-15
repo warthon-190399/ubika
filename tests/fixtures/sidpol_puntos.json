@@ -1,0 +1,107 @@
+{
+ "features": [
+  {
+   "attributes": {
+    "OBJECTID": 3588337,
+    "ID_DGC_03": "355804571050215",
+    "fecha_hora_hecho": 1782864000000,
+    "fecha_actualizacion": 1785776597000,
+    "provincia_hecho": "LIMA",
+    "distrito_hecho": "CHORRILLOS",
+    "ubigeo_hecho_delito": "150108",
+    "tipo_hecho": "PATRIMONIO (DELITO)",
+    "subtipo_hecho": "ROBO",
+    "modalidad_hecho": "ROBO AGRAVADO",
+    "lat_hecho": -12.1929938,
+    "long_hecho": -77.0122692,
+    "ESTADO_COORD": "INVERTIDA"
+   }
+  },
+  {
+   "attributes": {
+    "OBJECTID": 3588463,
+    "ID_DGC_03": "355805065040202",
+    "fecha_hora_hecho": 1782864000000,
+    "fecha_actualizacion": 1785776597000,
+    "provincia_hecho": "LIMA",
+    "distrito_hecho": "VILLA MARIA DEL TRIUNFO",
+    "ubigeo_hecho_delito": "150143",
+    "tipo_hecho": "LEY DE VIOLENCIA CONTRA LA MUJER Y GRUPOS VULNERABLES",
+    "subtipo_hecho": "LEY PARA PREVENIR , SANCIONAR Y ERRADICAR LA VIOLENCIA CONTRA LAS MUJERES Y LOS INTEGRANTES DEL GRUPO FAMILIAR (LEY Nro 30364)",
+    "modalidad_hecho": "VIOLENCIA PSICOLOGICA",
+    "lat_hecho": -12.1907403,
+    "long_hecho": -76.9282077,
+    "ESTADO_COORD": "INVERTIDA"
+   }
+  },
+  {
+   "attributes": {
+    "OBJECTID": 3588505,
+    "ID_DGC_03": "355805425040204",
+    "fecha_hora_hecho": 1782864600000,
+    "fecha_actualizacion": 1785776597000,
+    "provincia_hecho": "LIMA",
+    "distrito_hecho": "SAN MARTIN DE PORRES",
+    "ubigeo_hecho_delito": "150135",
+    "tipo_hecho": "LEY DE VIOLENCIA CONTRA LA MUJER Y GRUPOS VULNERABLES",
+    "subtipo_hecho": "LEY PARA PREVENIR",
+    "modalidad_hecho": "VIOLENCIA ECONOMICA O PATRIMONIAL",
+    "lat_hecho": -11.9667056,
+    "long_hecho": -77.0899918,
+    "ESTADO_COORD": "INVERTIDA"
+   }
+  },
+  {
+   "attributes": {
+    "OBJECTID": 3588709,
+    "ID_DGC_03": "355806311010316",
+    "fecha_hora_hecho": 1782866400000,
+    "fecha_actualizacion": 1785776597000,
+    "provincia_hecho": "CALLAO",
+    "distrito_hecho": "VENTANILLA",
+    "ubigeo_hecho_delito": "070106",
+    "tipo_hecho": "VIDA, EL CUERPO Y LA SALUD (DELITO)",
+    "subtipo_hecho": "LESIONES",
+    "modalidad_hecho": "LESIONES",
+    "lat_hecho": -11.8285048,
+    "long_hecho": -77.1226228,
+    "ESTADO_COORD": "INVERTIDA"
+   }
+  },
+  {
+   "attributes": {
+    "OBJECTID": 3588795,
+    "ID_DGC_03": "355806611050215",
+    "fecha_hora_hecho": 1782868800000,
+    "fecha_actualizacion": 1785776597000,
+    "provincia_hecho": "LIMA",
+    "distrito_hecho": "LOS OLIVOS",
+    "ubigeo_hecho_delito": "150117",
+    "tipo_hecho": "PATRIMONIO (DELITO)",
+    "subtipo_hecho": "ROBO",
+    "modalidad_hecho": "ROBO AGRAVADO",
+    "lat_hecho": -11.9562118,
+    "long_hecho": -77.0796432,
+    "ESTADO_COORD": "INVERTIDA"
+   }
+  },
+  {
+   "attributes": {
+    "OBJECTID": 3588970,
+    "ID_DGC_03": "355807011050107",
+    "fecha_hora_hecho": 1782865920000,
+    "fecha_actualizacion": 1785776597000,
+    "provincia_hecho": "LIMA",
+    "distrito_hecho": "SAN JUAN DE LURIGANCHO",
+    "ubigeo_hecho_delito": "150132",
+    "tipo_hecho": "PATRIMONIO (DELITO)",
+    "subtipo_hecho": "HURTO",
+    "modalidad_hecho": "HURTO AGRAVADO",
+    "lat_hecho": -12.0264739,
+    "long_hecho": -76.9912696,
+    "ESTADO_COORD": "INVERTIDA"
+   }
+  }
+ ],
+ "exceededTransferLimit": true
+}

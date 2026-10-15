@@ -1,0 +1,49 @@
+.sidebar {
+  width:256px; min-width:256px; background:var(--navy2);
+  border-right:1px solid var(--border);
+  display:flex; flex-direction:column; overflow:hidden;
+  transition:width .25s ease,min-width .25s ease;
+}
+.sidebar.collapsed { width:52px; min-width:52px; }
+
+.logo {
+  padding:14px 14px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:10px; min-height:58px;
+}
+.logoImg { width:80px; height:auto; object-fit:contain; flex-shrink:0; }
+.logoFallback { display:flex; align-items:center; gap:8px; }
+.logoText { font-family:'Inter',sans-serif; font-size:20px; font-weight:800; color:var(--white); letter-spacing:-0.3px; }
+.logoTag { font-family:var(--font-mono); font-size:7.5px; color:var(--muted); letter-spacing:.06em; margin-top:1px; }
+.collapseBtn {
+  margin-left:auto; background:transparent; border:1px solid var(--border2);
+  color:var(--muted); width:22px; height:22px; border-radius:4px;
+  cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; transition:all .15s;
+}
+.collapseBtn:hover { border-color:var(--orange); color:var(--orange); }
+
+.body { flex:1; overflow-y:auto; padding:14px; }
+.section { margin-bottom:18px; }
+.secLabel {
+  font-family:var(--font-mono); font-size:8.5px; font-weight:500;
+  color:var(--muted); letter-spacing:.14em; text-transform:uppercase;
+  padding-bottom:7px; border-bottom:1px solid var(--border); margin-bottom:11px;
+}
+.filterGroup { margin-bottom:10px; }
+.filterLabel { font-family:var(--font-mono); font-size:9.5px; color:var(--muted); display:flex; justify-content:space-between; margin-bottom:4px; }
+.filterVal { color:var(--orange); }
+.chipRow { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:0; }
+.chip {
+  font-family:var(--font-mono); font-size:9.5px; padding:4px 9px;
+  border-radius:20px; border:1px solid var(--border2); color:var(--muted);
+  cursor:pointer; transition:all .15s; background:transparent;
+}
+.chip:hover { border-color:var(--orange); color:var(--text); }
+.chipOn { background:var(--orange); color:#fff; border-color:var(--orange); font-weight:600; }
+.prefRow { margin-bottom:8px; }
+.prefHeader { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
+.prefName { font-family:var(--font-mono); font-size:9.5px; color:var(--muted); display:flex; align-items:center; gap:5px; }
+.prefNum { font-family:var(--font-mono); font-size:10px; font-weight:500; color:var(--orange); min-width:14px; text-align:right; }
+.prefTrack { height:2px; background:var(--navy4); border-radius:1px; position:relative; }
+.prefFill { height:100%; background:var(--orange); border-radius:1px; transition:width .2s ease; box-shadow:0 0 5px rgba(255,140,66,.4); pointer-events:none; }
+.prefInput { position:absolute; left:0; top:-5px; width:100%; height:12px; opacity:0; cursor:pointer; }

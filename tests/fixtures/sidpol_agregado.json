@@ -1,0 +1,46 @@
+{
+ "features": [
+  {
+   "attributes": {
+    "n": 5,
+    "distrito_hecho": "BELLAVISTA",
+    "tipo_hecho": "ADMINISTRACION PUBLICA (DELITO)"
+   }
+  },
+  {
+   "attributes": {
+    "n": 12,
+    "distrito_hecho": "BELLAVISTA",
+    "tipo_hecho": "FALTAS"
+   }
+  },
+  {
+   "attributes": {
+    "n": 1,
+    "distrito_hecho": "BELLAVISTA",
+    "tipo_hecho": "FE PUBLICA (DELITO)"
+   }
+  },
+  {
+   "attributes": {
+    "n": 28,
+    "distrito_hecho": "BELLAVISTA",
+    "tipo_hecho": "INTERVENCION POLICIALES"
+   }
+  },
+  {
+   "attributes": {
+    "n": 17,
+    "distrito_hecho": "BELLAVISTA",
+    "tipo_hecho": "LEY 30096 DELITOS INFORMATICOS, MODIFICADA POR LA LEY 30171"
+   }
+  },
+  {
+   "attributes": {
+    "n": 76,
+    "distrito_hecho": "BELLAVISTA",
+    "tipo_hecho": "LEY DE VIOLENCIA CONTRA LA MUJER Y GRUPOS VULNERABLES"
+   }
+  }
+ ]
+}

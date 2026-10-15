@@ -1,0 +1,28 @@
+.topbar {
+  height:50px; min-height:50px; background:var(--navy2);
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; padding:0 18px;
+}
+.kpis { display:flex; align-items:stretch; }
+.kpi {
+  padding:0 16px; display:flex; flex-direction:column;
+  justify-content:center; border-right:1px solid var(--border); height:50px;
+}
+.kpi:first-child { padding-left:0; }
+.kpiV { font-family:var(--font-mono); font-size:15px; font-weight:500; color:var(--text); line-height:1; }
+.kpiUp .kpiV { color:var(--orange); }
+.kpiL { font-family:var(--font-mono); font-size:8px; color:var(--muted); margin-top:2px; letter-spacing:.06em; }
+.mockBadge {
+  margin-left:16px; font-family:var(--font-mono); font-size:9px; color:var(--orange);
+  background:rgba(255,140,66,.1); border:1px solid rgba(255,140,66,.25);
+  border-radius:4px; padding:4px 10px; letter-spacing:.04em;
+}
+
+.errBadge {
+  margin-left: 16px;
+  font-family: var(--font-mono); font-size: 9px;
+  color: #e63329;
+  background: rgba(230,51,41,.1);
+  border: 1px solid rgba(230,51,41,.25);
+  border-radius: 4px; padding: 4px 10px; letter-spacing: .04em;
+}

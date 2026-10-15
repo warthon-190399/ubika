@@ -13,7 +13,7 @@ scrape_antiguedad = SCRAPE_ANTIGUEDAD
 from src.data.scraping.scraper_adondevivir import main as scraper_adondevivir
 from src.data.scraping.scraper_adondevivir_detalles import main as scraper_adondevivir_detalles
 
-from src.data.processing.process_adondevivir import main as process_adondevivir
+from data.processing.process_propiedades import main as process_adondevivir
 from src.data.preprocessing.data_preprocessing import main as data_preprocessing
 
 from src.features.feature_engineering import main as feature_engineering

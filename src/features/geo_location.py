@@ -1,64 +1,115 @@
-#
+"""
+geo_location.py
+===============
+Lee propiedades_procesadas desde Neon, geocodifica direccion_completa
+con Google Maps y actualiza las columnas latitud/longitud en la misma tabla.
+
+Solo procesa filas donde latitud IS NULL para no repetir llamadas a la API.
+
+Uso:
+    python src/features/geo_location.py
+"""
+
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "src"))
+
+import os
+import logging
+from time import sleep
+
 import pandas as pd
 import googlemaps
-from time import sleep
 from dotenv import load_dotenv
-import os
-import config
+from sqlalchemy import text
+from service.db_client import get_engine
 
-def obtener_coordenadas(direccion, gmaps, contador=None):
+load_dotenv(ROOT / ".env")
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s  %(levelname)-8s  %(message)s",
+    datefmt="%H:%M:%S",
+)
+logger = logging.getLogger(__name__)
+
+
+# ------------------------------------------------------------------
+# Geocodificación
+# ------------------------------------------------------------------
+
+def obtener_coordenadas(direccion: str, gmaps, contador: int = None):
     try:
         resultado = gmaps.geocode(direccion)
         if resultado:
-            latitud = resultado[0]["geometry"]["location"]["lat"]
-            longitud = resultado[0]["geometry"]["location"]["lng"]
-            print(f"[{contador}] ✅ Coordenadas encontradas para: {direccion}")
-            return latitud, longitud
+            lat = resultado[0]["geometry"]["location"]["lat"]
+            lon = resultado[0]["geometry"]["location"]["lng"]
+            logger.info(f"  [{contador}] ✅ {direccion[:60]}")
+            return lat, lon
         else:
-            print(f"[{contador}] ⚠️ No se encontraron coordenadas para: {direccion}")
+            logger.warning(f"  [{contador}] ⚠️ Sin resultados: {direccion[:60]}")
             return None, None
     except Exception as e:
-        print(f"[{contador}] ❌ Error al geocodificar '{direccion}': {e}")
+        logger.error(f"  [{contador}] ❌ Error: {e}")
         return None, None
 
+
+# ------------------------------------------------------------------
+# Pipeline principal
+# ------------------------------------------------------------------
+
 def main():
-    for source, properaty_type in config.SCRAPING_CONFIG.items():
-        for property_type, settings in properaty_type.items():
-            new_folder = settings["folder"]
+    api_key = os.getenv("GOOGLE_GEOENCODING_APIKEY", "").strip().strip('"').strip("'")
+    if not api_key:
+        raise EnvironmentError("Falta GOOGLE_GEOENCODING_APIKEY en .env")
 
+    gmaps  = googlemaps.Client(key=api_key)
+    engine = get_engine()
 
-            # Read .env.example
-            BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-            BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
-            ENV_PATH = os.path.join(BASE_DIR, ".env")
-            input_path = os.path.join(BASE_DIR, "data", "processed",new_folder,f"{new_folder}_processed.csv")
-            output_path = os.path.join(BASE_DIR, "data", "processed",new_folder,f"{new_folder}_processed_geo.csv")
+    # 1. Leer solo filas sin coordenadas aún
+    logger.info("Leyendo filas sin geocodificar...")
+    df = pd.read_sql(
+        "SELECT prop_id, direccion_completa, distrito FROM propiedades_procesadas WHERE latitud IS NULL",
+        engine,
+    )
+    logger.info(f"  {len(df)} filas por geocodificar")
 
-            load_dotenv(ENV_PATH)
-            API_KEY = os.getenv("GOOGLE_GEOENCODING_APIKEY").strip().replace('"','').replace("'",'')
+    if df.empty:
+        logger.info("Todo ya está geocodificado.")
+        return
 
-            gmaps = googlemaps.Client(key=API_KEY)
+    # 2. Geocodificar
+    resultados = []
+    for i, row in enumerate(df.itertuples(), start=1):
+        direccion = row.direccion_completa if pd.notna(row.direccion_completa) else row.distrito
+        lat, lon  = obtener_coordenadas(direccion, gmaps, contador=i)
+        resultados.append({"prop_id": row.prop_id, "latitud": lat, "longitud": lon})
+        sleep(1)  # respetar rate limit de Google
 
-            df = pd.read_csv(input_path)
+    # 3. Actualizar en Neon fila por fila
+    logger.info("Guardando coordenadas en Neon...")
+    ok = errors = 0
+    with engine.begin() as conn:
+        for r in resultados:
+            if r["latitud"] is None:
+                errors += 1
+                continue
+            conn.execute(
+                text("""
+                    UPDATE propiedades_procesadas
+                    SET latitud  = :lat,
+                        longitud = :lon
+                    WHERE prop_id = :id
+                """),
+                {"lat": r["latitud"], "lon": r["longitud"], "id": str(r["prop_id"])},
+            )
+            ok += 1
 
-            # Aplicar geocodificación con contador
-            latitudes = []
-            longitudes = []
+    logger.info(f"✅ Geocodificadas: {ok}  |  Sin resultado: {errors}")
 
-            for i, row in enumerate(df.itertuples(), start=1):
-                direccion = row.direccion_completa
-                if pd.isna(direccion):
-                    direccion = row.distrito
-                lat, lon = obtener_coordenadas(direccion, gmaps, contador=i)
-                latitudes.append(lat)
-                longitudes.append(lon)
-                sleep(1)
-
-            # Asignar al DataFrame
-            df["latitud"] = latitudes
-            df["longitud"] = longitudes
-
-            df.to_csv(output_path, index = False)
 
 if __name__ == "__main__":
     main()

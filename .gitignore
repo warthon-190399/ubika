@@ -1,23 +1,32 @@
-# Entornos virtuales
-venv/
-env/
-ENV/
-.venv/
+# Secretos
+.env
+*.env
+!.env.example
 
 # Python
+.venv/
+venv/
+env/
 __pycache__/
 *.pyc
+*.egg-info/
+.pytest_cache/
 
-# Archivos temporales
-.DS_Store
-.env
-
-# Catboost
-catboost_info/
-**/catboost_info/
-
+# Modelos y artefactos de entrenamiento
 models/
 *.pkl
-
 catboost_info/
 catboost_info_backup/
+
+# Datos locales (la fuente de verdad es Neon)
+data/raw/
+data/processed/
+*.zip
+
+# Node
+node_modules/
+dist/
+
+# Sistema
+.DS_Store
+Thumbs.db

@@ -1,0 +1,8 @@
+# Fase 6: modelos de valor (alquiler y venta). Instalar solo cuando lleguemos ahí.
+-r requirements.txt
+catboost==1.2.8
+lightgbm==4.6.0
+xgboost==3.2.0
+optuna==4.4.0
+shap==0.44.1
+joblib==1.5.1

@@ -266,3 +266,228 @@ CREATE TABLE IF NOT EXISTS propiedades_procesadas (
 CREATE INDEX IF NOT EXISTS idx_pp_fuente   ON propiedades_procesadas(fuente);
 CREATE INDEX IF NOT EXISTS idx_pp_distrito ON propiedades_procesadas(distrito);
 CREATE INDEX IF NOT EXISTS idx_pp_nse      ON propiedades_procesadas(nivel_socioeconomico);
+
+-- ============================================================
+-- 005_add_geo_columns.sql
+-- Agrega latitud/longitud a propiedades_procesadas
+-- ============================================================
+ 
+ALTER TABLE propiedades_procesadas
+    ADD COLUMN IF NOT EXISTS latitud  DOUBLE PRECISION,
+    ADD COLUMN IF NOT EXISTS longitud DOUBLE PRECISION;
+ 
+CREATE INDEX IF NOT EXISTS idx_pp_sin_geo
+    ON propiedades_procesadas(latitud)
+    WHERE latitud IS NULL;
+ -- ============================================================
+-- 006_create_reference_tables.sql
+-- Tablas de referencia: colegios, comisarias, inpe,
+-- hospitales, malls, metropolitano, tren
+-- ============================================================
+ 
+CREATE TABLE IF NOT EXISTS colegios (
+    id          SERIAL PRIMARY KEY,
+    nombre      TEXT,
+    distrito    TEXT,
+    direccion   TEXT,
+    nivel_modalidad     TEXT,
+    gestion_dependencia TEXT,
+    latitud     DOUBLE PRECISION,
+    longitud    DOUBLE PRECISION
+);
+ 
+CREATE TABLE IF NOT EXISTS comisarias (
+    id          SERIAL PRIMARY KEY,
+    nombre      TEXT,
+    provincia   TEXT,
+    distrito    TEXT,
+    latitud     DOUBLE PRECISION,
+    longitud    DOUBLE PRECISION
+);
+ 
+CREATE TABLE IF NOT EXISTS inpe (
+    id                  SERIAL PRIMARY KEY,
+    periodo             TEXT,
+    ingresos            TEXT,
+    grupo_ingresos      TEXT,
+    delito_generico     TEXT,
+    delito_especifico   TEXT,
+    tipo_delito         TEXT,
+    situacion_juridica  TEXT,
+    edad                TEXT,
+    grupo_etareo        TEXT,
+    genero              TEXT,
+    estado_civil        TEXT,
+    grado_instruccion   TEXT,
+    ocupacion_generico  TEXT,
+    ocupacion_especifico TEXT,
+    nombre_nucleo_urbano TEXT,
+    departamento        TEXT,
+    provincia           TEXT,
+    distrito            TEXT,
+    latitud             DOUBLE PRECISION,
+    longitud            DOUBLE PRECISION
+);
+ 
+CREATE TABLE IF NOT EXISTS hospitales (
+    id          SERIAL PRIMARY KEY,
+    nombre      TEXT,
+    provincia   TEXT,
+    distrito    TEXT,
+    direccion   TEXT,
+    direccion_ubicacion TEXT,
+    latitud     DOUBLE PRECISION,
+    longitud    DOUBLE PRECISION
+);
+ 
+CREATE TABLE IF NOT EXISTS malls (
+    id          SERIAL PRIMARY KEY,
+    nombre      TEXT,
+    latitud     DOUBLE PRECISION,
+    longitud    DOUBLE PRECISION
+);
+ 
+CREATE TABLE IF NOT EXISTS metropolitano (
+    id                  SERIAL PRIMARY KEY,
+    nombre              TEXT,
+    direccion_completa  TEXT,
+    distrito            TEXT,
+    latitud             DOUBLE PRECISION,
+    longitud            DOUBLE PRECISION
+);
+ 
+CREATE TABLE IF NOT EXISTS tren (
+    id                  SERIAL PRIMARY KEY,
+    nombre              TEXT,
+    direccion_completa  TEXT,
+    distrito            TEXT,
+    latitud             DOUBLE PRECISION,
+    longitud            DOUBLE PRECISION
+);
+ 
+-- Índices de ubicación para joins espaciales
+CREATE INDEX IF NOT EXISTS idx_colegios_distrito     ON colegios(distrito);
+CREATE INDEX IF NOT EXISTS idx_comisarias_distrito   ON comisarias(distrito);
+CREATE INDEX IF NOT EXISTS idx_inpe_distrito         ON inpe(distrito);
+CREATE INDEX IF NOT EXISTS idx_hospitales_distrito   ON hospitales(distrito);
+CREATE INDEX IF NOT EXISTS idx_metropolitano_distrito ON metropolitano(distrito);
+CREATE INDEX IF NOT EXISTS idx_tren_distrito         ON tren(distrito);
+-- ============================================================
+-- 007_create_proximidades.sql
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS proximidades (
+    prop_id                 UUID PRIMARY KEY
+                            REFERENCES propiedades_procesadas(prop_id) ON DELETE CASCADE,
+    num_colegios_aprox      INTEGER,
+    num_hospitales_aprox    INTEGER,
+    num_tren_est_aprox      INTEGER,
+    num_metro_est_aprox     INTEGER,
+    num_comisarias_aprox    INTEGER,
+    num_delitos_aprox       INTEGER,
+    num_malls_aprox         INTEGER
+);
+
+-- ============================================================
+-- 008_create_dataset_tables.sql
+-- ============================================================
+ 
+-- Tabla intermedia: join de procesadas + proximidades + split
+CREATE TABLE IF NOT EXISTS dataset (
+    prop_id                 UUID PRIMARY KEY,
+    fuente                  TEXT,
+    listing_date            DATE,
+    url                     TEXT,
+    set                     TEXT,           -- 'train' | 'eval' | 'test'
+ 
+    precio_pen              INTEGER,
+    precio_usd              INTEGER,
+    mantenimiento_soles     INTEGER,
+    direccion_completa      TEXT,
+    distrito                TEXT,
+    nivel_socioeconomico    TEXT,
+    area_m2                 FLOAT,
+    num_dorm                FLOAT,
+    num_banios              FLOAT,
+    num_estac               FLOAT,
+    antiguedad              FLOAT,
+    publicado_por           TEXT,
+    fecha_publicacion       TEXT,
+    latitud                 DOUBLE PRECISION,
+    longitud                DOUBLE PRECISION,
+ 
+    num_colegios_aprox      INTEGER,
+    num_hospitales_aprox    INTEGER,
+    num_tren_est_aprox      INTEGER,
+    num_metro_est_aprox     INTEGER,
+    num_comisarias_aprox    INTEGER,
+    num_delitos_aprox       INTEGER,
+    num_malls_aprox         INTEGER
+);
+ 
+-- Tabla final: dataset + todas las features de ingeniería
+CREATE TABLE IF NOT EXISTS dataset_final (
+    prop_id                     UUID PRIMARY KEY,
+    fuente                      TEXT,
+    listing_date                DATE,
+    set                         TEXT,
+ 
+    -- Target
+    precio_pen                  INTEGER,
+    precio_usd                  INTEGER,
+ 
+    -- Features base
+    area_m2                     FLOAT,
+    num_dorm                    FLOAT,
+    num_banios                  FLOAT,
+    num_estac                   FLOAT,
+    antiguedad                  FLOAT,
+    mantenimiento_soles         INTEGER,
+    distrito                    TEXT,
+    nivel_socioeconomico        TEXT,
+    nivel_socioeconomico_cod    FLOAT,
+    latitud                     DOUBLE PRECISION,
+    longitud                    DOUBLE PRECISION,
+ 
+    -- Proximidades
+    num_colegios_aprox          INTEGER,
+    num_hospitales_aprox        INTEGER,
+    num_tren_est_aprox          INTEGER,
+    num_metro_est_aprox         INTEGER,
+    num_comisarias_aprox        INTEGER,
+    num_delitos_aprox           INTEGER,
+    num_malls_aprox             INTEGER,
+ 
+    -- Features derivadas
+    total_ambientes             FLOAT,
+    total_servicios_prox        FLOAT,
+    total_transporte_aprox      FLOAT,
+    flg_estac                   INTEGER,
+    flg_tren                    INTEGER,
+    flg_metro                   INTEGER,
+    precio_por_m2               FLOAT,
+    costo_total_mensual         FLOAT,
+    score_ubicacion             FLOAT,
+    categoria_precio            TEXT,
+    decada_construccion         FLOAT,
+ 
+    -- Zona APEIM
+    zona_apeim                  TEXT,
+    zona_apeim_cod              FLOAT,
+ 
+    -- Categóricas codificadas
+    tamano                      TEXT,
+    tamano_cod                  FLOAT,
+    antiguedad_categoria        TEXT,
+    antiguedad_cod              FLOAT,
+    categoria_crimenes          TEXT,
+    categoria_crimenes_cod      FLOAT,
+ 
+    -- Clustering
+    tipo_vivienda               TEXT,
+    tipo_vivienda_cod           INTEGER
+);
+ 
+CREATE INDEX IF NOT EXISTS idx_dataset_final_set      ON dataset_final(set);
+CREATE INDEX IF NOT EXISTS idx_dataset_final_distrito ON dataset_final(distrito);
+CREATE INDEX IF NOT EXISTS idx_dataset_final_fuente   ON dataset_final(fuente);

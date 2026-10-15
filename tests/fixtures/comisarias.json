@@ -1,0 +1,5 @@
+{"features": [
+ {"attributes": {"Latitud": -12.052672000308263, "Longitud": -77.0970989994118, "cod_cpnp": "6006", "comisaria": "CPNP LA LEGUA", "distrito": "CALLAO", "provincia": "CALLAO", "tipo_comisaria": "B"}},
+ {"attributes": {"Latitud": -12.054874999846316, "Longitud": -77.12874200036403, "cod_cpnp": "6000", "comisaria": "CPNP CALLAO", "distrito": "CALLAO", "provincia": "CALLAO", "tipo_comisaria": "A"}},
+ {"attributes": {"Latitud": -12.043941000209825, "Longitud": -77.10474299937849, "cod_cpnp": "6014", "comisaria": "CPNP MANUEL CIPRIANO DULANTO", "distrito": "CALLAO", "provincia": "CALLAO", "tipo_comisaria": "B"}}
+]}
