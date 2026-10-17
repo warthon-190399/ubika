@@ -1,93 +1,59 @@
-# Ubika — Real Estate Intelligence Platform
+# ubika-app
 
-Bloomberg inmobiliario para Lima. Stack: React + Deck.gl (WebGL) + MapLibre + Express + Neon.
+App web de ubika: mapa de Lima con el entorno de cada inmueble y un ranking según tus prioridades.
+React + deck.gl (front) y Express (API de solo lectura sobre Neon).
 
-## Estructura
+## Marca
 
-```
-ubika-app/
-├── server.js              ← API Express (conecta a Neon)
-├── src/
-│   ├── App.jsx            ← root component
-│   ├── hooks/
-│   │   └── useProperties.js  ← fetch desde API + fallback mock
-│   ├── lib/
-│   │   └── scoring.js     ← lógica de scores
-│   └── components/
-│       ├── Sidebar.jsx    ← filtros + sliders de preferencias
-│       ├── Topbar.jsx     ← KPIs + toggle vista
-│       ├── MapView.jsx    ← Deck.gl: scatter + heatmap + hex 3D
-│       ├── InsightsPanel.jsx ← rankings + scatter mini
-│       └── GridView.jsx   ← lista de tarjetas
-```
+`public/brand/` tiene el logo y el isotipo oficiales en SVG (para la app) y PNG con fondo transparente:
+`ubika-logo` (400/800/1600 px), `ubika-logo-blanco` (para fondos verdes), `ubika-isotipo` (64/256/512/1024 px)
+y `ubika-pin.svg` (inmueble seleccionado en el mapa). Tipografía: Inter, incluida en la app con `@fontsource/inter`.
 
-## Setup
-
-### 1. Instalar dependencias
+## Correr en local
 
 ```bash
 cd ubika-app
 npm install
-
-# Dependencias del servidor
-npm install express cors pg
+cp .env.example .env      # y pegar la DATABASE_URL de Neon
+npm run api               # API en http://localhost:3001   (una terminal)
+npm run dev               # app en http://localhost:5173   (otra terminal)
 ```
 
-### 2. Configurar variables de entorno
+La app pide los datos a `/api/...`; en desarrollo Vite los redirige a la API.
 
-```bash
-cp .env.example .env
-# Editar .env con tu DATABASE_URL de Neon
-```
+## Qué muestra
 
-### 3. Correr en desarrollo
+| Pestaña | Contenido |
+|---|---|
+| Entorno | Mapa con capas de seguridad, transporte o servicios para toda la ciudad; ficha del inmueble con puntaje de entorno, precio por m² frente a la mediana del distrito, minutos a pie y conteos a 500 m. |
+| Oportunidades | Filtros (distrito, presupuesto, dormitorios) y seis prioridades: precio, espacio, antigüedad, seguridad, servicios y transporte. Las burbujas del mapa y el ranking se ordenan con ese puntaje. |
+| Valor · Evolución | Próximamente: evaluador de precio (Fase 6) y series de precios (necesita varios cortes semanales). |
 
-**Terminal 1 — API:**
-```bash
-node server.js
-# → http://localhost:3001
-```
+## Cómo se calculan los puntajes (`src/lib/scoring.js`)
 
-**Terminal 2 — Frontend:**
-```bash
-npm run dev
-# → http://localhost:5173
-```
+Cada criterio es el percentil del inmueble entre todos los de su operación (alquiler o venta), de 0 a 1:
 
-### 4. Build para producción
+- **Precio:** precio + mantenimiento (más barato = mejor).
+- **Espacio:** 60% área, 20% dormitorios, 10% baños, 10% estacionamientos.
+- **Antigüedad:** más nuevo = mejor. Si el aviso no tiene el dato, el criterio no cuenta para ese aviso.
+- **Seguridad:** denuncias de robo y violencia a 500 m en 12 meses, ponderadas por distrito.
+- **Servicios:** colegios + salud + comisarías + comercio grande a 500 m.
+- **Transporte:** distancia a la estación de metro, tren o Metropolitano más cercana.
 
-```bash
-npm run build
-# Output en dist/
-```
+Puntaje de oportunidad = promedio ponderado con los pesos de los controles.
+Puntaje de entorno (0–10) = 45% seguridad, 30% transporte, 25% servicios.
 
-## Variables de entorno
+## API (`server.js`)
 
-| Variable         | Descripción                          |
-|------------------|--------------------------------------|
-| `DATABASE_URL`   | Connection string de Neon PostgreSQL |
-| `VITE_API_URL`   | URL del servidor Express (default: http://localhost:3001) |
+| Ruta | Devuelve |
+|---|---|
+| `GET /api/salud` | estado de la conexión y fecha del último scraping |
+| `GET /api/propiedades?operacion=alquiler\|venta` | inmuebles activos con su entorno (`v_app_propiedades`) |
+| `GET /api/distritos?operacion=…` | medianas por distrito (`v_resumen_distrito`) |
+| `GET /api/capas/seguridad\|transporte\|servicios` | grilla de la ciudad (`capas_grilla`): `[lat, lon, índice 0–1, valor]` |
 
-## Capas del mapa
+## Limitaciones conocidas
 
-| Modo      | Descripción                                      |
-|-----------|--------------------------------------------------|
-| Puntos    | ScatterplotLayer — un punto por propiedad         |
-| Heatmap   | HeatmapLayer — densidad de oportunidades          |
-| 3D Hex    | HexagonLayer — torres 3D por concentración        |
-| Todo      | Las tres capas superpuestas                       |
-
-## Colores (score compuesto)
-
-| Rango      | Color  | Significado              |
-|------------|--------|--------------------------|
-| ≥ 0.72     | Amarillo `#e8ff47` | Alto      |
-| 0.56–0.72  | Teal `#2dd4bf`     | Medio     |
-| 0.40–0.56  | Púrpura `#8b7cf8`  | Base      |
-| < 0.40     | Rojo `#e63329`     | Bajo      |
-
-## Notas
-
-- Sin `DATABASE_URL` o si el servidor no responde, la app corre en **modo demo** con datos sintéticos.
-- El score se recalcula en el cliente cada vez que cambias un slider — no requiere llamada a la API.
-- Los filtros de distrito/presupuesto/fuente sí hacen llamadas a la API para reducir el volumen de datos.
+- La capa de seguridad cuenta **denuncias**, no tasas por habitante: una zona con mucha gente y comercio tiene más denuncias.
+- Los minutos a pie son en línea recta a 80 m/min, no por calles.
+- No hay datos de parques todavía.

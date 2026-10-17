@@ -14,9 +14,9 @@ from ubika.db import engine
 TABLAS = [
     "distritos", "distrito_alias", "corridas", "raw_listings", "raw_detalles",
     "propiedades", "avisos", "geocode_cache", "puntos_interes", "inpe_domicilios", "entorno",
-    "delitos_puntos", "delitos_distrito_mes",
+    "delitos_puntos", "delitos_distrito_mes", "capas_grilla",
 ]
-VISTAS = ["v_app_propiedades", "v_resumen_distrito", "v_historial_avisos", "v_delitos_distrito_12m"]
+VISTAS = ["v_app_propiedades", "v_resumen_distrito", "v_historial_avisos", "v_delitos_distrito_12m", "v_crimen_distrito"]
 LEGADO = ["urbania_listings", "adondevivir_listings", "propiedades_procesadas", "dataset_final"]
 
 
@@ -53,7 +53,7 @@ def main() -> int:
         print(f"\n⚠ Quedan tablas del esquema anterior: {', '.join(restos)}. Corre sql/00_drop_legacy.sql")
 
     if faltan:
-        print(f"\n✗ Faltan {faltan} objetos. Corre en Neon, en orden: 01_schema.sql, 02_seed_distritos.sql, 03_views.sql, 04_delitos.sql")
+        print(f"\n✗ Faltan {faltan} objetos. Corre en Neon, en orden: 01_schema.sql, 02_seed_distritos.sql, 03_views.sql … 08_poblacion.sql")
         return 1
     if conteos.get("distritos", 0) < 50:
         print("\n⚠ El catálogo de distritos está incompleto. Corre sql/02_seed_distritos.sql")

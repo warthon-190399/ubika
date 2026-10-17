@@ -67,23 +67,28 @@ def upsert(nombre: str, records: list[dict] | pd.DataFrame, conflicto: list[str]
         return 0
 
     t = tabla(nombre)
-    if actualizar is None:
-        actualizar = [c for c in records[0] if c not in conflicto]
+    # Un INSERT multi-fila necesita las mismas columnas en todas las filas: agrupar por columnas
+    grupos: dict[tuple, list[dict]] = {}
+    for r in records:
+        grupos.setdefault(tuple(sorted(r)), []).append(r)
 
     total = 0
     with engine().begin() as conn:
-        for i in range(0, len(records), chunk):
-            parte = records[i:i + chunk]
-            stmt = pg_insert(t).values(parte)
-            if actualizar:
-                stmt = stmt.on_conflict_do_update(
-                    index_elements=conflicto,
-                    set_={c: stmt.excluded[c] for c in actualizar},
-                )
-            else:
-                stmt = stmt.on_conflict_do_nothing(index_elements=conflicto)
-            conn.execute(stmt)
-            total += len(parte)
+        for cols, filas in grupos.items():
+            set_cols = [c for c in cols if c not in conflicto] if actualizar is None else \
+                [c for c in actualizar if c in cols]
+            for i in range(0, len(filas), chunk):
+                parte = filas[i:i + chunk]
+                stmt = pg_insert(t).values(parte)
+                if set_cols:
+                    stmt = stmt.on_conflict_do_update(
+                        index_elements=conflicto,
+                        set_={c: stmt.excluded[c] for c in set_cols},
+                    )
+                else:
+                    stmt = stmt.on_conflict_do_nothing(index_elements=conflicto)
+                conn.execute(stmt)
+                total += len(parte)
     return total
 
 
@@ -130,6 +135,9 @@ def corrida(etapa: str, **parametros: Any):
     log.info("Corrida %s · %s %s", cid, etapa, parametros or "")
     try:
         yield c
+    except KeyboardInterrupt:
+        _cerrar(c, "error", "Interrumpida a mano (Ctrl+C)")
+        raise
     except Exception as exc:
         _cerrar(c, "error", f"{type(exc).__name__}: {exc}"[:2000])
         raise

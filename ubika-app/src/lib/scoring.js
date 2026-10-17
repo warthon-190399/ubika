@@ -1,98 +1,91 @@
 /**
  * scoring.js
- * Computes the composite opportunity score from weights and property features.
- * Works with both real Neon data and mock data.
+ * Puntaje de oportunidad (prioridades del usuario) y puntaje de entorno.
+ *
+ * Cada criterio se convierte en un índice 0–1 (1 = mejor) con el percentil del inmueble
+ * entre todos los de su operación. Los percentiles no se deforman con un aviso extremo
+ * (un penthouse de 1 300 m² no aplasta al resto) y no cambian al filtrar.
  */
 
-export const DEFAULT_WEIGHTS = { seg: 7, trn: 6, pre: 8, srv: 5, esp: 5, val: 4 };
+export const CRITERIOS = [
+  { k: "precio",     l: "Precio",     ayuda: "más barato, incluido el mantenimiento" },
+  { k: "espacio",    l: "Espacio",    ayuda: "área, dormitorios, baños y estacionamiento" },
+  { k: "antiguedad", l: "Antigüedad", ayuda: "más nuevo" },
+  { k: "seguridad",  l: "Seguridad",  ayuda: "menos denuncias de robo y violencia cerca" },
+  { k: "servicios",  l: "Servicios",  ayuda: "colegios, salud, comisarías y comercio a 500 m" },
+  { k: "transporte", l: "Transporte", ayuda: "más cerca del metro, tren o Metropolitano" },
+];
 
-/**
- * Normalizes a value between 0 and 1 given a min/max range.
- */
-export function norm(v, mn, mx) {
-  if (mx === mn) return 0.5;
-  return Math.max(0, Math.min(1, (v - mn) / (mx - mn)));
+export const PESOS_INICIALES = { precio: 8, espacio: 5, antiguedad: 3, seguridad: 7, servicios: 4, transporte: 6 };
+
+export const SEQ = ["#E3CD52", "#A9BD57", "#6FA055", "#3E7F5C", "#1F5D50", "#10383A"];
+export const SEQ_RGB = SEQ.map(hexToRgb);
+
+export function hexToRgb(h) {
+  const n = parseInt(h.slice(1), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
-/**
- * Computes opportunity score for a property.
- * Accepts both real data (score_ubicacion + raw fields) and mock data (_seg, _trn, etc.)
- */
-export function computeScore(prop, weights, bounds) {
-  const tot = Object.values(weights).reduce((a, b) => a + b, 0) || 1;
+export const tramo = indice => Math.max(0, Math.min(5, Math.floor(indice * 6)));
 
-  // Real data path — use pre-computed score_ubicacion + individual fields
-  let seg_s, trn_s, srv_s, esp_s, val_s;
-
-  if (prop._seg !== undefined) {
-    // Mock data has pre-normalized scores
-    seg_s = prop._seg;
-    trn_s = prop._trn;
-    srv_s = prop._srv;
-    esp_s = prop._esp;
-    val_s = prop._val;
-  } else {
-    // Real data — normalize from raw proximity counts
-    seg_s = prop.num_delitos_aprox != null
-      ? 1 - norm(prop.num_delitos_aprox, bounds.minDelitos, bounds.maxDelitos) : 0.5;
-    trn_s = norm(
-      (prop.num_tren_est_aprox || 0) + (prop.num_metro_est_aprox || 0),
-      0, bounds.maxTransporte
-    );
-    srv_s = norm(
-      (prop.num_colegios_aprox || 0) + (prop.num_hospitales_aprox || 0) + (prop.num_comisarias_aprox || 0),
-      0, bounds.maxServicios
-    );
-    esp_s = norm(prop.area_m2 || 0, bounds.minArea, bounds.maxArea);
-    val_s = prop.score_ubicacion != null
-      ? norm(prop.score_ubicacion, 0, 1) : 0.5;
+/** Percentil (0–1) de cada valor dentro de la lista; empates promediados; null queda null. */
+function percentiles(valores) {
+  const validos = valores.map((v, i) => [v, i]).filter(([v]) => v != null && !Number.isNaN(v)).sort((a, b) => a[0] - b[0]);
+  const out = new Array(valores.length).fill(null);
+  const n = validos.length;
+  if (!n) return out;
+  let i = 0;
+  while (i < n) {
+    let j = i;
+    while (j + 1 < n && validos[j + 1][0] === validos[i][0]) j++;
+    const p = n === 1 ? 0.5 : ((i + j) / 2) / (n - 1);
+    for (let k = i; k <= j; k++) out[validos[k][1]] = p;
+    i = j + 1;
   }
-
-  const pre_s = prop.precio_pen != null
-    ? 1 - norm(prop.precio_pen, bounds.minPrecio, bounds.maxPrecio) : 0.5;
-
-  return (
-    weights.seg * seg_s +
-    weights.trn * trn_s +
-    weights.pre * pre_s +
-    weights.srv * srv_s +
-    weights.esp * esp_s +
-    weights.val * val_s
-  ) / tot;
+  return out;
 }
 
-/**
- * Computes per-field bounds from a property array.
- */
-export function computeBounds(props) {
-  if (!props.length) return { minPrecio:500, maxPrecio:15000, minArea:20, maxArea:300,
-    minDelitos:0, maxDelitos:200, maxTransporte:6, maxServicios:20 };
-  return {
-    minPrecio:  Math.min(...props.map(p => p.precio_pen || 99999)),
-    maxPrecio:  Math.max(...props.map(p => p.precio_pen || 0)),
-    minArea:    Math.min(...props.map(p => p.area_m2    || 999)),
-    maxArea:    Math.max(...props.map(p => p.area_m2    || 0)),
-    minDelitos: 0,
-    maxDelitos: Math.max(...props.map(p => p.num_delitos_aprox || 0), 1),
-    maxTransporte: Math.max(...props.map(p => (p.num_tren_est_aprox||0)+(p.num_metro_est_aprox||0)), 1),
-    maxServicios:  Math.max(...props.map(p => (p.num_colegios_aprox||0)+(p.num_hospitales_aprox||0)+(p.num_comisarias_aprox||0)), 1),
-  };
+/** Índices 0–1 (1 = mejor) por inmueble. Devuelve un Map prop_id → { precio, espacio, … }. */
+export function calcularIndices(props) {
+  const col = f => percentiles(props.map(f));
+  const precio = col(p => (p.precio_pen ?? NaN) + (p.mantenimiento_pen ?? 0));
+  const area = col(p => p.area_m2);
+  const dorm = col(p => p.num_dorm ?? 0);
+  const banos = col(p => p.num_banios ?? 0);
+  const estac = col(p => p.num_estac ?? 0);
+  const antig = col(p => p.antiguedad_anios);
+  const delitos = col(p => p.n_delitos_12m);
+  const servicios = col(p => (p.n_colegios ?? 0) + (p.n_salud ?? 0) + (p.n_comisarias ?? 0) + (p.n_malls ?? 0));
+  const transporte = col(p => p.dist_transporte_m);
+  const inv = v => (v == null ? null : 1 - v);
+
+  const m = new Map();
+  props.forEach((p, i) => m.set(p.prop_id, {
+    precio: inv(precio[i]),
+    espacio: area[i] == null ? null : 0.6 * area[i] + 0.2 * dorm[i] + 0.1 * banos[i] + 0.1 * estac[i],
+    antiguedad: inv(antig[i]),
+    seguridad: inv(delitos[i]),
+    servicios: servicios[i],
+    transporte: inv(transporte[i]),
+  }));
+  return m;
 }
 
-/**
- * Maps a score 0–1 to the Ubika color palette.
- * Returns [R, G, B, A] for Deck.gl.
- */
-export function scoreToColor(s, alpha = 210) {
-  if (s >= 0.72) return [232, 255,  71, alpha]; // yellow
-  if (s >= 0.56) return [ 45, 212, 191, alpha]; // teal
-  if (s >= 0.40) return [139, 124, 248, alpha]; // purple
-  return              [230,  51,  41, alpha];   // red
+/** Puntaje de oportunidad 0–1. Los criterios sin dato no cuentan (sus pesos se reparten). */
+export function puntaje(ix, pesos) {
+  if (!ix) return 0;
+  let suma = 0, total = 0;
+  for (const { k } of CRITERIOS) {
+    if (ix[k] == null || !pesos[k]) continue;
+    suma += pesos[k] * ix[k];
+    total += pesos[k];
+  }
+  return total ? suma / total : 0;
 }
 
-/**
- * Heatmap weight — brighter = higher score.
- */
-export function scoreToWeight(s) {
-  return Math.max(0.1, s);
-}
+/** Calidad de vida 0–10 (se calcula en ciudad.js con los seis componentes del entorno). */
+export const puntajeEntorno = ix => ix?.calidad ?? null;
+
+export const fmt = n => (n == null || Number.isNaN(n)) ? "—" : Math.round(n).toLocaleString("en-US").replace(/,/g, " ");
+export const soles = n => `S/ ${fmt(n)}`;
+export const minutos = m => (m == null ? "—" : `${m} min`);

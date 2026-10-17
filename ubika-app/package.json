@@ -1,27 +1,27 @@
 {
   "name": "ubika-app",
   "private": true,
-  "version": "1.0.0",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
+    "api": "node server.js",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@deck.gl/aggregation-layers": "^9.0.0",
-    "@deck.gl/core": "^9.0.0",
-    "@deck.gl/layers": "^9.0.0",
-    "@deck.gl/react": "^9.0.0",
+    "@deck.gl/aggregation-layers": "^9.3.3",
+    "@deck.gl/core": "^9.3.3",
+    "@deck.gl/geo-layers": "^9.3.3",
+    "@deck.gl/layers": "^9.3.3",
+    "@deck.gl/react": "^9.3.3",
+    "@fontsource/inter": "^5.1.0",
     "cors": "^2.8.6",
     "dotenv": "^16.4.5",
     "express": "^5.2.1",
-    "maplibre-gl": "^4.0.0",
     "pg": "^8.21.0",
-    "postgres": "^3.4.4",
     "react": "^18.3.0",
-    "react-dom": "^18.3.0",
-    "react-map-gl": "^8.1.1"
+    "react-dom": "^18.3.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.0",

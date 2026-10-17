@@ -13,12 +13,19 @@ sql/                   esquema de Neon. Se corre a mano en el SQL Editor de Neon
   02_seed_distritos.sql  catálogo de distritos y alias
   03_views.sql           vistas que lee la API
   04_delitos.sql         denuncias SIDPOL y ubigeo de distritos
+  05_scraping.sql        campos extra de los portales (coordenadas, detalle estructurado)
+  06_vistas_entorno.sql  agrega delitos cercanos a la vista de la app
+  07_capas.sql           grilla de la ciudad para las capas del mapa
   query.sql              consultas de verificación (solo lectura)
 src/ubika/             paquete Python
   config.py              lee config.yaml y .env
   db.py                  conexión, upsert y registro de corridas
   texto.py               normalización de texto
   referencias/sidpol.py  descarga de denuncias policiales (MININTER)
+  referencias/puntos.py  carga colegios, salud, malls, transporte e INPE (CSV) y comisarías (MININTER)
+  scraping/navent.py     parsers de adondevivir/urbania (misma plataforma)
+  scraping/__main__.py   scraper: listado + detalle → raw_listings / raw_detalles
+  pipeline/              limpieza + repetidos → geocoding → entorno
 scripts/
   check_db.py            verifica conexión y esquema
 tests/                 pruebas (pytest)
@@ -37,7 +44,7 @@ playwright install chromium      # para los scrapers (Fase 2)
 cp .env.example .env             # y completar los valores
 ```
 
-En Neon, SQL Editor, correr en orden: `00_drop_legacy.sql` (solo la primera vez), `01_schema.sql`, `02_seed_distritos.sql`, `03_views.sql`, `04_delitos.sql`. Después:
+En Neon, SQL Editor, correr en orden: `00_drop_legacy.sql` (solo la primera vez), `01_schema.sql`, `02_seed_distritos.sql`, `03_views.sql`, `04_delitos.sql`, `05_scraping.sql`, `06_vistas_entorno.sql`, `07_capas.sql`. Después:
 
 ```bash
 python scripts/check_db.py
@@ -48,6 +55,29 @@ Denuncias policiales (tarda unos minutos; se puede volver a correr sin duplicar)
 ```bash
 python -m ubika.referencias.sidpol                     # desde 2025-01-01
 python -m ubika.referencias.sidpol --desde 2026-07-01  # actualización
+```
+
+Puntos de interés (lee los CSV de `data/processed/`; se puede volver a correr):
+
+```bash
+python -m ubika.referencias.puntos
+```
+
+Avisos (alquiler y venta por separado; se puede volver a correr el mismo día sin duplicar):
+
+```bash
+python -m ubika.scraping --operacion alquiler            # 100 avisos (config.yaml) + su detalle
+python -m ubika.scraping --operacion venta
+python -m ubika.scraping --operacion venta --solo-detalle  # completa fichas que fallaron
+python -m ubika.scraping --operacion alquiler --ver        # muestra el navegador
+```
+
+Pipeline descriptivo (después de scrapear; se puede volver a correr sin duplicar):
+
+```bash
+python -m ubika.pipeline                    # limpieza → geocoding → entorno → capas
+python -m ubika.pipeline --sin-google       # sin consultar Google
+python -m ubika.pipeline --etapas entorno   # una sola etapa
 ```
 
 ## Modelo de datos
@@ -64,6 +94,7 @@ python -m ubika.referencias.sidpol --desde 2026-07-01  # actualización
 | Referencia | `delitos_distrito_mes` | Conteo de todas las denuncias por distrito, mes y tipo, y cuántas tienen ubicación. |
 | Derivada | `geocode_cache` | Cada dirección consultada a Google, una sola vez. |
 | Derivada | `entorno` | Conteos dentro del radio y distancia al más cercano, por inmueble. |
+| Derivada | `capas_grilla` | Grilla de la ciudad (~350 m) con índices de seguridad, transporte y servicios para el mapa. |
 | Control | `corridas` | Cada ejecución de scraping o pipeline, con su estado y conteos. |
 
 ## Fuentes
@@ -75,8 +106,8 @@ python -m ubika.referencias.sidpol --desde 2026-07-01  # actualización
 
 - [x] 0 · Saneamiento del repo
 - [x] 1 · Esquema SQL
-- [ ] 2 · Scrapers de alquiler y venta (adondevivir), 100 + 100
-- [ ] 3 · Pipeline descriptivo: limpieza, repetidos, geocoding, entorno
-- [ ] 4 · API y app descriptiva con la nueva marca
+- [x] 2 · Scrapers de alquiler y venta (adondevivir), 100 + 100
+- [x] 3 · Pipeline descriptivo: limpieza, repetidos, geocoding, entorno
+- [x] 4 · API y app descriptiva con la nueva marca (ver `ubika-app/README.md`)
 - [ ] 5 · Scraping completo semanal (+ urbania)
 - [ ] 6 · Modelos de valor por operación y Evaluador

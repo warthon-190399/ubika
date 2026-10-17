@@ -1,102 +1,33 @@
-import styles from "./Sidebar.module.css";
-import { DEFAULT_WEIGHTS } from "../lib/scoring";
+/** Navegación principal a la izquierda (abajo en el teléfono). */
+const I = {
+  explorar: <path d="M9 4 3 6.5v13.5L9 17.5l6 2.5 6-2.5V4l-6 2.5L9 4Zm0 0v13.5m6-11v13.5" />,
+  comparar: <path d="M4 5h6v14H4zM14 5h6v14h-6zM7 9v1m0 3v1m10-5v1m0 3v1" />,
+  credito: <path d="M3 10.5 12 4l9 6.5M5.5 9v10h13V9M9.5 19v-5h5v5" />,
+  evolucion: <path d="M4 19h16M5 15l4-4 3 3 6-7m0 0h-4m4 0v4" />,
+};
 
-const PREFS = [
-  {k:"seg",label:"Seguridad",   icon:"🛡"},
-  {k:"trn",label:"Transporte",  icon:"🚇"},
-  {k:"pre",label:"Precio",      icon:"💰"},
-  {k:"srv",label:"Servicios",   icon:"🏫"},
-  {k:"esp",label:"Espacio",     icon:"📐"},
-  {k:"val",label:"Valoriz.",    icon:"📈"},
+export const SECCIONES = [
+  { v: "explorar", l: "Explorar", ayuda: "Mapa, entorno y oportunidades" },
+  { v: "comparar", l: "Comparar", ayuda: "Inmuebles lado a lado" },
+  { v: "credito", l: "Crédito", ayuda: "Simulador hipotecario" },
+  { v: "evolucion", l: "Evolución", ayuda: "Precios en el tiempo", pronto: true },
 ];
 
-export default function Sidebar({ filters, onFilters, weights, onWeights, distritos }) {
-  const distList = Array.isArray(distritos)
-    ? [...new Set(distritos.map(d=>d.distrito))].filter(Boolean).sort()
-    : [];
-
+export default function Sidebar({ vista, onVista, nComparar }) {
   return (
-    <aside className={styles.sidebar}>
-      {/* Logo */}
-      <div className={styles.logo}>
-        <img
-          src="/logo.png"
-          alt="Ubika"
-          className={styles.logoImg}
-          onError={e=>{
-            e.target.style.display="none";
-            e.target.nextSibling.style.display="flex";
-          }}
-        />
-        <div className={styles.logoFallback} style={{display:"none"}}>
-          <span className={styles.logoText}>ubika</span>
-        </div>
-      </div>
-
-      <div className={styles.body}>
-        {/* Filtros */}
-        <section className={styles.section}>
-          <div className={styles.secLabel}>Filtros</div>
-
-          <div className={styles.filterGroup}>
-            <div className={styles.filterLabel}>Distrito</div>
-            <select value={filters.distrito} onChange={e=>onFilters(f=>({...f,distrito:e.target.value}))}>
-              <option value="">Todos los distritos</option>
-              {distList.map(d=><option key={d} value={d}>{d}</option>)}
-            </select>
-          </div>
-
-          <div className={styles.filterGroup}>
-            <div className={styles.filterLabel}>
-              Presupuesto
-              <span className={styles.filterVal}>S/ {Number(filters.precio_max).toLocaleString()}</span>
-            </div>
-            <input type="range" min={500} max={15000} step={100} value={filters.precio_max}
-              onChange={e=>onFilters(f=>({...f,precio_max:+e.target.value}))}/>
-          </div>
-
-          <div className={styles.filterGroup}>
-            <div className={styles.filterLabel} style={{marginBottom:6}}>Segmento</div>
-            <div className={styles.chipRow}>
-              {["","Premium","Medio","Económico"].map(s=>(
-                <button key={s||"all"}
-                  className={`${styles.chip} ${filters.segmento===s?styles.chipOn:""}`}
-                  onClick={()=>onFilters(f=>({...f,segmento:s}))}>
-                  {s||"Todos"}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className={styles.filterGroup}>
-            <div className={styles.filterLabel}>Fuente</div>
-            <select value={filters.fuente} onChange={e=>onFilters(f=>({...f,fuente:e.target.value}))}>
-              <option value="">Urbania + Adondevivir</option>
-              <option value="urbania">Urbania</option>
-              <option value="adondevivir">Adondevivir</option>
-            </select>
-          </div>
-        </section>
-
-        {/* Preferencias */}
-        <section className={styles.section}>
-          <div className={styles.secLabel}>Preferencias Urbanas</div>
-          {PREFS.map(({k,label,icon})=>(
-            <div key={k} className={styles.prefRow}>
-              <div className={styles.prefHeader}>
-                <div className={styles.prefName}><span>{icon}</span>{label}</div>
-                <div className={styles.prefNum}>{weights[k]}</div>
-              </div>
-              <div className={styles.prefTrack}>
-                <div className={styles.prefFill} style={{width:`${weights[k]*10}%`}}/>
-                <input type="range" min={0} max={10} step={1} value={weights[k]}
-                  className={styles.prefInput}
-                  onChange={e=>onWeights(w=>({...w,[k]:+e.target.value}))}/>
-              </div>
-            </div>
-          ))}
-        </section>
-      </div>
-    </aside>
+    <nav className="sidebar" aria-label="Secciones">
+      {SECCIONES.map(s => (
+        <button key={s.v} className="sb-item" aria-current={vista === s.v ? "page" : undefined}
+          onClick={() => onVista(s.v)} title={s.ayuda}>
+          <span className="sb-ico">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"
+              strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{I[s.v]}</svg>
+            {s.v === "comparar" && nComparar > 0 && <b className="sb-badge mono">{nComparar}</b>}
+          </span>
+          <span className="sb-l">{s.l}</span>
+          {s.pronto && <span className="sb-pronto">Pronto</span>}
+        </button>
+      ))}
+    </nav>
   );
 }

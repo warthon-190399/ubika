@@ -4,8 +4,9 @@
 scraping:
   headless: true
   timeout_ms: 60000
-  pausa_seg: [1.5, 3.5]          # pausa aleatoria entre páginas
-  workers_detalle: 3             # pestañas en paralelo para el detalle de cada aviso
+  pausa_seg: [4, 8]              # pausa aleatoria entre páginas del listado
+  pausa_detalle_seg: [20, 35]    # pausa entre fichas: el portal bloquea las fichas mucho antes que el listado
+  max_paginas: 5                 # el robots.txt de ambos portales solo permite a los robots las páginas 2 a 5 de cada listado
   fuentes:
     adondevivir:
       activo: true
@@ -16,7 +17,7 @@ scraping:
         url: "https://www.adondevivir.com/departamentos-en-venta-pagina-{pagina}-q-lima.html"
         max_avisos: 100
     urbania:
-      activo: false              # se reactiva en la Fase 5
+      activo: false              # Fase 5. Misma plataforma (Navent) que adondevivir: hay que verificar las URLs
       alquiler:
         url: "https://urbania.pe/buscar/alquiler-de-departamentos-en-lima?page={pagina}"
         max_avisos: 100
