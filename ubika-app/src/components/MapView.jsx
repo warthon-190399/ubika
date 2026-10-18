@@ -9,7 +9,9 @@ import Indicadores from "./Indicadores";
 import { PRINCIPALES, VARIABLES, VARIABLES_KEYS, disponible, tramos, valoresCeldas, valoresDistrito } from "../lib/variables";
 import { CATEGORIAS, CATEGORIAS_KEYS, aPie, grupoDe, icono, titulo } from "../lib/poi";
 
-const VISTA_INICIAL = { longitude: -77.03, latitude: -12.09, zoom: 11.3, pitch: 0, bearing: 0 };
+// Esri Light Gray Canvas solo tiene imágenes hasta el zoom 16: más cerca se verían pixeladas
+const ZOOM_MIN = 9, ZOOM_MAX = 16;
+const VISTA_INICIAL = { longitude: -77.03, latitude: -12.09, zoom: 11.3, pitch: 0, bearing: 0, minZoom: ZOOM_MIN, maxZoom: ZOOM_MAX };
 const PIN = "/brand/ubika-pin.svg";
 
 /* ── Mapa base: Esri gris claro (sin clave). Calles abajo, nombres encima de los datos ── */
@@ -17,7 +19,7 @@ const ESRI = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas";
 const BASE = `${ESRI}/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}`;
 const NOMBRES = `${ESRI}/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}`;
 const capaTiles = (id, url) => new TileLayer({
-  id, data: url, minZoom: 0, maxZoom: 16, tileSize: 256,
+  id, data: url, minZoom: 0, maxZoom: ZOOM_MAX, tileSize: 256,
   renderSubLayers: props => {
     const [[w, s], [e, n]] = props.tile.boundingBox;
     return new BitmapLayer(props, { data: null, image: props.data, bounds: [w, s, e, n] });
@@ -258,8 +260,8 @@ export default function MapView({ props, grillas, ciudad, capa, onCapa, escala, 
 
       <div className="map-der">
         <div className="map-zoom" role="group" aria-label="Zoom">
-          <button aria-label="Acercar" onClick={() => setViewState(vs => ({ ...vs, zoom: Math.min(vs.zoom + 1, 18), transitionDuration: 250 }))}>+</button>
-          <button aria-label="Alejar" onClick={() => setViewState(vs => ({ ...vs, zoom: Math.max(vs.zoom - 1, 9), transitionDuration: 250 }))}>−</button>
+          <button aria-label="Acercar" onClick={() => setViewState(vs => ({ ...vs, zoom: Math.min(vs.zoom + 1, ZOOM_MAX), transitionDuration: 250 }))}>+</button>
+          <button aria-label="Alejar" onClick={() => setViewState(vs => ({ ...vs, zoom: Math.max(vs.zoom - 1, ZOOM_MIN), transitionDuration: 250 }))}>−</button>
         </div>
       </div>
 
