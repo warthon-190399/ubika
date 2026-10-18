@@ -51,7 +51,8 @@ function escalaPrecio(props, zoom) {
 
 export default function MapView({ props, grillas, ciudad, capa, onCapa, escala, onEscala, distritos, crimenDist, limites,
   colorDe, colorTitulo, selected, ixSelected, ficha, onCerrarFicha, onVerFicha, onSelect, foco,
-  enComparacion, onComparar, lleno, nComparar, onAbrirComparador, cerca, poiFiltro, onPoiFiltro }) {
+  enComparacion, onComparar, lleno, nComparar, onAbrirComparador, cerca, poiFiltro, onPoiFiltro,
+  punto, onPunto, resaltar }) {
   const [viewState, setViewState] = useState(VISTA_INICIAL);
   const [hover, setHover] = useState(null);
   const [poiSel, setPoiSel] = useState(null);         // lugar cercano tocado en el mapa
@@ -171,6 +172,16 @@ export default function MapView({ props, grillas, ciudad, capa, onCapa, escala, 
       onClick: ({ object }) => object && setPoiSel(object),
       updateTriggers: { getSize: [poiSel] },
     }),
+    // Evaluador: los avisos que usa como comparables y el punto que se evalúa
+    resaltar?.length > 0 && new ScatterplotLayer({
+      id: "comparables", data: resaltar, getPosition: p => [p.longitud, p.latitud], parameters: MEZCLA,
+      radiusUnits: "pixels", getRadius: 11, stroked: true, filled: false,
+      getLineColor: [254, 183, 34, 255], lineWidthUnits: "pixels", getLineWidth: 2.5,
+    }),
+    punto && new IconLayer({
+      id: "punto", data: [punto], getPosition: d => [d.lon, d.lat], parameters: MEZCLA,
+      getIcon: () => ({ url: PIN, width: 96, height: 96, anchorY: 48 }), getSize: 44, sizeUnits: "pixels",
+    }),
     selected && new IconLayer({
       id: "activo", data: [selected], getPosition: p => [p.longitud, p.latitud], parameters: MEZCLA,
       getIcon: () => ({ url: PIN, width: 96, height: 96, anchorY: 48 }), getSize: 40, sizeUnits: "pixels",
@@ -233,8 +244,12 @@ export default function MapView({ props, grillas, ciudad, capa, onCapa, escala, 
       <DeckGL
         viewState={viewState} controller={true} layers={layers}
         onViewStateChange={({ viewState: vs }) => setViewState(vs)}
-        onClick={({ object }) => { if (!object) { onCerrarFicha(); setPoiSel(null); } }}
-        getCursor={({ isHovering, isDragging }) => (isDragging ? "grabbing" : isHovering ? "pointer" : "grab")}
+        onClick={({ object, coordinate }) => {
+          if (object) return;
+          onCerrarFicha(); setPoiSel(null);
+          if (onPunto && coordinate) onPunto({ lat: coordinate[1], lon: coordinate[0] });
+        }}
+        getCursor={({ isHovering, isDragging }) => (isDragging ? "grabbing" : isHovering || onPunto ? "pointer" : "grab")}
         getTooltip={tooltip}
       />
 

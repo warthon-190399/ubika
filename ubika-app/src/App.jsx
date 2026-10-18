@@ -5,12 +5,14 @@ import { frenteCiudad, referencia, territorio } from "./lib/ciudad";
 import { nombre } from "./lib/distritos";
 import { FILTRO_INICIAL, agrupar } from "./lib/poi";
 import { CREDITO_INICIAL, capacidad } from "./lib/credito";
+import { CONSULTA_INICIAL, distritoCercano, errorTipico, estimar } from "./lib/evaluador";
 import Topbar from "./components/Topbar";
 import Sidebar from "./components/Sidebar";
 import MapView from "./components/MapView";
 import { EntornoPanel, OportunidadesPanel, ProximamentePanel } from "./components/Panels";
 import Comparador, { MAX_COMPARAR } from "./components/Comparador";
 import CreditoPanel from "./components/CreditoPanel";
+import EvaluadorPanel from "./components/EvaluadorPanel";
 import "./app.css";
 
 const FILTROS_INICIALES = { distrito: "", precioMax: Infinity, dormMin: 0 };
@@ -20,7 +22,7 @@ const leerComparar = op => { try { return JSON.parse(localStorage.getItem(`ubika
 const guardarComparar = (op, ids) => { try { localStorage.setItem(`ubika.comparar.${op}`, JSON.stringify(ids)); } catch { /* sin almacenamiento */ } };
 
 /**
- * Secciones (barra lateral): explorar · comparar · credito · evolucion.
+ * Secciones (barra lateral): explorar · comparar · credito · valor · evolucion.
  * El mapa queda montado siempre; Comparar y Evolución se abren encima, así al volver
  * el mapa conserva su zoom y posición.
  */
@@ -40,6 +42,7 @@ export default function App() {
   const [comparar, setComparar] = useState(() => leerComparar("alquiler"));
   const [credito, setCredito] = useState(CREDITO_INICIAL);
   const [soloAlcanza, setSoloAlcanza] = useState(true);
+  const [consulta, setConsulta] = useState(CONSULTA_INICIAL);   // Evaluador: el inmueble que se evalúa
 
   const elegir = p => { setFoco(true); setSelected(p); setFicha(true); setDetalle(true); };
   const alternarComparar = p => setComparar(ids => {
@@ -95,6 +98,14 @@ export default function App() {
     .filter(p => p.precio_pen && p.precio_pen <= precioMax)
     .sort((a, b) => (puntajes.get(b.prop_id) ?? 0) - (puntajes.get(a.prop_id) ?? 0)), [todos, operacion, precioMax, puntajes]);
 
+  // Evaluador: estimación por comparables (si se evalúa un aviso publicado, sin usarlo a él mismo)
+  const enValor = vista === "valor";
+  const estimacion = useMemo(() => (enValor ? estimar(todos, consulta, { excluir: consulta.propId }) : null),
+    [enValor, todos, consulta]);
+  const errorEval = useMemo(() => (enValor ? errorTipico(todos) : null), [enValor, todos]);
+  const ponerPunto = ({ lat, lon }) =>
+    setConsulta(q => ({ ...q, lat, lon, propId: null, distrito: distritoCercano(todos, lat, lon) || q.distrito }));
+
   const ranking = useMemo(() => visibles.map(p => ({ p, s: puntajes.get(p.prop_id) ?? 0 }))
     .sort((a, b) => b.s - a.s).slice(0, 15), [visibles, puntajes]);
 
@@ -102,6 +113,7 @@ export default function App() {
   useEffect(() => {
     setFiltros(FILTROS_INICIALES); setSelected(null); setFicha(false); setDetalle(false);
     setComparar(leerComparar(operacion));
+    setConsulta(q => ({ ...q, pedido: null, propId: null }));   // un precio de alquiler no sirve para venta
   }, [operacion]);
 
   // Búsqueda por distrito: filtra y centra en el mejor aviso de ese distrito
@@ -145,7 +157,9 @@ export default function App() {
                 ficha={ficha} onCerrarFicha={() => setFicha(false)}
                 onVerFicha={() => { setVista("explorar"); setDetalle(true); }}
                 onSelect={elegir} foco={foco} {...cmp}
-                nComparar={aComparar.length} onAbrirComparador={() => setVista("comparar")} />
+                nComparar={aComparar.length} onAbrirComparador={() => setVista("comparar")}
+                punto={enValor && consulta.lat != null ? consulta : null} onPunto={enValor ? ponerPunto : null}
+                resaltar={estimacion?.comparables.map(c => c.p)} />
 
               <aside className="panel" aria-label="Detalle" key={`${vista}-${detalle && selected ? selected.prop_id : "lista"}`}>
                 {vista === "explorar" && (detalle && selected
@@ -154,6 +168,10 @@ export default function App() {
                   : <OportunidadesPanel filtros={filtros} onFiltros={setFiltros} pesos={pesos} onPesos={setPesos}
                       ranking={ranking} total={visibles.length} selected={selected} onSelect={elegir} {...cmp}
                       distritos={distritos} operacion={operacion} sinAntiguedad={sinAntiguedad} />)}
+                {enValor && (
+                  <EvaluadorPanel q={consulta} onQ={setConsulta} operacion={operacion} props={todos} distritos={distritos}
+                    est={estimacion} error={errorEval} selected={selected} onSelect={elegir} />
+                )}
                 {vista === "credito" && (
                   <CreditoPanel c={credito} onC={setCredito} operacion={operacion} onVenta={() => setOperacion("venta")}
                     selected={selected} alcanzan={alcanzan} soloAlcanza={soloAlcanza} onSoloAlcanza={setSoloAlcanza} onSelect={elegir} />

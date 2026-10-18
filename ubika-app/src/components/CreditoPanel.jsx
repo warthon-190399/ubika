@@ -9,14 +9,15 @@ const NIVEL = {
   alto: { l: "Fuera de tu presupuesto", c: "alto" },
 };
 
-function Campo({ id, l, valor, onCambio, prefijo, sufijo, paso = 100, min = 0 }) {
+/** Campo numérico. Con `opcional`, vacío vale null (sin dato) en vez de 0. */
+export function Campo({ id, l, valor, onCambio, prefijo, sufijo, paso = 100, min = 0, opcional = false, placeholder }) {
   return (
     <label className="cr-campo" htmlFor={id}>
       <span>{l}</span>
       <span className="cr-input">
         {prefijo && <i>{prefijo}</i>}
-        <input id={id} type="number" inputMode="decimal" min={min} step={paso} value={valor}
-          onChange={e => onCambio(e.target.value === "" ? 0 : +e.target.value)} />
+        <input id={id} type="number" inputMode="decimal" min={min} step={paso} value={valor ?? ""} placeholder={placeholder}
+          onChange={e => onCambio(e.target.value === "" ? (opcional ? null : 0) : +e.target.value)} />
         {sufijo && <i>{sufijo}</i>}
       </span>
     </label>

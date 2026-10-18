@@ -17,6 +17,7 @@ npm install
 cp .env.example .env      # y pegar la DATABASE_URL de Neon
 npm run api               # API en http://localhost:3001   (una terminal)
 npm run dev               # app en http://localhost:5173   (otra terminal)
+npm test                  # pruebas de la lógica (node:test, sin base)
 ```
 
 La app pide los datos a `/api/...`; en desarrollo Vite los redirige a la API.
@@ -27,7 +28,8 @@ La app pide los datos a `/api/...`; en desarrollo Vite los redirige a la API.
 |---|---|
 | Entorno | Mapa con capas de seguridad, transporte o servicios para toda la ciudad; ficha del inmueble con puntaje de entorno, precio por m² frente a la mediana del distrito, minutos a pie y conteos a 500 m. |
 | Oportunidades | Filtros (distrito, presupuesto, dormitorios) y seis prioridades: precio, espacio, antigüedad, seguridad, servicios y transporte. Las burbujas del mapa y el ranking se ordenan con ese puntaje. |
-| Valor · Evolución | Próximamente: evaluador de precio (Fase 6) y series de precios (necesita varios cortes semanales). |
+| Evaluador | Cuánto debería costar un inmueble: ubicación (toque en el mapa, distrito o el inmueble elegido), área, dormitorios, baños, estacionamientos y antigüedad. Da el precio estimado, el rango, la confianza, si el precio pedido está por debajo o por encima, y los 12 avisos que usó (resaltados en el mapa). |
+| Evolución | Próximamente: series de precios (necesita varios cortes semanales). |
 
 ## Cómo se calculan los puntajes (`src/lib/scoring.js`)
 
@@ -42,6 +44,17 @@ Cada criterio es el percentil del inmueble entre todos los de su operación (alq
 
 Puntaje de oportunidad = promedio ponderado con los pesos de los controles.
 Puntaje de entorno (0–10) = 45% seguridad, 30% transporte, 25% servicios.
+
+## Cómo estima el evaluador (`src/lib/evaluador.js`)
+
+Por comparables, con los avisos de la misma operación que ya carga la app (no llama a la API):
+
+- **Parecido:** 1 km de distancia pesa lo mismo que 25 % de diferencia de área, 0.6 dormitorios, 0.4 baños o estacionamientos, o 15 años de antigüedad (esta solo si los dos la tienen).
+- **Estimación:** mediana del precio por m² de los 12 más parecidos, ponderada por 1/(0.25 + diferencia)², × el área. El rango son los percentiles 25 y 75.
+- **Confianza:** alta si hay 8+ comparables a ≤ 1.5 km en mediana y su precio por m² varía poco (p75/p25 ≤ 1.35); media hasta 3 km y 1.7; si no, baja.
+- **Error típico:** la pestaña estima cada aviso con los demás y muestra la mediana del error. Con los ~100 avisos por operación de octubre 2026: 13.5 % en alquiler y 15 % en venta. Mejora con más avisos (Fase 5).
+
+No usa los modelos de `models/*.pkl` del evaluador anterior (Streamlit, `app/autoevaluator.py`): se entrenaron con otro dataset y necesitan Python.
 
 ## API (`server.js`)
 

@@ -7,7 +7,8 @@
     "api": "node server.js",
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --test \"test/*.test.js\""
   },
   "dependencies": {
     "@deck.gl/aggregation-layers": "^9.3.3",
