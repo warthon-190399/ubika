@@ -22,6 +22,14 @@ npm test                  # pruebas de la lógica (node:test, sin base)
 
 La app pide los datos a `/api/...`; en desarrollo Vite los redirige a la API.
 
+### Mapa base (Stadia Maps)
+
+El fondo del mapa es [Stadia Maps](https://stadiamaps.com/) (Alidade Smooth, y Stamen Toner Labels para los nombres encima de las capas de color), hasta zoom 19.
+
+- **En local** (`localhost`) funciona sin clave.
+- **En producción** hay que crear una cuenta gratuita en Stadia Maps y, en su panel, registrar el dominio donde se publique la app (no hace falta tocar el código). Otra opción es crear una API key y ponerla en `ubika-app/.env` como `VITE_STADIA_API_KEY=...` antes de `npm run build`; la clave queda visible en el navegador, así que conviene restringirla al dominio.
+- Sin dominio registrado ni clave, Stadia rechaza las imágenes y el mapa queda en blanco (los datos se siguen viendo).
+
 ## Qué muestra
 
 | Pestaña | Contenido |

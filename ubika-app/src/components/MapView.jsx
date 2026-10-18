@@ -9,17 +9,22 @@ import Indicadores from "./Indicadores";
 import { PRINCIPALES, VARIABLES, VARIABLES_KEYS, disponible, tramos, valoresCeldas, valoresDistrito } from "../lib/variables";
 import { CATEGORIAS, CATEGORIAS_KEYS, aPie, grupoDe, icono, titulo } from "../lib/poi";
 
-// Esri Light Gray Canvas solo tiene imágenes hasta el zoom 16: más cerca se verían pixeladas
-const ZOOM_MIN = 9, ZOOM_MAX = 16;
+// Stadia tiene imágenes hasta el zoom 20; 19 ya es nivel de calle
+const ZOOM_MIN = 9, ZOOM_MAX = 19;
 const VISTA_INICIAL = { longitude: -77.03, latitude: -12.09, zoom: 11.3, pitch: 0, bearing: 0, minZoom: ZOOM_MIN, maxZoom: ZOOM_MAX };
 const PIN = "/brand/ubika-pin.svg";
 
-/* ── Mapa base: Esri gris claro (sin clave). Calles abajo, nombres encima de los datos ── */
-const ESRI = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas";
-const BASE = `${ESRI}/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}`;
-const NOMBRES = `${ESRI}/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}`;
-const capaTiles = (id, url) => new TileLayer({
-  id, data: url, minZoom: 0, maxZoom: ZOOM_MAX, tileSize: 256,
+/* ── Mapa base: Stadia Alidade Smooth, gris claro. Encima de los colores, solo los nombres (Stamen Toner Labels).
+   Imágenes @2x (512 px) solo en pantallas de alta densidad: en las normales achicarían los nombres.
+   En localhost no pide clave; en producción hay que registrar el dominio en Stadia Maps
+   o poner VITE_STADIA_API_KEY en ubika-app/.env (ver README). ── */
+const STADIA_KEY = import.meta.env.VITE_STADIA_API_KEY;
+const RETINA = typeof window !== "undefined" && window.devicePixelRatio > 1 ? "@2x" : "";
+const stadia = estilo => `https://tiles.stadiamaps.com/tiles/${estilo}/{z}/{x}/{y}${RETINA}.png${STADIA_KEY ? `?api_key=${STADIA_KEY}` : ""}`;
+const BASE = stadia("alidade_smooth");
+const NOMBRES = stadia("stamen_toner_labels");
+const capaTiles = (id, url, opacity = 1) => new TileLayer({
+  id, data: url, minZoom: 0, maxZoom: ZOOM_MAX, tileSize: 256, opacity,
   renderSubLayers: props => {
     const [[w, s], [e, n]] = props.tile.boundingBox;
     return new BitmapLayer(props, { data: null, image: props.data, bounds: [w, s, e, n] });
@@ -130,7 +135,7 @@ export default function MapView({ props, grillas, ciudad, capa, onCapa, escala, 
   const layers = [
     capaTiles("base", BASE),
     ...capasCiudad(),
-    capaTiles("nombres", NOMBRES),     // nombres de calles y distritos encima de los colores
+    conCapa && capaTiles("nombres", NOMBRES, 0.55),   // nombres encima de los colores (sin capa, ya vienen en la base)
     // Radio de 500 m del inmueble elegido: la zona que miden sus indicadores
     selected && new ScatterplotLayer({
       id: "radio", data: [selected], getPosition: p => [p.longitud, p.latitud],
@@ -304,7 +309,7 @@ export default function MapView({ props, grillas, ciudad, capa, onCapa, escala, 
 
       <div className="map-atrib">
         {capa && !celdas && escala === "barrio" && <span>Cargando capa… · </span>}
-        <span className="mono">{fmt(props.length)} inmuebles</span> · © Esri, HERE, Garmin, © OpenStreetMap
+        <span className="mono">{fmt(props.length)} inmuebles</span> · © Stadia Maps · © OpenMapTiles · © OpenStreetMap
       </div>
 
       {ficha && selected && (
