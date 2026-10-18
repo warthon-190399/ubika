@@ -13,3 +13,4 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src"]          # para importar src/modeling (modelos de valor)

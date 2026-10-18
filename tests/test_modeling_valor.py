@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from ubika.modelado import valor
+from modeling import valor
 
 MIRA, COMAS = (-12.1211, -77.0297), (-11.94, -77.05)
 

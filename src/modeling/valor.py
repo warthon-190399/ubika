@@ -19,9 +19,9 @@ Guarda en models/valor/ (no se versiona):
 y anota la corrida en la tabla corridas (salvo --sin-registro). Solo lee datos de Neon: no cambia tablas.
 
 Uso (desde la raíz del repo, con el entorno activado):
-    python -m ubika.modelado.valor                       # alquiler y venta
-    python -m ubika.modelado.valor --operacion venta
-    python -m ubika.modelado.valor --sin-registro        # prueba: no escribe en corridas
+    python -m modeling.valor                       # alquiler y venta
+    python -m modeling.valor --operacion venta
+    python -m modeling.valor --sin-registro        # prueba: no escribe en corridas
 """
 from __future__ import annotations
 
