@@ -26,6 +26,7 @@ src/ubika/             paquete Python
   scraping/navent.py     parsers de adondevivir/urbania (misma plataforma)
   scraping/__main__.py   scraper: listado + detalle → raw_listings / raw_detalles
   pipeline/              limpieza + repetidos → geocoding → entorno
+  modelado/valor.py      modelo de valor: entrena y compara métodos con los datos de Neon (Fase 6)
 scripts/
   check_db.py            verifica conexión y esquema
 tests/                 pruebas (pytest)
@@ -79,6 +80,16 @@ python -m ubika.pipeline                    # limpieza → geocoding → entorno
 python -m ubika.pipeline --sin-google       # sin consultar Google
 python -m ubika.pipeline --etapas entorno   # una sola etapa
 ```
+
+Modelo de valor (Fase 6; solo lee de Neon y guarda en `models/valor/`, que no se versiona):
+
+```bash
+python -m ubika.modelado.valor                    # alquiler y venta
+python -m ubika.modelado.valor --operacion venta
+python -m ubika.modelado.valor --sin-registro     # prueba: no anota la corrida en Neon
+```
+
+Compara con validación cruzada (5 partes × 3 repeticiones) la mediana del distrito, los comparables de la app, Ridge, Random Forest y gradient boosting. Guarda `{operacion}_metricas.json` (MAPE, error mediano, % a menos de 20 %, R² y RMSE de cada método) y el mejor modelo en `{operacion}_modelo.joblib`. Con ~100 inmuebles por operación (octubre 2026) los resultados son inestables: hay que acumular avisos antes de usarlo en la app.
 
 ## Modelo de datos
 
