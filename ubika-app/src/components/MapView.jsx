@@ -3,6 +3,7 @@ import DeckGL from "@deck.gl/react";
 import { WebMercatorViewport } from "@deck.gl/core";
 import { BitmapLayer, ColumnLayer, GeoJsonLayer, IconLayer, LineLayer, ScatterplotLayer, TextLayer } from "@deck.gl/layers";
 import { TileLayer } from "@deck.gl/geo-layers";
+import { PathStyleExtension } from "@deck.gl/extensions";
 import { SEQ, SEQ_RGB, fmt, hexToRgb, soles, tramo } from "../lib/scoring";
 import { nombre } from "../lib/distritos";
 import Indicadores from "./Indicadores";
@@ -40,7 +41,13 @@ const HEX_RADIO_M = 196;     // la grilla va cada 350 m (350/√3 ≈ 202 m de r
 const ALFA = 175;            // la misma opacidad en las dos escalas
 const MEZCLA = { blend: true, blendColorSrcFactor: "src-alpha", blendColorDstFactor: "one-minus-src-alpha",
   blendAlphaSrcFactor: "one", blendAlphaDstFactor: "one-minus-src-alpha" };
-const ZOOM_PRECIOS = 13.2;   // desde aquí cada burbuja muestra su precio
+const ZOOM_PRECIOS = 12;     // desde aquí se muestran precios; los que se pisarían se ocultan
+const PUNTEADO = new PathStyleExtension({ dash: true });
+const DASH = [4, 3];         // trazo y espacio de los límites de distrito, en múltiplos del grosor
+const ROJO = [220, 38, 38, 240];   // borde del distrito elegido en el filtro
+const MAGENTA = [214, 36, 110];    // inmuebles sobre capas amarillo→verde (SEQ)
+const AZUL = [29, 78, 216];        // inmuebles sobre capas naranja→rojo (crimen, ruido)
+const R_SOBRE_CAPA = 4.5;          // radio fijo de los inmuebles sobre una capa, en píxeles
 
 const porMes = p => (p.operacion === "alquiler" ? " /mes" : "");
 const SIN_CAJA = { background: "transparent", border: "none", padding: 0 };
@@ -56,8 +63,8 @@ function escalaPrecio(props, zoom) {
   return { r, muestras: v.length ? [cuantil(v, 0.1), cuantil(v, 0.5), tope] : [] };
 }
 
-export default function MapView({ props, grillas, ciudad, capa, onCapa, escala, onEscala, distritos, crimenDist, limites,
-  colorDe, colorTitulo, selected, ixSelected, ficha, onCerrarFicha, onVerFicha, onSelect, foco,
+export default function MapView({ props, grillas, ciudad, capa, onCapa, escala, onEscala, distritos, crimenDist, limites, distritoSel,
+  colorDe, colorTitulo, selected, ixSelected, ficha, onCerrarFicha, onVerFicha, onSelect, onDeseleccionar, foco,
   enComparacion, onComparar, lleno, nComparar, onAbrirComparador, cerca, poiFiltro, onPoiFiltro,
   punto, onPunto, resaltar }) {
   const [viewState, setViewState] = useState(VISTA_INICIAL);
@@ -73,6 +80,28 @@ export default function MapView({ props, grillas, ciudad, capa, onCapa, escala, 
     return () => ro.disconnect();
   }, []);
   useEffect(() => setPoiSel(null), [selected?.prop_id]);
+
+  // Distrito elegido en el filtro: su borde en rojo, encima de cualquier capa
+  const limiteSel = useMemo(() => limites && distritoSel
+    ? limites.features.filter(f => f.properties.distrito === distritoSel) : [], [limites, distritoSel]);
+
+  // Al elegir un distrito, encuadrarlo; al volver a «Todos», la vista de toda la ciudad.
+  // Va antes del efecto del inmueble: si ambos cambian a la vez (búsqueda), gana el inmueble.
+  useEffect(() => {
+    if (!distritoSel) {
+      setViewState(vs => ({ ...vs, ...VISTA_INICIAL, transitionDuration: 600 }));
+      return;
+    }
+    if (!limiteSel.length) return;
+    const puntos = limiteSel.flatMap(f => f.geometry.type === "MultiPolygon"
+      ? f.geometry.coordinates.flat(2) : f.geometry.coordinates.flat(1));
+    const lons = puntos.map(p => p[0]), lats = puntos.map(p => p[1]);
+    const caja = [[Math.min(...lons), Math.min(...lats)], [Math.max(...lons), Math.max(...lats)]];
+    setViewState(vs => {
+      const { longitude, latitude, zoom } = new WebMercatorViewport({ ...vs, ...tam }).fitBounds(caja, { padding: { top: 40, bottom: 90, left: 40, right: 40 } });   // abajo, la barra de capas
+      return { ...vs, longitude, latitude, zoom: Math.min(zoom, 15), transitionDuration: 600 };
+    });
+  }, [distritoSel, limiteSel.length]);
 
   // Al elegir: acercar hasta que el círculo de 500 m se lea y correr el mapa para que la ficha quepa al costado
   useEffect(() => {
@@ -107,13 +136,21 @@ export default function MapView({ props, grillas, ciudad, capa, onCapa, escala, 
   }, [grillas.seguridad, celdas, ciudad]);
 
   const capasCiudad = () => {
-    if (!V || !escalaColor) return [];
+    // Sin capa: solo el contorno punteado de los distritos, para ubicarse sin tapar los precios
+    if (!V || !escalaColor) return limites ? [new GeoJsonLayer({
+      id: "limites-punteados", data: limites, stroked: true, filled: false, parameters: MEZCLA,
+      getLineColor: [8, 51, 47, 150], lineWidthUnits: "pixels", getLineWidth: 1.2,
+      getDashArray: DASH, dashJustified: true, extensions: [PUNTEADO],
+    })] : [];
+    const relleno = escala === "distrito";
     const bordes = limites && new GeoJsonLayer({
-      id: "limites", data: limites, stroked: true, filled: escala === "distrito", pickable: escala === "distrito", parameters: MEZCLA,
+      id: "limites", data: limites, stroked: true, filled: relleno, pickable: relleno, parameters: MEZCLA,
       getFillColor: f => colorDeTramo(escalaColor.tramo(porDistrito.get(f.properties.distrito)?.v)) || [190, 195, 192, 50],
-      getLineColor: escala === "distrito" ? [255, 255, 255, 235] : [8, 51, 47, 90],
-      lineWidthUnits: "pixels", getLineWidth: escala === "distrito" ? 1.4 : 1,
-      updateTriggers: { getFillColor: [capa, escala, porDistrito, escalaColor], getLineColor: [escala], getLineWidth: [escala] },
+      getLineColor: relleno ? [255, 255, 255, 235] : [8, 51, 47, 110],
+      lineWidthUnits: "pixels", getLineWidth: relleno ? 1.4 : 1.1,
+      // Sobre los hexágonos el borde va punteado; con el mapa por distrito, línea continua entre colores
+      getDashArray: relleno ? [0, 0] : DASH, dashJustified: true, extensions: [PUNTEADO],
+      updateTriggers: { getFillColor: [capa, escala, porDistrito, escalaColor], getLineColor: [escala], getLineWidth: [escala], getDashArray: [escala] },
     });
     if (escala === "distrito") return [bordes];
     return [
@@ -130,18 +167,63 @@ export default function MapView({ props, grillas, ciudad, capa, onCapa, escala, 
   const poisVisibles = useMemo(() => !cerca ? [] : CATEGORIAS_KEYS.filter(k => poiFiltro[k]).flatMap(k => cerca[k]), [cerca, poiFiltro]);
   const estacionLejos = cerca && poiFiltro.transporte ? cerca.transporte.find(x => x.mas_cercana) : null;
   const conCapa = !!V;
-  const conPrecio = !conCapa && viewState.zoom >= ZOOM_PRECIOS;
+  // Sobre una capa, los inmuebles van en el color complementario de su paleta para no perderse en ella
+  const puntoSobreCapa = V?.paleta === SEQ ? MAGENTA : AZUL;
+  const conPrecio = viewState.zoom >= ZOOM_PRECIOS;
+  const radio = p => (conCapa ? R_SOBRE_CAPA : escalaB.r(p.precio_pen));
+
+  // Precios sin encimarse: de mayor a menor puntaje, cada etiqueta entra solo si no pisa a otra ya puesta.
+  // La distancia en pantalla entre dos puntos depende solo del zoom, así que no se recalcula al mover el mapa.
+  const zoomEtiquetas = Math.round(viewState.zoom * 4) / 4;
+  const conEtiqueta = useMemo(() => {
+    if (!conPrecio) return [];
+    const vp = new WebMercatorViewport({ longitude: 0, latitude: 0, zoom: zoomEtiquetas, width: 1, height: 1 });
+    const px = 2 ** zoomEtiquetas;                     // projectFlat da unidades de mundo (512 = el planeta a zoom 0)
+    const orden = props.filter(p => p.prop_id !== selected?.prop_id)
+      .sort((a, b) => (colorDe(b) ?? 0) - (colorDe(a) ?? 0));
+    const celdas = new Map(), CELDA = 64, puestas = [];
+    for (const p of orden) {
+      const [mx, my] = vp.projectFlat([p.longitud, p.latitud]);
+      const x = mx * px, y = -my * px - (radio(p) + 11);   // en pantalla la y crece hacia abajo
+      const w = 7 * corto(p.precio_pen).length + 12, h = 17;
+      const caja = [x - w / 2, y - h / 2, x + w / 2, y + h / 2];
+      const cx0 = Math.floor(caja[0] / CELDA), cx1 = Math.floor(caja[2] / CELDA);
+      const cy0 = Math.floor(caja[1] / CELDA), cy1 = Math.floor(caja[3] / CELDA);
+      let choca = false;
+      for (let cx = cx0; cx <= cx1 && !choca; cx++) for (let cy = cy0; cy <= cy1 && !choca; cy++)
+        choca = (celdas.get(`${cx},${cy}`) || []).some(o => o[0] < caja[2] && caja[0] < o[2] && o[1] < caja[3] && caja[1] < o[3]);
+      if (choca) continue;
+      for (let cx = cx0; cx <= cx1; cx++) for (let cy = cy0; cy <= cy1; cy++) {
+        const k = `${cx},${cy}`;
+        celdas.set(k, [...(celdas.get(k) || []), caja]);
+      }
+      puestas.push(p);
+    }
+    return puestas;
+  }, [conPrecio, zoomEtiquetas, props, selected?.prop_id, colorDe, conCapa, escalaB]);
 
   const layers = [
     capaTiles("base", BASE),
     ...capasCiudad(),
     conCapa && capaTiles("nombres", NOMBRES, 0.55),   // nombres encima de los colores (sin capa, ya vienen en la base)
-    // Radio de 500 m del inmueble elegido: la zona que miden sus indicadores
+    limiteSel.length > 0 && new GeoJsonLayer({
+      id: "limite-elegido", data: limiteSel, stroked: true, filled: false, parameters: MEZCLA,
+      getLineColor: ROJO, lineWidthUnits: "pixels", getLineWidth: 2.5,
+    }),
+    // Radio de 500 m del inmueble elegido: la zona que miden sus indicadores.
+    // Sobre una capa va en el color de contraste de su paleta, con un halo blanco debajo del borde
+    selected && conCapa && new ScatterplotLayer({
+      id: "radio-halo", data: [selected], getPosition: p => [p.longitud, p.latitud],
+      getRadius: 500, radiusUnits: "meters", stroked: true, filled: false, parameters: MEZCLA,
+      getLineColor: [255, 255, 255, 230], lineWidthUnits: "pixels", getLineWidth: 6,
+    }),
     selected && new ScatterplotLayer({
       id: "radio", data: [selected], getPosition: p => [p.longitud, p.latitud],
       getRadius: 500, radiusUnits: "meters", stroked: true, filled: true, parameters: MEZCLA,
-      getFillColor: [254, 183, 34, conCapa ? 0 : 30], getLineColor: [8, 51, 47, 220], lineWidthUnits: "pixels", getLineWidth: 1.5,
-      updateTriggers: { getFillColor: [conCapa] },
+      getFillColor: conCapa ? [...puntoSobreCapa, 55] : [254, 183, 34, 30],
+      getLineColor: conCapa ? [...puntoSobreCapa, 255] : [8, 51, 47, 220],
+      lineWidthUnits: "pixels", getLineWidth: conCapa ? 3 : 1.5,
+      updateTriggers: { getFillColor: [conCapa, puntoSobreCapa], getLineColor: [conCapa, puntoSobreCapa], getLineWidth: [conCapa] },
     }),
     // Estación más cercana cuando queda fuera del círculo: una línea hasta ella
     selected && estacionLejos && new LineLayer({
@@ -153,24 +235,24 @@ export default function MapView({ props, grillas, ciudad, capa, onCapa, escala, 
       id: "inmuebles", data: props, getPosition: p => [p.longitud, p.latitud], parameters: MEZCLA,
       radiusUnits: "pixels", stroked: true, lineWidthUnits: "pixels", pickable: true,
       getRadius: p => {
-        const base = conCapa ? 3.5 : escalaB.r(p.precio_pen);
+        const base = radio(p);
         return p.prop_id === hover ? base + 2 : base;
       },
-      getFillColor: p => conCapa ? [255, 255, 255, 250] : [...SEQ_RGB[tramo(colorDe(p) ?? 0)], 230],
-      getLineColor: conCapa ? [8, 51, 47, 255] : [255, 255, 255, 240],
+      getFillColor: p => conCapa ? [...puntoSobreCapa, 255] : [...SEQ_RGB[tramo(colorDe(p) ?? 0)], 230],
+      getLineColor: [255, 255, 255, 240],
       getLineWidth: conCapa ? 1.5 : 1.25,
       onHover: ({ object }) => setHover(object?.prop_id ?? null),
       onClick: ({ object }) => object && onSelect(object),
-      updateTriggers: { getRadius: [hover, conCapa, escalaB], getFillColor: [conCapa, colorDe] },
+      updateTriggers: { getRadius: [hover, conCapa, escalaB], getFillColor: [conCapa, colorDe, puntoSobreCapa] },
     }),
-    // Precio sobre cada burbuja al acercarse
+    // Precio sobre cada burbuja al acercarse (también sobre las capas)
     conPrecio && new TextLayer({
-      id: "precios", data: props.filter(p => p.prop_id !== selected?.prop_id), parameters: MEZCLA,
+      id: "precios", data: conEtiqueta, parameters: MEZCLA,
       getPosition: p => [p.longitud, p.latitud], getText: p => corto(p.precio_pen),
-      getPixelOffset: p => [0, -(escalaB.r(p.precio_pen) + 11)], getSize: 11, getColor: [8, 51, 47, 255],
+      getPixelOffset: p => [0, -(radio(p) + 11)], getSize: 11, getColor: [8, 51, 47, 255],
       fontFamily: "Inter, system-ui, sans-serif", fontWeight: 600, characterSet: "auto",
       background: true, getBackgroundColor: [255, 255, 255, 235], backgroundPadding: [5, 2], getBorderColor: [217, 222, 220, 255], getBorderWidth: 1,
-      updateTriggers: { getPixelOffset: [escalaB] },
+      updateTriggers: { getPixelOffset: [escalaB, conCapa] },
     }),
     // Lo que hay alrededor del inmueble elegido: un emoji por lugar, según el filtro
     selected && poisVisibles.length > 0 && new IconLayer({
@@ -251,9 +333,11 @@ export default function MapView({ props, grillas, ciudad, capa, onCapa, escala, 
       <DeckGL
         viewState={viewState} controller={true} layers={layers}
         onViewStateChange={({ viewState: vs }) => setViewState(vs)}
-        onClick={({ object, coordinate }) => {
-          if (object) return;
-          onCerrarFicha(); setPoiSel(null);
+        onClick={({ object, layer, coordinate }) => {
+          // Hexágonos y distritos de una capa se pueden tocar (tooltip), pero son fondo: cuentan como mapa vacío
+          const fondo = layer && (layer.id.startsWith("hex-") || layer.id === "limites");
+          if (object && !fondo) return;
+          onDeseleccionar(); setPoiSel(null);
           if (onPunto && coordinate) onPunto({ lat: coordinate[1], lon: coordinate[0] });
         }}
         getCursor={({ isHovering, isDragging }) => (isDragging ? "grabbing" : isHovering || onPunto ? "pointer" : "grab")}

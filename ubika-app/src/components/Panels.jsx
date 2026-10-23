@@ -156,12 +156,17 @@ export function OportunidadesPanel({ filtros, onFiltros, pesos, onPesos, ranking
 
       <section className="bloque">
         <div className="eyebrow">Qué te importa más</div>
+        <p className="nota pref-escala">Cuánto pesa cada criterio al ordenar los avisos y colorear el mapa.</p>
         <div className="prefs">
-          {CRITERIOS.map(({ k, l, ayuda }) => (
-            <label key={k} className="pref" htmlFor={`peso-${k}`} title={ayuda}>
+          {CRITERIOS.map(({ k, l, max, ayuda }) => (
+            <label key={k} className="pref" htmlFor={`peso-${k}`} title={`Mejor: ${ayuda}`}>
               <span className="pref-h"><span>{l}</span><span className="mono">{pesos[k]}</span></span>
               <input id={`peso-${k}`} type="range" min={0} max={10} step={1} value={pesos[k]}
+                aria-describedby={`ayuda-${k}`}
                 onChange={e => onPesos(w => ({ ...w, [k]: +e.target.value }))} />
+              <span id={`ayuda-${k}`} className="pref-extremos">
+                <span>0 · da igual</span><span>10 · prioriza {max}</span>
+              </span>
             </label>
           ))}
         </div>

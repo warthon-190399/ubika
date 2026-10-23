@@ -17,7 +17,7 @@ const metros = v => (v == null ? "—" : v < 1000 ? `${Math.round(v / 10) * 10} 
 
 export const VARIABLES = {
   calidad: {
-    l: "Calidad de vida", titulo: "Calidad de vida", paleta: SEQ, bajo: "menor", alto: "mayor",
+    l: "Calidad de vida", titulo: "Calidad de vida", paleta: SEQ, bajo: "peor calidad", alto: "mejor calidad",
     unidad: "Puntaje 0–10: seguridad, transporte, servicios, áreas verdes, comercio y tranquilidad",
     f: v => v.toFixed(1), sufijo: " /10",
     nota: {
@@ -26,7 +26,7 @@ export const VARIABLES = {
     },
   },
   crimen: {
-    l: "Crimen", titulo: "Crimen por habitante", paleta: CALIENTE, bajo: "menos", alto: "más",
+    l: "Crimen", titulo: "Crimen por habitante", paleta: CALIENTE, bajo: "menos crimen", alto: "más crimen",
     unidad: "Denuncias de robo y violencia en 12 meses por cada 10 mil habitantes",
     f: v => fmt(v), sufijo: " por 10 mil hab.",
     nota: {

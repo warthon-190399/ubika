@@ -8,12 +8,13 @@
  */
 
 export const CRITERIOS = [
-  { k: "precio",     l: "Precio",     ayuda: "más barato, incluido el mantenimiento" },
-  { k: "espacio",    l: "Espacio",    ayuda: "área, dormitorios, baños y estacionamiento" },
-  { k: "antiguedad", l: "Antigüedad", ayuda: "más nuevo" },
-  { k: "seguridad",  l: "Seguridad",  ayuda: "menos denuncias de robo y violencia cerca" },
-  { k: "servicios",  l: "Servicios",  ayuda: "colegios, salud, comisarías y comercio a 500 m" },
-  { k: "transporte", l: "Transporte", ayuda: "más cerca del metro, tren o Metropolitano" },
+  // `max`: lo que prioriza el peso 10, para el extremo derecho de la barra
+  { k: "precio",     l: "Precio",     max: "lo más barato",       ayuda: "más barato, incluido el mantenimiento" },
+  { k: "espacio",    l: "Espacio",    max: "lo más amplio",       ayuda: "más área, dormitorios, baños y estacionamiento" },
+  { k: "antiguedad", l: "Antigüedad", max: "lo más nuevo",        ayuda: "más nuevo" },
+  { k: "seguridad",  l: "Seguridad",  max: "lo más seguro",       ayuda: "menos denuncias de robo y violencia cerca" },
+  { k: "servicios",  l: "Servicios",  max: "más servicios cerca", ayuda: "más colegios, salud, comisarías y comercio a 500 m" },
+  { k: "transporte", l: "Transporte", max: "transporte cerca",    ayuda: "más cerca del metro, tren o Metropolitano" },
 ];
 
 export const PESOS_INICIALES = { precio: 8, espacio: 5, antiguedad: 3, seguridad: 7, servicios: 4, transporte: 6 };

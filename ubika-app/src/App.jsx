@@ -45,6 +45,14 @@ export default function App() {
   const [consulta, setConsulta] = useState(CONSULTA_INICIAL);   // Evaluador: el inmueble que se evalúa
 
   const elegir = p => { setFoco(true); setSelected(p); setFicha(true); setDetalle(true); };
+  // Soltar el inmueble elegido: clic en el mapa vacío, Esc o cambio de sección
+  const deseleccionar = () => { setSelected(null); setFicha(false); setDetalle(false); };
+  const cambiarVista = v => { if (v !== vista) deseleccionar(); setVista(v); };
+  useEffect(() => {
+    const alTeclear = e => { if (e.key === "Escape") deseleccionar(); };
+    window.addEventListener("keydown", alTeclear);
+    return () => window.removeEventListener("keydown", alTeclear);
+  }, []);
   const alternarComparar = p => setComparar(ids => {
     const sig = ids.includes(p.prop_id) ? ids.filter(i => i !== p.prop_id)
       : ids.length >= MAX_COMPARAR ? ids : [...ids, p.prop_id];
@@ -138,7 +146,7 @@ export default function App() {
     <div className="shell">
       <Topbar operacion={operacion} onOperacion={setOperacion} query={query} onQuery={setQuery} distritos={nombresDistrito} />
       <div className="cuerpo">
-        <Sidebar vista={vista} onVista={setVista} nComparar={aComparar.length} />
+        <Sidebar vista={vista} onVista={cambiarVista} nComparar={aComparar.length} />
         <main className="work">
           {loading && <div className="estado">Cargando inmuebles…</div>}
           {!loading && error && (
@@ -154,9 +162,9 @@ export default function App() {
                 escala={escala} onEscala={setEscala} distritos={distritos} colorDe={colorDe} colorTitulo="Oportunidad"
                 selected={selected} ixSelected={selected && ixCiudad.get(selected.prop_id)}
                 cerca={cerca} poiFiltro={poiFiltro} onPoiFiltro={setPoiFiltro} crimenDist={crimenDist} limites={limites}
-                ficha={ficha} onCerrarFicha={() => setFicha(false)}
+                distritoSel={filtros.distrito} ficha={ficha} onCerrarFicha={() => setFicha(false)}
                 onVerFicha={() => { setVista("explorar"); setDetalle(true); }}
-                onSelect={elegir} foco={foco} {...cmp}
+                onSelect={elegir} onDeseleccionar={deseleccionar} foco={foco} {...cmp}
                 nComparar={aComparar.length} onAbrirComparador={() => setVista("comparar")}
                 punto={enValor && consulta.lat != null ? consulta : null} onPunto={enValor ? ponerPunto : null}
                 resaltar={estimacion?.comparables.map(c => c.p)} />

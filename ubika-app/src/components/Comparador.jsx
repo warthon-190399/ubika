@@ -117,7 +117,16 @@ export default function Comparador({ props, ixCiudad, indices, puntajes, onQuita
       <header className="cmp-head">
         <div>
           <h2>Comparar inmuebles</h2>
-          <p>{cols.length} de {MAX_COMPARAR} · <span className="cmp-mejor-ej" aria-hidden="true" /> mejor valor de cada fila</p>
+          <p className="cmp-cupos">
+            <span className="cmp-casillas" aria-hidden="true">
+              {Array.from({ length: MAX_COMPARAR }, (_, i) => <i key={i} style={i < cols.length ? { "--c": COLORES[i] } : undefined} className={i < cols.length ? "llena" : ""} />)}
+            </span>
+            <b>{cols.length} de {MAX_COMPARAR}</b>
+            {cols.length < MAX_COMPARAR
+              ? `· puedes agregar ${MAX_COMPARAR - cols.length} más`
+              : "· llegaste al máximo; quita uno para agregar otro"}
+          </p>
+          {cols.length > 1 && <p><span className="cmp-mejor-ej" aria-hidden="true" /> mejor valor de cada fila</p>}
         </div>
         <div className="cmp-acciones">
           {cols.length > 0 && <button className="link" onClick={onLimpiar}>Quitar todos</button>}
@@ -158,8 +167,21 @@ export default function Comparador({ props, ixCiudad, indices, puntajes, onQuita
                       ? <>Gana en {gana[j].map(g => <em key={g}>{g}</em>)}</>
                       : <span>No lidera ningún eje</span>}
                   </div>
+                  <div className="cmp-card-acciones">
+                    <button className="link" onClick={() => onVer(c.p)}>Ver en el mapa →</button>
+                    <button className="link cmp-quitar" onClick={() => onQuitar(c.p)}
+                      aria-label={`Quitar ${nombre(c.p.distrito)} de la comparación`}>✕ Quitar</button>
+                  </div>
                 </article>
               ))}
+              {/* Cupos libres: cómo sumar otro inmueble */}
+              {cols.length < MAX_COMPARAR && (
+                <div className="cmp-card cmp-libre">
+                  <b>{MAX_COMPARAR - cols.length === 1 ? "Queda 1 espacio libre" : `Quedan ${MAX_COMPARAR - cols.length} espacios libres`}</b>
+                  <span>Agrega otro inmueble con «+ Comparar» en su ficha o en el ranking.</span>
+                  <button className="link" onClick={onCerrar}>Ir al mapa →</button>
+                </div>
+              )}
             </div>
           </div>
           <table className="cmp-tabla" style={{ "--cols": cols.length }}>
