@@ -10,12 +10,37 @@ scraping:
   fuentes:
     adondevivir:
       activo: true
+      # Un listado por distrito (slug del portal): con el tope de 5 páginas, un solo listado
+      # de Lima no pasa de ~130 avisos. Un slug que no existe redirige al listado general y se salta.
+      # max_avisos se reparte en partes iguales entre las zonas.
+      zonas: &zonas_adondevivir
+        - miraflores
+        - santiago-de-surco
+        - san-isidro
+        - barranco
+        - san-borja
+        - jesus-maria
+        - lince
+        - magdalena
+        - pueblo-libre
+        - san-miguel
+        - surquillo
+        - la-molina
+        - chorrillos
+        - los-olivos
+        - la-victoria
+        - lima-cercado
+        - brena
+        - callao
+        - san-juan-de-lurigancho
       alquiler:
-        url: "https://www.adondevivir.com/departamentos-en-alquiler-pagina-{pagina}-q-lima.html"
-        max_avisos: 100
+        url: "https://www.adondevivir.com/departamentos-en-alquiler-en-{zona}-pagina-{pagina}.html"
+        zonas: *zonas_adondevivir
+        max_avisos: 500
       venta:
-        url: "https://www.adondevivir.com/departamentos-en-venta-pagina-{pagina}-q-lima.html"
-        max_avisos: 100
+        url: "https://www.adondevivir.com/departamentos-en-venta-en-{zona}-pagina-{pagina}.html"
+        zonas: *zonas_adondevivir
+        max_avisos: 500
     urbania:
       activo: false              # Fase 5. Misma plataforma (Navent) que adondevivir: hay que verificar las URLs
       alquiler:

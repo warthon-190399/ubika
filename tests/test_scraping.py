@@ -69,3 +69,19 @@ def test_bloque_respeta_llaves_dentro_de_strings():
 def test_aviso_id():
     assert navent.aviso_id("/propiedades/clasificado/veclapin-venta-en-chorrillos-151228718.html") == "151228718"
     assert navent.aviso_id("/otra-cosa") is None
+
+
+def test_url_pagina_sin_numero_en_la_primera():
+    from ubika.scraping.__main__ import url_pagina
+    p = "https://www.adondevivir.com/departamentos-en-venta-en-{zona}-pagina-{pagina}.html"
+    assert url_pagina(p, 1, "miraflores") == "https://www.adondevivir.com/departamentos-en-venta-en-miraflores.html"
+    assert url_pagina(p, 3, "miraflores") == "https://www.adondevivir.com/departamentos-en-venta-en-miraflores-pagina-3.html"
+    u = "https://urbania.pe/buscar/venta-de-departamentos-en-lima?page={pagina}"
+    assert url_pagina(u, 1) == "https://urbania.pe/buscar/venta-de-departamentos-en-lima"
+    assert url_pagina(u, 2) == "https://urbania.pe/buscar/venta-de-departamentos-en-lima?page=2"
+
+
+def test_cupos_por_zona():
+    from ubika.scraping.__main__ import cupos_por_zona
+    assert cupos_por_zona(500, ["a"] * 19) == 27
+    assert cupos_por_zona(100, [None]) == 100

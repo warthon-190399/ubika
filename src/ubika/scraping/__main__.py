@@ -2,7 +2,8 @@
 Scraper de avisos (portales Navent: adondevivir, urbania) → Neon.
 
 Dos pasos por operación:
-1. Listado: recorre las páginas de resultados hasta juntar `max_avisos` unidades
+1. Listado: recorre los listados por distrito (`zonas` en config.yaml), cada uno hasta su
+   cupo o hasta la página 5 que permite el robots.txt, hasta juntar `max_avisos` unidades
    (las tarjetas de proyectos se ignoran) y las guarda en raw_listings con la fecha de hoy.
 2. Detalle: abre solo las URLs que todavía no están en raw_detalles.
    Si una ficha falla por timeout no se guarda, y se reintenta en la siguiente corrida.
@@ -18,7 +19,9 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import logging
+import math
 import random
+import re
 import time
 from urllib.parse import urlparse
 
@@ -99,65 +102,113 @@ def _misma_pagina(pedida: str, final: str) -> bool:
     return urlparse(pedida).path.rstrip("/") == urlparse(final).path.rstrip("/")
 
 
+def url_pagina(plantilla: str, pagina: int, zona: str | None = None) -> str:
+    """
+    URL de una página del listado. La página 1 va sin número: el robots.txt de Navent
+    permite la URL base y las páginas 2 a 5, pero no `-pagina-1.html` ni `page=1`.
+    """
+    if pagina == 1:
+        plantilla = re.sub(r"-pagina-\{pagina\}|[?&]page=\{pagina\}", "", plantilla)
+    return plantilla.format(pagina=pagina, zona=zona or "")
+
+
+def cupos_por_zona(max_avisos: int, zonas: list) -> int:
+    """Reparte el máximo entre las zonas para que la muestra no quede concentrada en una sola."""
+    return math.ceil(max_avisos / max(len(zonas), 1))
+
+
 # ── Paso 1: listado ──────────────────────────────────────────
 
 def scrapear_listado(nav, fuente: str, operacion: str, max_avisos: int, hoy: dt.date) -> int:
+    """
+    Recorre cada zona de config.yaml (listados por distrito) hasta su cupo o hasta el tope
+    de páginas del robots.txt. Al retomar en el mismo día se vuelven a leer las páginas,
+    pero los avisos ya guardados hoy no se duplican y cuentan para el cupo de su zona.
+    """
     conf = cfg()["scraping"]["fuentes"][fuente][operacion]
     plantilla = conf["url"]
+    zonas = conf.get("zonas") or [None]
     base = "{0.scheme}://{0.netloc}".format(urlparse(plantilla))
+    cupo = cupos_por_zona(max_avisos, zonas)
+    max_paginas = cfg()["scraping"].get("max_paginas", 5)   # respeta el robots.txt del portal
 
-    # Retomar: lo que ya se guardó hoy cuenta para el máximo y se sigue desde la página siguiente
-    previos = read_df("""SELECT url, pagina FROM raw_listings
+    previos = read_df("""SELECT url FROM raw_listings
                          WHERE fuente = :f AND operacion = :o AND scrape_date = :d""",
                       {"f": fuente, "o": operacion, "d": hoy})
-    guardados: dict[str, dict] = {u: {} for u in previos["url"]}
-    pagina = int(previos["pagina"].max()) + 1 if len(previos) else 1
+    guardados: set[str] = set(previos["url"])
     if len(previos):
-        log.info("  Retomando: %d avisos ya guardados hoy, sigo desde la página %d", len(previos), pagina)
+        log.info("  Retomando: %d avisos ya guardados hoy", len(previos))
+    log.info("  %d zonas · cupo de %d avisos por zona · máximo %d", len(zonas), cupo, max_avisos)
 
-    with corrida("scraping_listado", fuente=fuente, operacion=operacion, max_avisos=max_avisos) as c:
-        leidas = 0
-        max_paginas = cfg()["scraping"].get("max_paginas", 5)   # respeta el robots.txt del portal
-        while len(guardados) < max_avisos:
-            if pagina > max_paginas:
-                log.info("  Tope de %d páginas por listado (robots.txt); para más volumen, agrega listados por distrito", max_paginas)
+    with corrida("scraping_listado", fuente=fuente, operacion=operacion, max_avisos=max_avisos,
+                 zonas=len(zonas)) as c:
+        leidas, problemas = 0, []
+        for zona in zonas:
+            if len(guardados) >= max_avisos:
                 break
-            url = plantilla.format(pagina=pagina)
-            status, final, html = nav.html(url)
-            if status in BLOQUEO:
-                c.mensaje = (f"El portal bloqueó en la página {pagina} ({status}). "
-                             f"Quedan {len(guardados)} avisos guardados; vuelve a correr en un rato y retoma.")
-                log.warning("  %s", c.mensaje)
-                break
-            if status >= 400:
-                raise RuntimeError(f"El portal respondió {status} en {url}")
-            if pagina > 1 and not _misma_pagina(url, final):
-                log.info("  Fin de resultados (la página %d redirige a %s)", pagina, final)
-                break
-            avisos, total = parsear_listado(html, base)
-            if pagina == 1:
-                log.info("  %s %s: el portal anuncia %s avisos", fuente, operacion, f"{total:,}" if total else "?")
-            if not avisos:
-                log.warning("  Página %d sin tarjetas: ¿cambió el HTML del portal?", pagina)
-                break
-            leidas += len(avisos)
-            nuevas = []
-            for a in avisos:
-                if a["tipo_raw"] != TIPO_UNIDAD or a["url"] in guardados:
-                    continue
-                if len(guardados) >= max_avisos:
+            etiqueta = zona or "listado general"
+            en_zona: set[str] = set()
+            for pagina in range(1, max_paginas + 1):
+                if len(en_zona) >= cupo or len(guardados) >= max_avisos:
                     break
-                fila = {**a, "fuente": fuente, "operacion": operacion, "scrape_date": hoy,
-                        "pagina": pagina, "corrida_id": c.id}
-                guardados[a["url"]] = fila
-                nuevas.append(fila)
-            upsert("raw_listings", nuevas, ["url", "scrape_date"])
-            con_geo = sum(1 for f in nuevas if f["latitud"] is not None)
-            log.info("  Página %d: %d unidades (%d con coordenadas) · total %d/%d",
-                     pagina, len(nuevas), con_geo, len(guardados), max_avisos)
-            pagina += 1
-            _pausa()
+                url = url_pagina(plantilla, pagina, zona)
+                try:
+                    status, final, html = nav.html(url)
+                except Exception as exc:                   # timeout o red: se salta la zona, no la corrida
+                    problemas.append(f"{etiqueta}: {type(exc).__name__}")
+                    log.warning("  [%s] ⚠ %s en la página %d; sigo con la siguiente zona",
+                                etiqueta, type(exc).__name__, pagina)
+                    break
+                if status in BLOQUEO:
+                    c.mensaje = (f"El portal bloqueó en {etiqueta}, página {pagina} ({status}). "
+                                 f"Hay {len(guardados)} avisos guardados hoy; vuelve a correr en un rato y retoma.")
+                    log.warning("  %s", c.mensaje)
+                    c.leidas, c.escritas = leidas, len(guardados) - len(previos)
+                    return len(guardados)
+                if status >= 400:
+                    problemas.append(f"{etiqueta}: HTTP {status}")
+                    log.warning("  [%s] ⚠ HTTP %d en %s; sigo con la siguiente zona", etiqueta, status, url)
+                    break
+                if not _misma_pagina(url, final):
+                    if pagina == 1:                        # zona mal escrita: el portal manda al listado general
+                        problemas.append(f"{etiqueta}: redirige")
+                        log.warning("  [%s] ⚠ la zona no existe en el portal (redirige a %s); la salto",
+                                    etiqueta, final)
+                    else:
+                        log.info("  [%s] fin de resultados en la página %d", etiqueta, pagina)
+                    break
+                avisos, total = parsear_listado(html, base)
+                if pagina == 1:
+                    log.info("  [%s] el portal anuncia %s avisos", etiqueta, f"{total:,}" if total else "?")
+                if not avisos:
+                    log.warning("  [%s] página %d sin tarjetas: ¿cambió el HTML del portal?", etiqueta, pagina)
+                    break
+                leidas += len(avisos)
+                nuevas = []
+                for a in avisos:
+                    if a["tipo_raw"] != TIPO_UNIDAD or a["url"] in en_zona:
+                        continue
+                    if len(en_zona) >= cupo or len(guardados) >= max_avisos:
+                        break
+                    en_zona.add(a["url"])
+                    if a["url"] in guardados:
+                        continue
+                    fila = {**a, "fuente": fuente, "operacion": operacion, "scrape_date": hoy,
+                            "pagina": pagina, "corrida_id": c.id}
+                    guardados.add(a["url"])
+                    nuevas.append(fila)
+                upsert("raw_listings", nuevas, ["url", "scrape_date"])
+                con_geo = sum(1 for f in nuevas if f["latitud"] is not None)
+                log.info("  [%s] página %d: %d nuevas (%d con coordenadas) · zona %d/%d · total %d/%d",
+                         etiqueta, pagina, len(nuevas), con_geo, len(en_zona), cupo, len(guardados), max_avisos)
+                _pausa()
+            else:
+                if len(en_zona) < cupo:
+                    log.info("  [%s] tope de %d páginas (robots.txt) con %d/%d avisos",
+                             etiqueta, max_paginas, len(en_zona), cupo)
         c.leidas, c.escritas = leidas, len(guardados) - len(previos)
+        if problemas and not c.mensaje:
+            c.mensaje = "Zonas con problemas: " + "; ".join(problemas)
     return len(guardados)
 
 

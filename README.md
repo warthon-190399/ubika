@@ -83,8 +83,8 @@ python -m ubika.referencias.puntos
 Avisos (alquiler y venta por separado; se puede volver a correr el mismo día sin duplicar):
 
 ```bash
-python -m ubika.scraping --operacion alquiler            # 100 avisos (config.yaml) + su detalle
-python -m ubika.scraping --operacion venta
+python -m ubika.scraping --operacion alquiler            # 500 avisos repartidos por distrito (config.yaml) + su detalle
+python -m ubika.scraping --operacion venta --sin-detalle   # solo el listado (el detalle tarda ~30 s por ficha)
 python -m ubika.scraping --operacion venta --solo-detalle  # completa fichas que fallaron
 python -m ubika.scraping --operacion alquiler --ver        # muestra el navegador
 ```
