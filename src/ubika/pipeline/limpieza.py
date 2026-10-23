@@ -21,6 +21,7 @@ import pandas as pd
 from ubika.config import cfg
 from ubika.db import execute, read_df, upsert
 from ubika.pipeline import parseo
+from ubika.pipeline.limites import cargar as cargar_limites, distrito_en, metros_a_distrito
 from ubika.texto import normalizar
 
 log = logging.getLogger(__name__)
@@ -68,10 +69,12 @@ def _primero(*vals):
     return None
 
 
-def limpiar(crudos: pd.DataFrame, alias: dict[str, str], conf: dict | None = None) -> tuple[pd.DataFrame, dict]:
-    """Devuelve (avisos limpios, conteo de descartes por motivo)."""
+def limpiar(crudos: pd.DataFrame, alias: dict[str, str], conf: dict | None = None,
+            limites: list | None = None) -> tuple[pd.DataFrame, dict]:
+    """Devuelve (avisos limpios, conteo de descartes por motivo). `limites`: ver pipeline/limites.py."""
     conf = conf or cfg()
     lim, caja = conf["limpieza"], conf["geocoding"]["caja"]
+    max_fuera = lim.get("max_metros_fuera_distrito", math.inf)
     filas, descartes = [], {}
     crudos = crudos.astype(object).where(crudos.notna(), None)      # NaN de pandas → None
 
@@ -92,6 +95,21 @@ def limpiar(crudos: pd.DataFrame, alias: dict[str, str], conf: dict | None = Non
         lat, lon = r.get("latitud"), r.get("longitud")
         if lat is not None and not (caja["lat_min"] <= lat <= caja["lat_max"] and caja["lon_min"] <= lon <= caja["lon_max"]):
             lat = lon = None
+        lat_portal = lon_portal = correccion = None
+        if limites and lat is not None:
+            # 'Lima, Lima' se leería como Cercado aunque el punto esté en Magdalena: si el texto no nombra
+            # un distrito y hay coordenadas, manda el polígono donde cae el punto
+            if dist is None or parseo.ubicacion_generica(r.get("ubicacion_raw")):
+                en_poligono = distrito_en(lat, lon, limites)
+                if en_poligono and en_poligono != dist:
+                    dist, correccion = en_poligono, "distrito_por_poligono"
+            # Pin muy lejos del distrito que declara el anunciante: el portal ubicó la calle en otro
+            # distrito (calles homónimas). Se descarta y geocoding lo vuelve a ubicar con dirección + distrito
+            else:
+                fuera = metros_a_distrito(lat, lon, dist, limites)
+                if fuera is not None and fuera > max_fuera:
+                    lat_portal, lon_portal, correccion = lat, lon, "pin_lejos_del_distrito"
+                    lat = lon = None
         filas.append({
             "fuente": r["fuente"], "operacion": r["operacion"], "url": r["url"],
             "tipo_inmueble": parseo.tipo_inmueble(r.get("tipo_inmueble_raw")),
@@ -107,6 +125,7 @@ def limpiar(crudos: pd.DataFrame, alias: dict[str, str], conf: dict | None = Non
             "direccion": (r.get("direccion_raw") or "").strip() or None,
             "distrito": dist,
             "latitud": lat, "longitud": lon,
+            "lat_portal": lat_portal, "lon_portal": lon_portal, "correccion_ubicacion": correccion,
             "geo_precision": None if lat is None else (
                 "portal_exacta" if r.get("visibilidad_direccion") == "EXACT" else "portal"),
             "inmobiliaria": (r.get("inmobiliaria_raw") or "").strip() or None,
@@ -205,7 +224,8 @@ def consolidar(df: pd.DataFrame, existentes: dict[str, str]) -> tuple[list[dict]
             **{k: rep[k] for k in ("operacion", "tipo_inmueble", "precio_pen", "precio_usd", "mantenimiento_pen",
                                    "area_m2", "num_dorm", "num_banios", "num_estac", "antiguedad_anios",
                                    "direccion", "direccion_norm", "distrito", "latitud", "longitud",
-                                   "geo_precision", "inmobiliaria", "fecha_publicacion")},
+                                   "geo_precision", "inmobiliaria", "fecha_publicacion",
+                                   "lat_portal", "lon_portal", "correccion_ubicacion")},
             "primera_vez": g["primera_vez"].min(),
             "ultima_vez": g["ultima_vez"].max(),
         })
@@ -221,7 +241,7 @@ def correr(c) -> dict:
     conf = cfg()
     crudos = leer_crudos()
     c.leidas = len(crudos)
-    limpios, descartes = limpiar(crudos, _alias(), conf)
+    limpios, descartes = limpiar(crudos, _alias(), conf, cargar_limites(conf["limpieza"]["limites"]))
     for motivo, n in sorted(descartes.items(), key=lambda x: -x[1]):
         log.info("  descartados · %s: %d", motivo, n)
     if limpios.empty:

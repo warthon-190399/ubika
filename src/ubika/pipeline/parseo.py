@@ -119,6 +119,21 @@ def distrito(ubicacion: str | None, alias: dict[str, str]) -> str | None:
     return alias.get(partes[-1]) if partes else None
 
 
+GENERICOS = ("lima", "callao", "lima metropolitana", "peru")
+
+
+def ubicacion_generica(ubicacion: str | None) -> bool:
+    """
+    'Lima, Lima' → True: el portal solo dice la provincia (que también es el nombre de un distrito),
+    así que el distrito leído del texto no es confiable. 'Magdalena, Lima' → False.
+    """
+    ubicacion = _s(ubicacion)
+    if not ubicacion:
+        return True
+    partes = [normalizar(p) for p in str(ubicacion).split(",") if p.strip()]
+    return all(p in GENERICOS for p in partes)
+
+
 TIPOS = {"apartamento": "departamento", "departamento": "departamento", "casa": "casa",
          "oficina": "oficina", "terreno": "terreno", "local comercial": "local", "habitacion": "habitacion"}
 

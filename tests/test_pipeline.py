@@ -155,3 +155,71 @@ def test_capas_indices():
     assert s.loc[peor, "indice"] == s["indice"].min()              # más denuncias = índice más bajo
     t = out[out.capa == "transporte"].set_index("celda")
     assert t.loc[t["valor"].idxmin(), "indice"] == t["indice"].max()  # más cerca de la estación = mejor
+
+
+# ── límites distritales ──────────────────────────────────────
+
+def _cuadrado(lon0, lat0, lado=0.01):
+    return [[[lon0, lat0], [lon0 + lado, lat0], [lon0 + lado, lat0 + lado], [lon0, lat0 + lado], [lon0, lat0]]]
+
+
+# Dos distritos sintéticos lado a lado; magdalena con un hueco en el medio
+LIMITES = [
+    ("magdalena", [_cuadrado(-77.07, -12.10, 0.03) + [_cuadrado(-77.06, -12.09)[0]]]),
+    ("lima cercado", [_cuadrado(-77.04, -12.10, 0.03)]),
+]
+
+
+def test_ubicacion_generica():
+    assert parseo.ubicacion_generica("Lima, Lima")
+    assert parseo.ubicacion_generica("Callao, Callao")
+    assert parseo.ubicacion_generica(None)
+    assert not parseo.ubicacion_generica("Magdalena, Lima")
+    assert not parseo.ubicacion_generica("Santa Beatriz, Lima Cercado")
+
+
+def test_distrito_en_poligono():
+    from ubika.pipeline.limites import distrito_en
+    assert distrito_en(-12.095, -77.065, LIMITES) == "magdalena"
+    assert distrito_en(-12.095, -77.03, LIMITES) == "lima cercado"
+    assert distrito_en(-12.085, -77.055, LIMITES) is None        # en el hueco
+    assert distrito_en(-12.20, -77.20, LIMITES) is None          # fuera de todo
+
+
+def test_limpiar_ubica_por_poligono_solo_si_el_texto_es_generico():
+    crudos = pd.DataFrame([
+        _crudo("u1", ubicacion_raw="Lima, Lima", latitud=-12.095, longitud=-77.065),       # Cercado por texto, cae en Magdalena
+        _crudo("u2", ubicacion_raw="Miraflores, Lima", latitud=-12.095, longitud=-77.065),  # el texto nombra un distrito: se respeta
+        _crudo("u3", ubicacion_raw="Lima, Lima", latitud=-12.20, longitud=-77.20),          # fuera de los polígonos: queda el texto
+        _crudo("u4", ubicacion_raw="Barrio inventado", latitud=-12.095, longitud=-77.03),  # sin distrito en el texto: lo da el punto
+    ])
+    df, _ = limpieza.limpiar(crudos, ALIAS, CONF, LIMITES)
+    d = df.set_index("url")["distrito"]
+    assert d.to_dict() == {"u1": "magdalena", "u2": "miraflores", "u3": "lima cercado", "u4": "lima cercado"}
+
+
+def test_metros_a_distrito():
+    from ubika.pipeline.limites import metros_a_distrito
+    assert metros_a_distrito(-12.095, -77.065, "magdalena", LIMITES) == 0
+    # 0,005° al este del borde de magdalena (-77.04) a la latitud de Lima ≈ 545 m
+    assert 520 < metros_a_distrito(-12.095, -77.035, "magdalena", LIMITES) < 570
+    assert metros_a_distrito(-12.095, -77.065, "barranco", LIMITES) is None
+
+
+def test_limpiar_descarta_pin_lejos_del_distrito_declarado():
+    conf = {**CONF, "limpieza": {**CONF["limpieza"], "max_metros_fuera_distrito": 2000}}
+    crudos = pd.DataFrame([
+        _crudo("lejos", ubicacion_raw="Magdalena, Lima", latitud=-12.095, longitud=-77.015),   # ~2,7 km fuera
+        _crudo("borde", ubicacion_raw="Magdalena, Lima", latitud=-12.095, longitud=-77.035,    # ~550 m fuera
+               direccion_raw="Otra calle"),
+        _crudo("generico", ubicacion_raw="Lima, Lima", latitud=-12.095, longitud=-77.065, direccion_raw="Tercera"),
+    ])
+    df, _ = limpieza.limpiar(crudos, ALIAS, conf, LIMITES)
+    df = df.set_index("url")
+    lejos = df.loc["lejos"]
+    assert lejos["distrito"] == "magdalena" and lejos["correccion_ubicacion"] == "pin_lejos_del_distrito"
+    assert pd.isna(lejos["latitud"]) and pd.isna(lejos["geo_precision"])
+    assert (lejos["lat_portal"], lejos["lon_portal"]) == (-12.095, -77.015)
+    borde = df.loc["borde"]
+    assert borde["latitud"] == -12.095 and pd.isna(borde["correccion_ubicacion"])
+    assert df.loc["generico", "correccion_ubicacion"] == "distrito_por_poligono"

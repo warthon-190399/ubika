@@ -1,5 +1,6 @@
 """
-Paso 2 del pipeline: coordenadas para los inmuebles que el portal no ubicó.
+Paso 2 del pipeline: coordenadas para los inmuebles que el portal no ubicó, o cuyo pin la
+limpieza descartó por caer lejos del distrito declarado (esos solo se aceptan dentro del distrito).
 
 Cada texto se consulta a Google una sola vez (tabla geocode_cache). Resultados fuera de
 Lima/Callao o de baja precisión a nivel de ciudad se marcan y no se usan.
@@ -11,6 +12,7 @@ import time
 
 from ubika.config import cfg, google_api_key
 from ubika.db import execute, read_df, upsert
+from ubika.pipeline.limites import cargar as cargar_limites, metros_a_distrito
 
 log = logging.getLogger(__name__)
 
@@ -45,7 +47,8 @@ def interpretar(resultados: list[dict]) -> dict:
 
 def correr(c) -> dict:
     pendientes = read_df("""
-        SELECT p.prop_id::text AS prop_id, p.direccion, d.nombre AS distrito_nombre
+        SELECT p.prop_id::text AS prop_id, p.direccion, p.distrito, p.correccion_ubicacion,
+               d.nombre AS distrito_nombre
         FROM propiedades p LEFT JOIN distritos d USING (distrito)
         WHERE p.latitud IS NULL
     """)
@@ -74,9 +77,28 @@ def correr(c) -> dict:
             upsert("geocode_cache", [{"consulta": q, **fila}], ["consulta"])
             time.sleep(pausa)
 
+    # Pines que la limpieza descartó por caer lejos de su distrito: el resultado de Google tiene que
+    # caer en ese distrito (o a menos del mismo umbral); si no, el inmueble queda sin coordenadas
+    corregir = pendientes[pendientes["correccion_ubicacion"] == "pin_lejos_del_distrito"]
+    rechazadas = set()
+    if not corregir.empty:
+        limites = cargar_limites(cfg()["limpieza"]["limites"])
+        max_fuera = cfg()["limpieza"]["max_metros_fuera_distrito"]
+        cache = read_df("SELECT consulta, latitud, longitud FROM geocode_cache WHERE consulta = ANY(:q) AND estado = 'ok'",
+                        {"q": corregir["consulta"].unique().tolist()}).set_index("consulta")
+        for r in corregir.to_dict("records"):
+            g = cache.loc[r["consulta"]] if r["consulta"] in cache.index else None
+            fuera = None if g is None else metros_a_distrito(g["latitud"], g["longitud"], r["distrito"], limites)
+            if fuera is not None and fuera > max_fuera:
+                rechazadas.add(r["prop_id"])
+        log.info("  %d pines descartados por estar lejos de su distrito; Google tampoco ubica %d dentro",
+                 len(corregir), len(rechazadas))
+
     # Aplicar lo que haya en caché (solo resultados útiles)
     n = 0
     for r in pendientes.to_dict("records"):
+        if r["prop_id"] in rechazadas:
+            continue
         n += execute("""
             UPDATE propiedades p
             SET latitud = g.latitud, longitud = g.longitud, geo_precision = 'google_' || lower(g.location_type)

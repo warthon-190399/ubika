@@ -19,6 +19,7 @@ sql/                   esquema de Neon. Se corre a mano en el SQL Editor de Neon
   08_poblacion.sql       población por distrito (censo 2017) y tasa de denuncias
   09_calidad_vida.sql    áreas verdes, comercio de barrio y ruido estimado
   10_defunciones.sql     defunciones SINADEF y tasa de mortalidad por 100 mil habitantes
+  11_correccion_ubicacion.sql  pin original del portal y motivo de las correcciones de ubicación
   query.sql              consultas de verificación (solo lectura)
 src/ubika/             paquete Python
   config.py              lee config.yaml y .env
@@ -52,7 +53,7 @@ playwright install chromium      # para los scrapers (Fase 2)
 cp .env.example .env             # y completar los valores
 ```
 
-En Neon, SQL Editor, correr en orden: `00_drop_legacy.sql` (solo la primera vez), `01_schema.sql`, `02_seed_distritos.sql`, `03_views.sql`, `04_delitos.sql`, `05_scraping.sql`, `06_vistas_entorno.sql`, `07_capas.sql`, `08_poblacion.sql`, `09_calidad_vida.sql`, `10_defunciones.sql`. Después:
+En Neon, SQL Editor, correr en orden: `00_drop_legacy.sql` (solo la primera vez), `01_schema.sql`, `02_seed_distritos.sql`, `03_views.sql`, `04_delitos.sql`, `05_scraping.sql`, `06_vistas_entorno.sql`, `07_capas.sql`, `08_poblacion.sql`, `09_calidad_vida.sql`, `10_defunciones.sql`, `11_correccion_ubicacion.sql`. Después:
 
 ```bash
 python scripts/check_db.py
@@ -126,6 +127,10 @@ Compara con validación cruzada (5 partes × 3 repeticiones) la mediana del dist
 | Control | `corridas` | Cada ejecución de scraping o pipeline, con su estado y conteos. |
 
 ## Fuentes
+
+- **Avisos:** adondevivir.com (listados por distrito, `config.yaml`). Lo scrapeado se guarda intacto en `raw_listings`/`raw_detalles`; la limpieza corrige dos inconsistencias de ubicación y deja cada caso marcado en `propiedades.correccion_ubicacion`:
+  - `distrito_por_poligono`: el portal solo dice «Lima, Lima» (la provincia), que se leería como Cercado. El distrito sale del polígono IGN donde cae el pin.
+  - `pin_lejos_del_distrito`: el pin está a más de 2 km (`limpieza.max_metros_fuera_distrito`) del distrito que declara el anunciante, casi siempre porque el portal ubicó una calle homónima de otro distrito. El pin original se conserva en `lat_portal`/`lon_portal` y el aviso se vuelve a ubicar con Google (dirección + distrito declarado); si el resultado tampoco cae en el distrito, queda sin coordenadas (no sale en el mapa, pero cuenta en las cifras del distrito). Octubre 2026: 16 de 1131 inmuebles, 9 de ellos sin coordenadas. Los pines a menos de 2 km del distrito declarado (casos de borde) no se tocan.
 
 - **Denuncias:** SIDPOL, capa `SIDPOL_DELITOS_TOTAL` del [Mapa del Delito de MININTER](https://mininter-dgis.maps.arcgis.com/apps/webappviewer/index.html?id=ffc03c3586b142b988c931312d7da17b). Dos de cada tres denuncias de Lima (66%) no tienen coordenada propia y MININTER las pone en un punto fijo por distrito; esas solo entran en los conteos por distrito. Los puntos se ponderan por distrito (`v_delitos_distrito_12m.peso`).
 - **Defunciones:** [SINADEF de MINSA](https://www.datosabiertos.gob.pe/dataset/informaci%C3%B3n-de-fallecidos-del-sistema-inform%C3%A1tico-nacional-de-defunciones-sinadef-ministerio), un certificado por fila. El distrito es el de **domicilio** del fallecido (el archivo no trae dónde murió) y el tipo sale de la columna `MUERTE VIOLENTA`. El archivo publicado llega solo hasta 2024-05; 2020–2021 están infladas por COVID y 2017–2019 tienen menos cobertura. Los homicidios de SINADEF son menos que los de la PNP: sirven para comparar distritos, no como cifra oficial. Población: censo 2017.

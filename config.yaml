@@ -51,6 +51,12 @@ scraping:
         max_avisos: 100
 
 limpieza:
+  # Polígonos distritales (los mismos del mapa): ubican los avisos cuya ubicación solo dice «Lima, Lima»
+  limites: ubika-app/public/geo/distritos-lima.geojson
+  # Pin a más de esta distancia del distrito que declara el anunciante: el portal ubicó mal la calle.
+  # Se descarta (queda en lat_portal/lon_portal) y se vuelve a ubicar con Google. Octubre 2026: los
+  # desacuerdos de borde llegan a ~1,3 km y los pines errados empiezan en ~2,7 km.
+  max_metros_fuera_distrito: 2000
   # Rangos plausibles; lo que quede fuera se descarta como error de carga del portal
   area_m2: [15, 1000]
   precio_pen:
