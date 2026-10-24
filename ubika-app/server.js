@@ -8,6 +8,7 @@
  *   GET /api/cerca?lat=…&lon=…          puntos de interés a 500 m de un punto + la estación más cercana
  *   GET /api/crimen-distritos           denuncias de 12 meses por 10 mil habitantes (v_crimen_distrito)
  *                                       y homicidios por 100 mil habitantes (v_mortalidad_distrito_reciente, SINADEF)
+ *                                       y edad promedio al morir por causas naturales (v_longevidad_distrito, SINADEF)
  *
  * Correr: node server.js   (lee DATABASE_URL de ubika-app/.env)
  */
@@ -112,9 +113,11 @@ app.get("/api/crimen-distritos", ruta(() => conCache("crimen-distritos", 60, asy
   const { rows } = await pool.query(`
     SELECT c.distrito, c.distrito_nombre, c.ubigeo, c.poblacion, c.denuncias, c.denuncias_patrimonio,
            c.denuncias_violencia, c.tasa_10k,
-           m.tasa_homicidios_100k, m.homicidios_anio, m.anio_desde AS homicidios_desde, m.anio_hasta AS homicidios_hasta
+           m.tasa_homicidios_100k, m.homicidios_anio, m.anio_desde AS homicidios_desde, m.anio_hasta AS homicidios_hasta,
+           l.edad_promedio_natural, l.pct_80_mas_natural, l.n_naturales, l.longevidad_desde, l.longevidad_hasta
     FROM v_crimen_distrito c
     LEFT JOIN v_mortalidad_distrito_reciente m USING (distrito)
+    LEFT JOIN v_longevidad_distrito l USING (distrito)
     ORDER BY c.tasa_10k DESC`);
   return rows;
 })));

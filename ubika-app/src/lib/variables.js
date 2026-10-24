@@ -7,10 +7,12 @@
  * Regla de color: más oscuro = más de lo que dice el título. Crimen usa la rampa cálida (alerta);
  * el resto, la secuencial verde de la marca.
  */
-import { SEQ, fmt } from "./scoring";
-import { tasa10k } from "./ciudad";
+import { SEQ, fmt } from "./scoring.js";
+import { tasa10k } from "./ciudad.js";
 
 export const CALIENTE = ["#FFE8B3", "#FDCB6E", "#FEB722", "#F0931E", "#E07A1F", "#B4401A"];
+// Azul para la longevidad (salud de la población): no se confunde con la verde de calidad ni con la cálida de crimen
+export const AZUL = ["#E3EEF9", "#BBD5EF", "#8CB6E0", "#5A91CB", "#2F6BAE", "#164581"];
 const IDW_RADIO_M = 1500;
 
 const metros = v => (v == null ? "—" : v < 1000 ? `${Math.round(v / 10) * 10} m` : `${(v / 1000).toFixed(1)} km`);
@@ -32,6 +34,15 @@ export const VARIABLES = {
     nota: {
       barrio: "Estimado: denuncias a 500 m entre la población del distrito repartida en sus celdas (censo 2017). Mide cuánto se denuncia: donde la gente denuncia poco, sale más baja.",
       distrito: "Población del censo 2017 (INEI). En distritos comerciales entra más gente de la que vive ahí y su tasa sale alta; donde se denuncia poco, sale baja.",
+    },
+  },
+  longevidad: {
+    l: "Longevidad", titulo: "Edad al morir", paleta: AZUL, bajo: "mueren más jóvenes", alto: "mueren más longevos",
+    unidad: "Edad promedio al morir por causas naturales, por distrito de residencia",
+    f: v => v.toFixed(1), sufijo: " años",
+    nota: {
+      barrio: "Dato por distrito: todas sus celdas tienen el mismo valor. SINADEF (MINSA), promedio de 2019, 2022 y 2023. También refleja la edad de la población: donde vive más gente mayor, sale más alta.",
+      distrito: "SINADEF (MINSA), muertes no violentas, promedio de 2019, 2022 y 2023. También refleja la edad de la población: donde vive más gente mayor, sale más alta.",
     },
   },
   homicidios: {
@@ -141,6 +152,13 @@ export function valoresDistrito(k, { celdas, ciudad, crimenDist, distritos }) {
   if (k === "homicidios") {
     for (const [d, r] of crimenDist || []) {
       if (r.tasa_homicidios_100k != null) out.set(d, { v: r.tasa_homicidios_100k, r, pequeno: r.poblacion < 10000 });
+    }
+    return out;
+  }
+  if (k === "longevidad") {
+    // Con menos de 100 muertes naturales en los 3 años, el promedio es poco confiable (Santa María del Mar, La Punta…)
+    for (const [d, r] of crimenDist || []) {
+      if (r.edad_promedio_natural != null) out.set(d, { v: r.edad_promedio_natural, r, pequeno: (r.n_naturales ?? 0) < 100 });
     }
     return out;
   }

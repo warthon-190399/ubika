@@ -63,7 +63,10 @@ function dentroDe(x, y, poligono) {          // poligono = [anillo, huecos…]; 
   return dentro;
 }
 
-/** { dist: [slug|null por celda], popCelda: Map slug → habitantes por celda, hom: Map slug → homicidios por 100 mil } */
+/**
+ * { dist: [slug|null por celda], popCelda: Map slug → habitantes por celda,
+ *   hom: Map slug → homicidios por 100 mil, longevidad: Map slug → edad promedio al morir (causas naturales) }
+ */
 export function territorio(grilla, limites, crimenDist) {
   if (!grilla?.celdas?.length || !limites?.features) return null;
   const feats = limites.features.map(f => {
@@ -88,9 +91,12 @@ export function territorio(grilla, limites, crimenDist) {
     const pob = crimenDist?.get(d)?.poblacion;
     if (pob) popCelda.set(d, pob / k);
   }
-  const hom = new Map();
-  for (const [d, r] of crimenDist || []) if (r.tasa_homicidios_100k != null) hom.set(d, r.tasa_homicidios_100k);
-  return { dist, popCelda, hom };
+  const hom = new Map(), longevidad = new Map();
+  for (const [d, r] of crimenDist || []) {
+    if (r.tasa_homicidios_100k != null) hom.set(d, r.tasa_homicidios_100k);
+    if (r.edad_promedio_natural != null) longevidad.set(d, r.edad_promedio_natural);
+  }
+  return { dist, popCelda, hom, longevidad };
 }
 
 /** Cantidad a 500 m → por habitante del círculo de 500 m (× escala). */
@@ -173,6 +179,8 @@ export function referencia(grillas, terr) {
   ref.denuncias = seg;
   // Homicidios por 100 mil del distrito de cada celda (mismo valor en todo el distrito)
   ref.valores.homicidios = terr?.hom?.size ? terr.dist.map(d => terr.hom.get(d) ?? null) : null;
+  // Edad promedio al morir por causas naturales del distrito de cada celda (solo para el mapa, no entra en la calidad de vida)
+  ref.valores.longevidad = terr?.longevidad?.size ? terr.dist.map(d => terr.longevidad.get(d) ?? null) : null;
   for (const k of [...CAPAS_KEYS, "homicidios"]) if (ref.valores[k]) ref.orden[k] = ordenar(ref.valores[k]);
   // Calidad de vida de cada celda, con la misma fórmula que la de un inmueble
   ref.valores.calidad = base.map((_, i) => {

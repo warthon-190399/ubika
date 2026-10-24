@@ -71,8 +71,12 @@ No usa los modelos de `models/*.pkl` del evaluador anterior (Streamlit, `app/aut
 | `GET /api/salud` | estado de la conexión y fecha del último scraping |
 | `GET /api/propiedades?operacion=alquiler\|venta` | inmuebles activos con su entorno (`v_app_propiedades`) |
 | `GET /api/distritos?operacion=…` | medianas por distrito (`v_resumen_distrito`) |
-| `GET /api/crimen-distritos` | por distrito: denuncias por 10 mil habitantes (`v_crimen_distrito`) y homicidios por 100 mil (`v_mortalidad_distrito_reciente`, necesita `sql/10_defunciones.sql` y `python -m ubika.referencias.sinadef`) |
+| `GET /api/crimen-distritos` | por distrito: denuncias por 10 mil habitantes (`v_crimen_distrito`) y homicidios por 100 mil (`v_mortalidad_distrito_reciente`, necesita `sql/10_defunciones.sql` y `python -m ubika.referencias.sinadef`) y edad promedio al morir por causas naturales (`v_longevidad_distrito`, `sql/12_edad_defuncion.sql`) |
 | `GET /api/capas/seguridad\|transporte\|servicios` | grilla de la ciudad (`capas_grilla`): `[lat, lon, índice 0–1, valor]` |
+
+## Capa de longevidad
+
+«Más capas → Edad al morir», en azul: edad promedio al morir por causas naturales (no violentas) del distrito, SINADEF, promedio de 2019, 2022 y 2023. Más oscuro = la gente muere más longeva. No entra en la calidad de vida: también refleja la edad de la población (donde vive más gente mayor sale más alta), así que se lee junto con ese contexto. Los distritos con menos de 100 muertes naturales en esos años se pintan, pero no cuentan para los cortes de color.
 
 ## Limitaciones conocidas
 

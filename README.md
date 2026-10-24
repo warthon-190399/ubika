@@ -20,6 +20,7 @@ sql/                   esquema de Neon. Se corre a mano en el SQL Editor de Neon
   09_calidad_vida.sql    áreas verdes, comercio de barrio y ruido estimado
   10_defunciones.sql     defunciones SINADEF y tasa de mortalidad por 100 mil habitantes
   11_correccion_ubicacion.sql  pin original del portal y motivo de las correcciones de ubicación
+  12_edad_defuncion.sql  edad al morir por distrito (SINADEF) para la capa de longevidad
   query.sql              consultas de verificación (solo lectura)
 src/ubika/             paquete Python
   config.py              lee config.yaml y .env
@@ -53,7 +54,7 @@ playwright install chromium      # para los scrapers (Fase 2)
 cp .env.example .env             # y completar los valores
 ```
 
-En Neon, SQL Editor, correr en orden: `00_drop_legacy.sql` (solo la primera vez), `01_schema.sql`, `02_seed_distritos.sql`, `03_views.sql`, `04_delitos.sql`, `05_scraping.sql`, `06_vistas_entorno.sql`, `07_capas.sql`, `08_poblacion.sql`, `09_calidad_vida.sql`, `10_defunciones.sql`, `11_correccion_ubicacion.sql`. Después:
+En Neon, SQL Editor, correr en orden: `00_drop_legacy.sql` (solo la primera vez), `01_schema.sql`, `02_seed_distritos.sql`, `03_views.sql`, `04_delitos.sql`, `05_scraping.sql`, `06_vistas_entorno.sql`, `07_capas.sql`, `08_poblacion.sql`, `09_calidad_vida.sql`, `10_defunciones.sql`, `11_correccion_ubicacion.sql`, `12_edad_defuncion.sql`. Después:
 
 ```bash
 python scripts/check_db.py
@@ -121,6 +122,7 @@ Compara con validación cruzada (5 partes × 3 repeticiones) la mediana del dist
 | Referencia | `delitos_puntos` | Denuncias SIDPOL con ubicación propia (Lima y Callao). |
 | Referencia | `delitos_distrito_mes` | Conteo de todas las denuncias por distrito, mes y tipo, y cuántas tienen ubicación. |
 | Referencia | `defunciones_distrito_mes` | Defunciones SINADEF por distrito de domicilio, mes y tipo de muerte (natural, homicidio, tránsito, suicidio…). |
+| Referencia | `defunciones_edad_distrito` | Por distrito, año y tipo (natural/violenta): cuántos tienen edad, suma de edades y cuántos murieron con 65+ y 80+ años. Vista `v_longevidad_distrito`. |
 | Derivada | `geocode_cache` | Cada dirección consultada a Google, una sola vez. |
 | Derivada | `entorno` | Conteos dentro del radio y distancia al más cercano, por inmueble. |
 | Derivada | `capas_grilla` | Grilla de la ciudad (~350 m) con índices de seguridad, transporte y servicios para el mapa. |

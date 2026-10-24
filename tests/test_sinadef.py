@@ -26,7 +26,8 @@ def test_tipo_muerte():
 
 def test_leer_columnas():
     df = next(sinadef.leer(FIX))
-    assert list(df.columns) == ["departamento", "provincia", "distrito_raw", "anio", "mes", "muerte_violenta"]
+    assert list(df.columns) == ["edad", "tiempo_edad", "departamento", "provincia", "distrito_raw", "anio", "mes",
+                                "muerte_violenta"]
     assert len(df) == 13
 
 
@@ -66,3 +67,27 @@ def test_anio_o_mes_invalido_se_descarta():
            "LIMA|LIMA|ATE|2023|05|HOMICIDIO\n")
     c = sinadef.contar(sinadef.leer(io.StringIO(csv)))
     assert dict(c) == {("LIMA", "ATE", 2023, 5, "homicidio"): 1}
+
+
+def test_edad_anios():
+    assert sinadef.edad_anios("80", "AÑOS") == 80
+    assert sinadef.edad_anios(" 7 ", "años") == 7
+    assert sinadef.edad_anios("3", "MESES") == 0                  # menores de un año cuentan como 0
+    assert sinadef.edad_anios("12", "HORAS") == 0
+    assert sinadef.edad_anios("SIN REGISTRO", "AÑOS") is None
+    assert sinadef.edad_anios("130", "AÑOS") is None              # fuera de rango
+    assert sinadef.edad_anios("5", "SIN REGISTRO") is None
+
+
+def test_edades_por_distrito_y_tipo():
+    conteo, edades = sinadef.agregar(sinadef.leer(FIX, chunksize=5))
+    assert sum(conteo.values()) == 11                              # el conteo de siempre no cambia
+    assert sum(e["n"] for e in edades.values()) == 11               # todas las filas de Lima/Callao tienen edad
+    nat = edades[("LIMA", "SAN JUAN DE LURIGANCHO", 2024, "natural")]
+    assert (nat["n"], nat["suma"], nat["n65"], nat["n80"]) == (1, 80, 1, 1)
+    vio = edades[("LIMA", "SAN JUAN DE LURIGANCHO", 2024, "violenta")]   # dos homicidios: 38 y 22 años
+    assert (vio["n"], vio["suma"], vio["n65"], vio["menores_1"]) == (2, 60, 0, 0)
+    assert ("LIMA", "MIRAFLORES", 2020, "natural") in edades      # MUERTE VIOLENTA vacía = natural
+    filas = sinadef.filas_edad(edades, ALIAS)
+    sjl = [f for f in filas if f["distrito"] == "sjl" and f["anio"] == 2024 and f["tipo"] == "violenta"][0]
+    assert sjl["suma_edad"] == 60 and sjl["n_con_edad"] == 2
