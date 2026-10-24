@@ -13,6 +13,8 @@ Pipeline descriptivo de ubika, todo en Neon:
     entorno  →  v_app_propiedades (lo que lee la API)
 
     capas      grilla de toda la ciudad (seguridad, transporte, servicios) → capas_grilla
+    calidad    score de calidad de vida 0–10 por celda, inmueble y distrito → calidad_vida_*
+               (docs/metodologia_calidad_vida.md)
 
 Cada etapa se puede volver a correr: actualiza sin duplicar.
 
@@ -26,12 +28,12 @@ import argparse
 import logging
 
 from ubika.db import corrida, read_df
-from ubika.pipeline import capas, entorno, geocoding, limpieza
+from ubika.pipeline import calidad, capas, entorno, geocoding, limpieza
 
 log = logging.getLogger(__name__)
 
 ETAPAS = {"limpieza": limpieza.correr, "geocoding": geocoding.correr, "entorno": entorno.correr,
-          "capas": capas.correr}
+          "capas": capas.correr, "calidad": calidad.correr}
 
 
 def main(argv: list[str] | None = None) -> None:

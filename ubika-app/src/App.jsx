@@ -72,8 +72,10 @@ export default function App() {
   const { data: gVer } = useApi("/api/capas/verde");
   const { data: gBar } = useApi("/api/capas/barrio");
   const { data: gRui } = useApi("/api/capas/ruido");
-  const grillas = useMemo(() => ({ seguridad: gSeg, transporte: gTra, servicios: gSrv, verde: gVer, barrio: gBar, ruido: gRui }),
-    [gSeg, gTra, gSrv, gVer, gBar, gRui]);
+  // Score de calidad de vida guardado en Neon por celda (si no está, ciudad.js lo calcula)
+  const { data: gCal } = useApi("/api/calidad-vida/celdas");
+  const grillas = useMemo(() => ({ seguridad: gSeg, transporte: gTra, servicios: gSrv, verde: gVer, barrio: gBar, ruido: gRui, calidad: gCal }),
+    [gSeg, gTra, gSrv, gVer, gBar, gRui, gCal]);
 
   // Crimen por 10 mil habitantes, por distrito, y los límites distritales para pintarlo
   const { data: crimenRows } = useApi("/api/crimen-distritos");

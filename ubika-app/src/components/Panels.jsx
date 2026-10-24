@@ -76,7 +76,7 @@ export function EntornoPanel({ p, ix, distritos, cerca, crimenDist, onVolver, on
             </p>
           );
         })()}
-        <p className="nota">Calidad de vida: seguridad pesa 25 % (mitad denuncias a 500 m, mitad homicidios del distrito); transporte, servicios, áreas verdes, comercio y tranquilidad, 15 % cada uno. Toca una fila para verla en el mapa.</p>
+        <p className="nota">Calidad de vida: seguridad 25 % (mitad denuncias a 500 m, mitad homicidios del distrito); transporte, servicios y áreas verdes 15 % cada uno; longevidad, comercio y tranquilidad 10 % cada uno. Toca una fila para verla en el mapa.</p>
       </section>
 
       <section className="bloque">

@@ -11,6 +11,9 @@
  *
  * Calidad de vida (0–10): promedio ponderado de la posición de cada componente frente a toda Lima.
  * Seguridad = mitad denuncias a 500 m, mitad homicidios del distrito (ver seguridadIx en scoring.js).
+ * El score se calcula y GUARDA en Neon (etapa calidad del pipeline, docs/metodologia_calidad_vida.md);
+ * la app usa el guardado y solo lo calcula aquí si no está. Los pesos de CAPAS deben ser los de
+ * config.yaml (calidad_vida.pesos): tests/test_calidad.py lo comprueba.
  */
 import { fmt, indiceCrimen, seguridadIx } from "./scoring.js";
 
@@ -20,6 +23,11 @@ export const CAPAS = {
     l: "Seguridad", menorEsMejor: true, peso: 0.25,
     texto: v => (v == null ? "—" : `${fmt(v)} por 10 mil hab.`),
     corto: v => (v == null ? "—" : `${fmt(v)} /10 mil`),
+  },
+  longevidad: {
+    l: "Longevidad", menorEsMejor: false, peso: 0.10,
+    texto: v => (v == null ? "—" : `${v.toFixed(1)} años al morir`),
+    corto: v => (v == null ? "—" : `${v.toFixed(1)} años`),
   },
   transporte: {
     l: "Transporte", menorEsMejor: true, peso: 0.15,
@@ -35,12 +43,12 @@ export const CAPAS = {
     corto: v => (v == null ? "—" : `${v < 10 ? v.toFixed(1) : fmt(v)} m²/hab`),
   },
   barrio: {
-    l: "Comercio", menorEsMejor: false, peso: 0.15,
+    l: "Comercio", menorEsMejor: false, peso: 0.10,
     texto: v => (v == null ? "—" : `${fmt(v)} locales a 500 m`),
     corto: v => (v == null ? "—" : `${fmt(v)} locales`),
   },
   ruido: {
-    l: "Tranquilidad", menorEsMejor: true, peso: 0.15,
+    l: "Tranquilidad", menorEsMejor: true, peso: 0.10,
     texto: v => (v == null ? "—" : `${Math.round(v)} dB estimados`),
     corto: v => (v == null ? "—" : `${Math.round(v)} dB`),
   },
@@ -185,13 +193,15 @@ export function referencia(grillas, terr) {
   // Calidad de vida de cada celda, con la misma fórmula que la de un inmueble.
   // De paso, el índice de crimen de la celda (capa Crimen): misma regla que la seguridad, al revés y de 0 a 10.
   ref.valores.crimen = new Array(base.length).fill(null);
+  const guardada = deGrilla("calidad");          // score de Neon (calidad_vida_celda), si existe
+  ref.calidadGuardada = !!guardada;
   ref.valores.calidad = base.map((_, i) => {
     const ix = {};
     for (const k of CAPAS_KEYS) ix[k] = ref.valores[k] ? rango(ref.orden[k], ref.valores[k][i], CAPAS[k].menorEsMejor) : null;
     const posHom = rango(ref.orden.homicidios, ref.valores.homicidios?.[i], true);
     ref.valores.crimen[i] = indiceCrimen(ix.seguridad, posHom);
     ix.seguridad = seguridadIx(ix.seguridad, posHom);
-    return calidadDe(ix);
+    return guardada ? guardada[i] : calidadDe(ix);
   });
   ref.orden.calidad = ordenar(ref.valores.calidad);
   return ref;
@@ -212,6 +222,7 @@ export function frenteCiudad(ref, p) {
     seguridad: tasa10k(p.n_delitos_12m, popP),
     transporte: p.dist_transporte_m,
     servicios: (p.n_colegios ?? 0) + (p.n_salud ?? 0) + (p.n_comisarias ?? 0) + (p.n_malls ?? 0),
+    longevidad: ref.terr?.longevidad?.get(p.distrito) ?? null,   // la de su distrito, no la de la celda
   };
   for (const k of CAPAS_KEYS) {
     const v = k in propios ? propios[k] : i >= 0 ? ref.valores[k]?.[i] ?? null : null;
@@ -223,7 +234,7 @@ export function frenteCiudad(ref, p) {
   o.denuncias = o.seguridad;
   o.homicidios = ref.orden.homicidios ? rango(ref.orden.homicidios, o.val.homicidios, true) : null;
   o.seguridad = seguridadIx(o.denuncias, o.homicidios);
-  o.calidad = calidadDe(o);
+  o.calidad = p.calidad_vida ?? calidadDe(o);          // el guardado en Neon, si está
   o.calidadPos = o.calidad == null ? null : rango(ref.orden.calidad, o.calidad, false);
   return o;
 }

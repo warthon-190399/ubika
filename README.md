@@ -21,6 +21,7 @@ sql/                   esquema de Neon. Se corre a mano en el SQL Editor de Neon
   10_defunciones.sql     defunciones SINADEF y tasa de mortalidad por 100 mil habitantes
   11_correccion_ubicacion.sql  pin original del portal y motivo de las correcciones de ubicación
   12_edad_defuncion.sql  edad al morir por distrito (SINADEF) para la capa de longevidad
+  13_calidad_vida.sql    score de calidad de vida guardado por celda, inmueble y distrito
   query.sql              consultas de verificación (solo lectura)
 src/ubika/             paquete Python
   config.py              lee config.yaml y .env
@@ -32,8 +33,10 @@ src/ubika/             paquete Python
   referencias/sinadef.py defunciones por distrito de domicilio (MINSA)
   scraping/navent.py     parsers de adondevivir/urbania (misma plataforma)
   scraping/__main__.py   scraper: listado + detalle → raw_listings / raw_detalles
-  pipeline/              limpieza + repetidos → geocoding → entorno
+  pipeline/              limpieza + repetidos → geocoding → entorno → capas → calidad de vida
 src/modeling/valor.py  modelo de valor: entrena y compara métodos con los datos de Neon (Fase 6)
+docs/
+  metodologia_calidad_vida.md  cómo se calcula el score de calidad de vida (componentes, pesos, fuentes)
 scripts/
   check_db.py            verifica conexión y esquema
 data/referencias/      cifras publicadas para contrastar (se versionan; el resto de data/ no)
@@ -54,7 +57,7 @@ playwright install chromium      # para los scrapers (Fase 2)
 cp .env.example .env             # y completar los valores
 ```
 
-En Neon, SQL Editor, correr en orden: `00_drop_legacy.sql` (solo la primera vez), `01_schema.sql`, `02_seed_distritos.sql`, `03_views.sql`, `04_delitos.sql`, `05_scraping.sql`, `06_vistas_entorno.sql`, `07_capas.sql`, `08_poblacion.sql`, `09_calidad_vida.sql`, `10_defunciones.sql`, `11_correccion_ubicacion.sql`, `12_edad_defuncion.sql`. Después:
+En Neon, SQL Editor, correr en orden: `00_drop_legacy.sql` (solo la primera vez), `01_schema.sql`, `02_seed_distritos.sql`, `03_views.sql`, `04_delitos.sql`, `05_scraping.sql`, `06_vistas_entorno.sql`, `07_capas.sql`, `08_poblacion.sql`, `09_calidad_vida.sql`, `10_defunciones.sql`, `11_correccion_ubicacion.sql`, `12_edad_defuncion.sql`, `13_calidad_vida.sql`. Después:
 
 ```bash
 python scripts/check_db.py
@@ -94,7 +97,7 @@ python -m ubika.scraping --operacion alquiler --ver        # muestra el navegado
 Pipeline descriptivo (después de scrapear; se puede volver a correr sin duplicar):
 
 ```bash
-python -m ubika.pipeline                    # limpieza → geocoding → entorno → capas
+python -m ubika.pipeline                    # limpieza → geocoding → entorno → capas → calidad
 python -m ubika.pipeline --sin-google       # sin consultar Google
 python -m ubika.pipeline --etapas entorno   # una sola etapa
 ```
@@ -126,6 +129,7 @@ Compara con validación cruzada (5 partes × 3 repeticiones) la mediana del dist
 | Derivada | `geocode_cache` | Cada dirección consultada a Google, una sola vez. |
 | Derivada | `entorno` | Conteos dentro del radio y distancia al más cercano, por inmueble. |
 | Derivada | `capas_grilla` | Grilla de la ciudad (~350 m) con índices de seguridad, transporte y servicios para el mapa. |
+| Derivada | `calidad_vida_celda`, `calidad_vida_inmueble`, `calidad_vida_distrito` | Score de calidad de vida 0–10 con el valor y la posición de cada componente. Metodología: [docs/metodologia_calidad_vida.md](docs/metodologia_calidad_vida.md). |
 | Control | `corridas` | Cada ejecución de scraping o pipeline, con su estado y conteos. |
 
 ## Fuentes

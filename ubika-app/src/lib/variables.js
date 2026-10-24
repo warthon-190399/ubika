@@ -20,10 +20,10 @@ const metros = v => (v == null ? "—" : v < 1000 ? `${Math.round(v / 10) * 10} 
 export const VARIABLES = {
   calidad: {
     l: "Calidad de vida", titulo: "Calidad de vida", paleta: SEQ, bajo: "peor calidad", alto: "mejor calidad",
-    unidad: "Puntaje 0–10: seguridad, transporte, servicios, áreas verdes, comercio y tranquilidad",
+    unidad: "Puntaje 0–10: seguridad, longevidad, transporte, servicios, áreas verdes, comercio y tranquilidad",
     f: v => v.toFixed(1), sufijo: " /10",
     nota: {
-      barrio: "Cada componente se mide frente a toda Lima; seguridad pesa 25 % y el resto 15 % cada uno.",
+      barrio: "Cada componente se mide frente a toda Lima. Pesos: seguridad 25 %; transporte, servicios y áreas verdes 15 %; longevidad, comercio y tranquilidad 10 %. Metodología en docs/metodologia_calidad_vida.md.",
       distrito: "Mediana de las celdas del distrito.",
     },
   },

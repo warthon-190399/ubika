@@ -2,7 +2,7 @@ import { CAPAS, CAPAS_KEYS, pct } from "../lib/ciudad";
 import { SEQ, fmt, tramo } from "../lib/scoring";
 
 // Componente del entorno → variable del mapa que lo pinta
-const VARIABLE = { seguridad: "crimen", transporte: "transporte", servicios: "servicios", verde: "verde", barrio: "barrio", ruido: "ruido" };
+const VARIABLE = { seguridad: "crimen", longevidad: "longevidad", transporte: "transporte", servicios: "servicios", verde: "verde", barrio: "barrio", ruido: "ruido" };
 
 /**
  * Los componentes de la calidad de vida de un inmueble: su valor real y una barra con su

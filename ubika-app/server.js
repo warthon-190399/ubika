@@ -6,6 +6,7 @@
  *   GET /api/distritos?operacion=…      medianas por distrito (v_resumen_distrito)
  *   GET /api/capas/:capa                grilla de la ciudad: seguridad | transporte | servicios
  *   GET /api/cerca?lat=…&lon=…          puntos de interés a 500 m de un punto + la estación más cercana
+ *   GET /api/calidad-vida/celdas        score de calidad de vida guardado por celda (calidad_vida_celda)
  *   GET /api/crimen-distritos           denuncias de 12 meses por 10 mil habitantes (v_crimen_distrito)
  *                                       y homicidios por 100 mil habitantes (v_mortalidad_distrito_reciente, SINADEF)
  *                                       y edad promedio al morir por causas naturales (v_longevidad_distrito, SINADEF)
@@ -67,23 +68,42 @@ app.get("/api/salud", ruta(async () => {
   return { ok: true, ...rows[0] };
 }));
 
+// El score de calidad de vida guardado (sql/13 + etapa calidad del pipeline). Si la tabla no existe
+// todavía, la app lo calcula como antes en el navegador.
+const hayTabla = nombre => pool.query("SELECT to_regclass($1) IS NOT NULL AS ok", [nombre]).then(r => r.rows[0].ok);
+
 app.get("/api/propiedades", ruta(req => {
   const op = operacionDe(req);
   return conCache(`props:${op}`, 5, async () => {
+    const conCalidad = await hayTabla("calidad_vida_inmueble");
     const { rows } = await pool.query(`
-      SELECT prop_id, operacion, precio_pen, precio_usd, mantenimiento_pen, area_m2, precio_m2_pen,
+      SELECT v.prop_id, operacion, precio_pen, precio_usd, mantenimiento_pen, area_m2, precio_m2_pen,
              num_dorm, num_banios, num_estac, antiguedad_anios, direccion, distrito, distrito_nombre,
              latitud, longitud, geo_precision, inmobiliaria, fecha_publicacion, primera_vez, url, fuentes,
              radio_m, n_colegios, n_salud, n_comisarias, n_transporte, n_malls, n_inpe, n_delitos_12m,
              dist_colegio_m, dist_salud_m, dist_comisaria_m, dist_transporte_m, dist_mall_m,
              min_transporte, min_colegio, min_salud, min_comisaria
-      FROM v_app_propiedades
+             ${conCalidad ? ", q.calidad_vida, q.calidad_version" : ""}
+      FROM v_app_propiedades v
+      ${conCalidad ? `LEFT JOIN (SELECT prop_id AS q_prop_id, score AS calidad_vida, version AS calidad_version
+                       FROM calidad_vida_inmueble) q ON q.q_prop_id = v.prop_id` : ""}
       WHERE operacion = $1
       ORDER BY primera_vez DESC
       LIMIT 5000`, [op]);
     return rows;
   });
 }));
+
+// Mismo formato compacto que /api/capas y en el mismo orden (celda), para alinearlo con la grilla
+app.get("/api/calidad-vida/celdas", ruta(() => conCache("calidad-celdas", 60, async () => {
+  if (!(await hayTabla("calidad_vida_celda"))) return { capa: "calidad", celdas: [] };
+  const { rows } = await pool.query(
+    "SELECT latitud, longitud, score, version FROM calidad_vida_celda ORDER BY celda");
+  return {
+    capa: "calidad", version: rows[0]?.version ?? null,
+    celdas: rows.map(r => [+r.latitud.toFixed(5), +r.longitud.toFixed(5), r.score == null ? null : r.score / 10, r.score]),
+  };
+})));
 
 app.get("/api/distritos", ruta(req => {
   const op = operacionDe(req);

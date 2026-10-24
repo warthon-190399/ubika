@@ -15,6 +15,7 @@ const EJES = [
   { k: "verde", l: "Verde", ayuda: "m² de parque por habitante" },
   { k: "barrio", l: "Comercio", ayuda: "mercados, farmacias, restaurantes" },
   { k: "ruido", l: "Tranquilidad", ayuda: "menos ruido de tráfico" },
+  { k: "longevidad", l: "Longevidad", ayuda: "edad al morir en el distrito" },
 ];
 const valorEje = (c, k) => (CAPAS_KEYS.includes(k) ? c.ix?.[k] : c.ixAviso?.[k]) ?? null;
 
@@ -87,6 +88,7 @@ const FILAS = [
   { l: "Áreas verdes", capa: "verde", v: entorno("verde"), f: v => CAPAS.verde.texto(v), mejor: "max" },
   { l: "Comercio de barrio", capa: "barrio", v: entorno("barrio"), f: v => CAPAS.barrio.texto(v), mejor: "max" },
   { l: "Ruido estimado", capa: "ruido", v: entorno("ruido"), f: v => CAPAS.ruido.texto(v), mejor: "min" },
+  { l: "Edad al morir (distrito)", capa: "longevidad", v: entorno("longevidad"), f: v => CAPAS.longevidad.texto(v), mejor: "max" },
   { g: "Puntajes" },
   { l: "Calidad de vida", v: (p, x) => puntajeEntorno(x.ix), f: v => (v == null ? "—" : `${v.toFixed(1)} /10`), mejor: "max" },
   { l: "Oportunidad con tus prioridades", v: (p, x) => 10 * (x.puntaje ?? 0), f: v => `${v.toFixed(1)} /10`, mejor: "max" },

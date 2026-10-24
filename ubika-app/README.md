@@ -51,7 +51,7 @@ Cada criterio es el percentil del inmueble entre todos los de su operación (alq
 - **Transporte:** distancia a la estación de metro, tren o Metropolitano más cercana.
 
 Puntaje de oportunidad = promedio ponderado con los pesos de los controles.
-Calidad de vida (0–10, `src/lib/ciudad.js`) = 25 % seguridad (la de arriba) + 15 % cada uno: transporte, servicios, áreas verdes, comercio de barrio y tranquilidad. Cada componente es la posición frente a todas las celdas de Lima.
+Calidad de vida (0–10) = seguridad 25 % (la de arriba); transporte, servicios y áreas verdes 15 % cada uno; longevidad, comercio de barrio y tranquilidad 10 % cada uno. Se calcula y **guarda en Neon** (etapa `calidad` del pipeline: `calidad_vida_celda` y `calidad_vida_inmueble`); la app lo lee de `/api/calidad-vida/celdas` y de `/api/propiedades` (`calidad_vida`) y solo lo calcula en `src/lib/ciudad.js` si esas tablas no existen. Metodología completa: [docs/metodologia_calidad_vida.md](../docs/metodologia_calidad_vida.md).
 
 ## Cómo estima el evaluador (`src/lib/evaluador.js`)
 
@@ -71,6 +71,7 @@ No usa los modelos de `models/*.pkl` del evaluador anterior (Streamlit, `app/aut
 | `GET /api/salud` | estado de la conexión y fecha del último scraping |
 | `GET /api/propiedades?operacion=alquiler\|venta` | inmuebles activos con su entorno (`v_app_propiedades`) |
 | `GET /api/distritos?operacion=…` | medianas por distrito (`v_resumen_distrito`) |
+| `GET /api/calidad-vida/celdas` | score de calidad de vida guardado por celda (`calidad_vida_celda`), mismo formato y orden que `/api/capas` |
 | `GET /api/crimen-distritos` | por distrito: denuncias por 10 mil habitantes (`v_crimen_distrito`) y homicidios por 100 mil (`v_mortalidad_distrito_reciente`, necesita `sql/10_defunciones.sql` y `python -m ubika.referencias.sinadef`) y edad promedio al morir por causas naturales (`v_longevidad_distrito`, `sql/12_edad_defuncion.sql`) |
 | `GET /api/capas/seguridad\|transporte\|servicios` | grilla de la ciudad (`capas_grilla`): `[lat, lon, índice 0–1, valor]` |
 
