@@ -12,7 +12,7 @@
  * Calidad de vida (0–10): promedio ponderado de la posición de cada componente frente a toda Lima.
  * Seguridad = mitad denuncias a 500 m, mitad homicidios del distrito (ver seguridadIx en scoring.js).
  */
-import { fmt, seguridadIx } from "./scoring.js";
+import { fmt, indiceCrimen, seguridadIx } from "./scoring.js";
 
 /** Componentes del entorno de un inmueble (ficha, comparador, calidad de vida). */
 export const CAPAS = {
@@ -182,11 +182,15 @@ export function referencia(grillas, terr) {
   // Edad promedio al morir por causas naturales del distrito de cada celda (solo para el mapa, no entra en la calidad de vida)
   ref.valores.longevidad = terr?.longevidad?.size ? terr.dist.map(d => terr.longevidad.get(d) ?? null) : null;
   for (const k of [...CAPAS_KEYS, "homicidios"]) if (ref.valores[k]) ref.orden[k] = ordenar(ref.valores[k]);
-  // Calidad de vida de cada celda, con la misma fórmula que la de un inmueble
+  // Calidad de vida de cada celda, con la misma fórmula que la de un inmueble.
+  // De paso, el índice de crimen de la celda (capa Crimen): misma regla que la seguridad, al revés y de 0 a 10.
+  ref.valores.crimen = new Array(base.length).fill(null);
   ref.valores.calidad = base.map((_, i) => {
     const ix = {};
     for (const k of CAPAS_KEYS) ix[k] = ref.valores[k] ? rango(ref.orden[k], ref.valores[k][i], CAPAS[k].menorEsMejor) : null;
-    ix.seguridad = seguridadIx(ix.seguridad, rango(ref.orden.homicidios, ref.valores.homicidios?.[i], true));
+    const posHom = rango(ref.orden.homicidios, ref.valores.homicidios?.[i], true);
+    ref.valores.crimen[i] = indiceCrimen(ix.seguridad, posHom);
+    ix.seguridad = seguridadIx(ix.seguridad, posHom);
     return calidadDe(ix);
   });
   ref.orden.calidad = ordenar(ref.valores.calidad);

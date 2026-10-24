@@ -59,6 +59,12 @@ export function seguridadIx(denuncias, homicidios) {
   return (1 - PESO_HOMICIDIOS) * denuncias + PESO_HOMICIDIOS * homicidios;
 }
 
+/** Índice de crimen 0–10 (10 = peor de Lima) a partir de las posiciones 0–1 de seguridad (1 = más seguro). */
+export function indiceCrimen(posDenuncias, posHomicidios) {
+  const s = seguridadIx(posDenuncias, posHomicidios);
+  return s == null ? null : 10 * (1 - s);
+}
+
 /**
  * Índices 0–1 (1 = mejor) por inmueble. Devuelve un Map prop_id → { precio, espacio, … }.
  * crimenDist: Map distrito → fila de /api/crimen-distritos (para los homicidios del distrito).

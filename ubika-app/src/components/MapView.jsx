@@ -316,10 +316,12 @@ export default function MapView({ props, grillas, ciudad, capa, onCapa, escala, 
       // Mismo formato en las dos escalas: valor, unidad y dónde
       html = `<div class="tt-t mono">${V.f(object.v)}<span class="tt-u">${V.sufijo}</span></div>
         <div class="tt-s">${object.d ? nombre(object.d) : "Lima"} · celda de 350 m</div>
-        ${capa === "crimen" ? `<div class="tt-h mono">${fmt(grillas.seguridad?.celdas[object.i]?.[3])} denuncias a 500 m en 12 meses</div>` : ""}`;
+        ${capa === "crimen" ? `<div class="tt-h mono">${fmt(grillas.seguridad?.celdas[object.i]?.[3])} denuncias a 500 m en 12 meses${
+          ciudad?.valores?.homicidios?.[object.i] != null ? ` · ${ciudad.valores.homicidios[object.i].toFixed(1)} homicidios por 100 mil en el distrito` : ""}</div>` : ""}`;
     } else if (V && id === "limites") {
       const d = object.properties.distrito, x = porDistrito.get(d);
-      const extra = capa === "crimen" && x ? `${fmt(x.r.denuncias)} denuncias · ${fmt(x.r.poblacion)} hab.`
+      const extra = capa === "crimen" && x ? `${fmt(x.r.tasa_10k)} denuncias por 10 mil · ${
+          x.r.tasa_homicidios_100k != null ? `${x.r.tasa_homicidios_100k.toFixed(1)} homicidios por 100 mil` : "sin dato de homicidios"}`
         : capa === "precio" && x ? `mediana de ${x.r.n_inmuebles} avisos` : "";
       html = `<div class="tt-t">${nombre(d)}</div>
         <div class="tt-r mono">${x ? `${V.f(x.v)}<span class="tt-u">${V.sufijo}</span>` : "Sin datos"}</div>

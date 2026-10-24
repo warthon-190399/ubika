@@ -7,7 +7,7 @@
  * Regla de color: más oscuro = más de lo que dice el título. Crimen usa la rampa cálida (alerta);
  * el resto, la secuencial verde de la marca.
  */
-import { SEQ, fmt } from "./scoring.js";
+import { SEQ, fmt, indiceCrimen } from "./scoring.js";
 import { tasa10k } from "./ciudad.js";
 
 export const CALIENTE = ["#FFE8B3", "#FDCB6E", "#FEB722", "#F0931E", "#E07A1F", "#B4401A"];
@@ -28,12 +28,12 @@ export const VARIABLES = {
     },
   },
   crimen: {
-    l: "Crimen", titulo: "Denuncias por habitante", paleta: CALIENTE, bajo: "menos denuncias", alto: "más denuncias",
-    unidad: "Denuncias de robo y violencia en 12 meses por cada 10 mil habitantes",
-    f: v => fmt(v), sufijo: " por 10 mil hab.",
+    l: "Crimen", titulo: "Índice de crimen", paleta: CALIENTE, bajo: "menos crimen", alto: "más crimen",
+    unidad: "Puntaje 0–10 frente a toda Lima: mitad denuncias de robo y violencia por habitante, mitad homicidios del distrito",
+    f: v => v.toFixed(1), sufijo: " /10",
     nota: {
-      barrio: "Estimado: denuncias a 500 m entre la población del distrito repartida en sus celdas (censo 2017). Mide cuánto se denuncia: donde la gente denuncia poco, sale más baja.",
-      distrito: "Población del censo 2017 (INEI). En distritos comerciales entra más gente de la que vive ahí y su tasa sale alta; donde se denuncia poco, sale baja.",
+      barrio: "Denuncias a 500 m en 12 meses (SIDPOL) y homicidios del distrito (SINADEF, 2019, 2022 y 2023), cada uno frente a todas las celdas de Lima. Los homicidios corrigen a los distritos donde se denuncia poco.",
+      distrito: "Denuncias por 10 mil habitantes (SIDPOL, 12 meses) y homicidios por 100 mil (SINADEF), cada uno frente a los demás distritos. Población del censo 2017.",
     },
   },
   longevidad: {
@@ -132,21 +132,35 @@ export function valoresCeldas(k, { grillas, ciudad, props }) {
   const base = grillas.seguridad?.celdas;
   if (!base) return null;
   if (k === "precio") return precioCeldas(base, props);
-  return ciudad?.valores?.[k === "crimen" ? "seguridad" : k] || null;
+  return ciudad?.valores?.[k] || null;
 }
 
 /** Si la variable tiene datos (las capas de OpenStreetMap pueden no estar cargadas todavía). */
 export function disponible(k, { ciudad }) {
   if (k === "precio") return true;
-  const v = ciudad?.valores?.[k === "crimen" ? "seguridad" : k];
+  const v = ciudad?.valores?.[k];
   return !!v && v.some(x => x != null && x > 0);
+}
+
+/** Posición 0–1 de v entre vals cuando menos es mejor (1 = el menor); empates a la mitad; null si no hay dato. */
+export function posicionMenorMejor(vals, v) {
+  const xs = vals.filter(x => x != null && !Number.isNaN(x));
+  if (v == null || Number.isNaN(v) || !xs.length) return null;
+  const mayores = xs.filter(x => x > v).length, iguales = xs.filter(x => x === v).length;
+  return (mayores + iguales / 2) / xs.length;
 }
 
 /** Valor por distrito: Map slug → { v, extra } */
 export function valoresDistrito(k, { celdas, ciudad, crimenDist, distritos }) {
   const out = new Map();
   if (k === "crimen") {
-    for (const [d, r] of crimenDist || []) if (r.tasa_10k != null) out.set(d, { v: r.tasa_10k, r, pequeno: r.poblacion < 10000 });
+    // Posición de cada distrito frente a los demás (1 = menos), en denuncias y en homicidios, combinadas como la seguridad
+    const filas = [...(crimenDist || new Map()).values()];
+    const den = filas.map(r => r.tasa_10k), hom = filas.map(r => r.tasa_homicidios_100k);
+    for (const r of filas) {
+      const v = indiceCrimen(posicionMenorMejor(den, r.tasa_10k), posicionMenorMejor(hom, r.tasa_homicidios_100k));
+      if (v != null) out.set(r.distrito, { v, r, pequeno: r.poblacion < 10000 });
+    }
     return out;
   }
   if (k === "homicidios") {
