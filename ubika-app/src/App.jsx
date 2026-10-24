@@ -90,7 +90,7 @@ export default function App() {
   const cerca = useMemo(() => (cercaRaw?.puntos ? agrupar(cercaRaw.puntos) : null), [cercaRaw]);
 
   // Índices sobre todos los avisos de la operación: no cambian al filtrar
-  const indices = useMemo(() => calcularIndices(todos), [todos]);
+  const indices = useMemo(() => calcularIndices(todos, crimenDist), [todos, crimenDist]);
   const puntajes = useMemo(() => new Map(todos.map(p => [p.prop_id, puntaje(indices.get(p.prop_id), pesos)])), [todos, indices, pesos]);
 
   // Crédito: precio máximo que alcanza con el ingreso, el ahorro y la tasa del usuario

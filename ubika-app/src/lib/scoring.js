@@ -12,7 +12,7 @@ export const CRITERIOS = [
   { k: "precio",     l: "Precio",     max: "lo más barato",       ayuda: "más barato, incluido el mantenimiento" },
   { k: "espacio",    l: "Espacio",    max: "lo más amplio",       ayuda: "más área, dormitorios, baños y estacionamiento" },
   { k: "antiguedad", l: "Antigüedad", max: "lo más nuevo",        ayuda: "más nuevo" },
-  { k: "seguridad",  l: "Seguridad",  max: "lo más seguro",       ayuda: "menos denuncias de robo y violencia cerca" },
+  { k: "seguridad",  l: "Seguridad",  max: "lo más seguro",       ayuda: "menos denuncias cerca y menos homicidios en el distrito" },
   { k: "servicios",  l: "Servicios",  max: "más servicios cerca", ayuda: "más colegios, salud, comisarías y comercio a 500 m" },
   { k: "transporte", l: "Transporte", max: "transporte cerca",    ayuda: "más cerca del metro, tren o Metropolitano" },
 ];
@@ -46,8 +46,24 @@ function percentiles(valores) {
   return out;
 }
 
-/** Índices 0–1 (1 = mejor) por inmueble. Devuelve un Map prop_id → { precio, espacio, … }. */
-export function calcularIndices(props) {
+/**
+ * Seguridad 0–1 (1 = más seguro) = mitad denuncias cerca, mitad homicidios del distrito.
+ * Las denuncias dependen de cuánto denuncia la gente (en SJL o Ancón se denuncia poco y saldrían
+ * "seguros"); los homicidios casi no tienen subregistro (SINADEF, certificados de defunción).
+ * Si falta uno, cuenta solo el otro.
+ */
+export const PESO_HOMICIDIOS = 0.5;
+export function seguridadIx(denuncias, homicidios) {
+  if (denuncias == null) return homicidios ?? null;
+  if (homicidios == null) return denuncias;
+  return (1 - PESO_HOMICIDIOS) * denuncias + PESO_HOMICIDIOS * homicidios;
+}
+
+/**
+ * Índices 0–1 (1 = mejor) por inmueble. Devuelve un Map prop_id → { precio, espacio, … }.
+ * crimenDist: Map distrito → fila de /api/crimen-distritos (para los homicidios del distrito).
+ */
+export function calcularIndices(props, crimenDist) {
   const col = f => percentiles(props.map(f));
   const precio = col(p => (p.precio_pen ?? NaN) + (p.mantenimiento_pen ?? 0));
   const area = col(p => p.area_m2);
@@ -56,6 +72,7 @@ export function calcularIndices(props) {
   const estac = col(p => p.num_estac ?? 0);
   const antig = col(p => p.antiguedad_anios);
   const delitos = col(p => p.n_delitos_12m);
+  const homicidios = col(p => crimenDist?.get(p.distrito)?.tasa_homicidios_100k ?? null);
   const servicios = col(p => (p.n_colegios ?? 0) + (p.n_salud ?? 0) + (p.n_comisarias ?? 0) + (p.n_malls ?? 0));
   const transporte = col(p => p.dist_transporte_m);
   const inv = v => (v == null ? null : 1 - v);
@@ -65,7 +82,7 @@ export function calcularIndices(props) {
     precio: inv(precio[i]),
     espacio: area[i] == null ? null : 0.6 * area[i] + 0.2 * dorm[i] + 0.1 * banos[i] + 0.1 * estac[i],
     antiguedad: inv(antig[i]),
-    seguridad: inv(delitos[i]),
+    seguridad: seguridadIx(inv(delitos[i]), inv(homicidios[i])),
     servicios: servicios[i],
     transporte: inv(transporte[i]),
   }));

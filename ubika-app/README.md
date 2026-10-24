@@ -46,12 +46,12 @@ Cada criterio es el percentil del inmueble entre todos los de su operación (alq
 - **Precio:** precio + mantenimiento (más barato = mejor).
 - **Espacio:** 60% área, 20% dormitorios, 10% baños, 10% estacionamientos.
 - **Antigüedad:** más nuevo = mejor. Si el aviso no tiene el dato, el criterio no cuenta para ese aviso.
-- **Seguridad:** denuncias de robo y violencia a 500 m en 12 meses, ponderadas por distrito.
+- **Seguridad:** mitad denuncias de robo y violencia a 500 m en 12 meses (ponderadas por distrito), mitad tasa de homicidios del distrito (SINADEF, por 100 mil habitantes). Las denuncias solas premian a los distritos donde se denuncia poco (SJL, Ancón) y castigan a los que tienen mucha gente de paso (San Isidro, Miraflores); los homicidios casi no tienen subregistro. La regla está en `seguridadIx` (`src/lib/scoring.js`).
 - **Servicios:** colegios + salud + comisarías + comercio grande a 500 m.
 - **Transporte:** distancia a la estación de metro, tren o Metropolitano más cercana.
 
 Puntaje de oportunidad = promedio ponderado con los pesos de los controles.
-Puntaje de entorno (0–10) = 45% seguridad, 30% transporte, 25% servicios.
+Calidad de vida (0–10, `src/lib/ciudad.js`) = 25 % seguridad (la de arriba) + 15 % cada uno: transporte, servicios, áreas verdes, comercio de barrio y tranquilidad. Cada componente es la posición frente a todas las celdas de Lima.
 
 ## Cómo estima el evaluador (`src/lib/evaluador.js`)
 
@@ -71,10 +71,12 @@ No usa los modelos de `models/*.pkl` del evaluador anterior (Streamlit, `app/aut
 | `GET /api/salud` | estado de la conexión y fecha del último scraping |
 | `GET /api/propiedades?operacion=alquiler\|venta` | inmuebles activos con su entorno (`v_app_propiedades`) |
 | `GET /api/distritos?operacion=…` | medianas por distrito (`v_resumen_distrito`) |
+| `GET /api/crimen-distritos` | por distrito: denuncias por 10 mil habitantes (`v_crimen_distrito`) y homicidios por 100 mil (`v_mortalidad_distrito_reciente`, necesita `sql/10_defunciones.sql` y `python -m ubika.referencias.sinadef`) |
 | `GET /api/capas/seguridad\|transporte\|servicios` | grilla de la ciudad (`capas_grilla`): `[lat, lon, índice 0–1, valor]` |
 
 ## Limitaciones conocidas
 
-- La capa de seguridad cuenta **denuncias**, no tasas por habitante: una zona con mucha gente y comercio tiene más denuncias.
+- Las **denuncias** miden cuánto denuncia la gente, no cuántos delitos ocurren: por eso la seguridad suma los homicidios.
+- Los **homicidios** son por distrito y por distrito de **residencia** de la víctima (SINADEF no trae dónde ocurrió), con datos hasta 2024-05: todas las celdas de un distrito tienen el mismo valor.
 - Los minutos a pie son en línea recta a 80 m/min, no por calles.
 - No hay datos de parques todavía.

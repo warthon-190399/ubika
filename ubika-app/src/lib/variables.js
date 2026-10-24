@@ -26,12 +26,21 @@ export const VARIABLES = {
     },
   },
   crimen: {
-    l: "Crimen", titulo: "Crimen por habitante", paleta: CALIENTE, bajo: "menos crimen", alto: "más crimen",
+    l: "Crimen", titulo: "Denuncias por habitante", paleta: CALIENTE, bajo: "menos denuncias", alto: "más denuncias",
     unidad: "Denuncias de robo y violencia en 12 meses por cada 10 mil habitantes",
     f: v => fmt(v), sufijo: " por 10 mil hab.",
     nota: {
-      barrio: "Estimado: denuncias a 500 m entre la población del distrito repartida en sus celdas (censo 2017).",
-      distrito: "Población del censo 2017 (INEI). En distritos comerciales entra más gente de la que vive ahí y su tasa sale alta.",
+      barrio: "Estimado: denuncias a 500 m entre la población del distrito repartida en sus celdas (censo 2017). Mide cuánto se denuncia: donde la gente denuncia poco, sale más baja.",
+      distrito: "Población del censo 2017 (INEI). En distritos comerciales entra más gente de la que vive ahí y su tasa sale alta; donde se denuncia poco, sale baja.",
+    },
+  },
+  homicidios: {
+    l: "Homicidios", titulo: "Homicidios por habitante", paleta: CALIENTE, bajo: "menos homicidios", alto: "más homicidios",
+    unidad: "Homicidios al año por cada 100 mil habitantes, por distrito de residencia de la víctima",
+    f: v => v.toFixed(1), sufijo: " por 100 mil hab.",
+    nota: {
+      barrio: "Dato por distrito: todas sus celdas tienen el mismo valor. SINADEF (MINSA), promedio de 2019, 2022 y 2023.",
+      distrito: "SINADEF (MINSA): certificados de defunción, casi sin subregistro. Promedio de 2019, 2022 y 2023; población del censo 2017.",
     },
   },
   precio: {
@@ -127,6 +136,12 @@ export function valoresDistrito(k, { celdas, ciudad, crimenDist, distritos }) {
   const out = new Map();
   if (k === "crimen") {
     for (const [d, r] of crimenDist || []) if (r.tasa_10k != null) out.set(d, { v: r.tasa_10k, r, pequeno: r.poblacion < 10000 });
+    return out;
+  }
+  if (k === "homicidios") {
+    for (const [d, r] of crimenDist || []) {
+      if (r.tasa_homicidios_100k != null) out.set(d, { v: r.tasa_homicidios_100k, r, pequeno: r.poblacion < 10000 });
+    }
     return out;
   }
   if (k === "precio") {

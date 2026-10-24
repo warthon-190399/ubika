@@ -7,6 +7,7 @@
  *   GET /api/capas/:capa                grilla de la ciudad: seguridad | transporte | servicios
  *   GET /api/cerca?lat=…&lon=…          puntos de interés a 500 m de un punto + la estación más cercana
  *   GET /api/crimen-distritos           denuncias de 12 meses por 10 mil habitantes (v_crimen_distrito)
+ *                                       y homicidios por 100 mil habitantes (v_mortalidad_distrito_reciente, SINADEF)
  *
  * Correr: node server.js   (lee DATABASE_URL de ubika-app/.env)
  */
@@ -109,8 +110,12 @@ app.get("/api/capas/:capa", ruta(req => {
 
 app.get("/api/crimen-distritos", ruta(() => conCache("crimen-distritos", 60, async () => {
   const { rows } = await pool.query(`
-    SELECT distrito, distrito_nombre, ubigeo, poblacion, denuncias, denuncias_patrimonio, denuncias_violencia, tasa_10k
-    FROM v_crimen_distrito ORDER BY tasa_10k DESC`);
+    SELECT c.distrito, c.distrito_nombre, c.ubigeo, c.poblacion, c.denuncias, c.denuncias_patrimonio,
+           c.denuncias_violencia, c.tasa_10k,
+           m.tasa_homicidios_100k, m.homicidios_anio, m.anio_desde AS homicidios_desde, m.anio_hasta AS homicidios_hasta
+    FROM v_crimen_distrito c
+    LEFT JOIN v_mortalidad_distrito_reciente m USING (distrito)
+    ORDER BY c.tasa_10k DESC`);
   return rows;
 })));
 

@@ -72,10 +72,11 @@ export function EntornoPanel({ p, ix, distritos, cerca, crimenDist, onVolver, on
             <p className="crimen-dist">
               <b className="mono">{fmt(d.tasa_10k)}</b> denuncias por 10 mil habitantes al año en {nombre(p.distrito)}
               {puesto > 0 && <span> · puesto {puesto} de {lista.length}, de menos a más</span>}
+              {d.tasa_homicidios_100k != null && <><br /><b className="mono">{d.tasa_homicidios_100k.toFixed(1)}</b> homicidios por 100 mil habitantes al año ({d.homicidios_desde}–{d.homicidios_hasta}, SINADEF)</>}
             </p>
           );
         })()}
-        <p className="nota">Calidad de vida: seguridad pesa 25 %; transporte, servicios, áreas verdes, comercio y tranquilidad, 15 % cada uno. Toca una fila para verla en el mapa.</p>
+        <p className="nota">Calidad de vida: seguridad pesa 25 % (mitad denuncias a 500 m, mitad homicidios del distrito); transporte, servicios, áreas verdes, comercio y tranquilidad, 15 % cada uno. Toca una fila para verla en el mapa.</p>
       </section>
 
       <section className="bloque">

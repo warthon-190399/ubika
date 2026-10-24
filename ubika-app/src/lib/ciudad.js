@@ -10,8 +10,9 @@
  * oficiales por distrito y a una escala más fina.
  *
  * Calidad de vida (0–10): promedio ponderado de la posición de cada componente frente a toda Lima.
+ * Seguridad = mitad denuncias a 500 m, mitad homicidios del distrito (ver seguridadIx en scoring.js).
  */
-import { fmt } from "./scoring";
+import { fmt, seguridadIx } from "./scoring.js";
 
 /** Componentes del entorno de un inmueble (ficha, comparador, calidad de vida). */
 export const CAPAS = {
@@ -62,7 +63,7 @@ function dentroDe(x, y, poligono) {          // poligono = [anillo, huecos…]; 
   return dentro;
 }
 
-/** { dist: [slug|null por celda], popCelda: Map slug → habitantes por celda } */
+/** { dist: [slug|null por celda], popCelda: Map slug → habitantes por celda, hom: Map slug → homicidios por 100 mil } */
 export function territorio(grilla, limites, crimenDist) {
   if (!grilla?.celdas?.length || !limites?.features) return null;
   const feats = limites.features.map(f => {
@@ -87,7 +88,9 @@ export function territorio(grilla, limites, crimenDist) {
     const pob = crimenDist?.get(d)?.poblacion;
     if (pob) popCelda.set(d, pob / k);
   }
-  return { dist, popCelda };
+  const hom = new Map();
+  for (const [d, r] of crimenDist || []) if (r.tasa_homicidios_100k != null) hom.set(d, r.tasa_homicidios_100k);
+  return { dist, popCelda, hom };
 }
 
 /** Cantidad a 500 m → por habitante del círculo de 500 m (× escala). */
@@ -168,11 +171,14 @@ export function referencia(grillas, terr) {
     ruido: deGrilla("ruido"),
   };
   ref.denuncias = seg;
-  for (const k of CAPAS_KEYS) if (ref.valores[k]) ref.orden[k] = ordenar(ref.valores[k]);
+  // Homicidios por 100 mil del distrito de cada celda (mismo valor en todo el distrito)
+  ref.valores.homicidios = terr?.hom?.size ? terr.dist.map(d => terr.hom.get(d) ?? null) : null;
+  for (const k of [...CAPAS_KEYS, "homicidios"]) if (ref.valores[k]) ref.orden[k] = ordenar(ref.valores[k]);
   // Calidad de vida de cada celda, con la misma fórmula que la de un inmueble
   ref.valores.calidad = base.map((_, i) => {
     const ix = {};
     for (const k of CAPAS_KEYS) ix[k] = ref.valores[k] ? rango(ref.orden[k], ref.valores[k][i], CAPAS[k].menorEsMejor) : null;
+    ix.seguridad = seguridadIx(ix.seguridad, rango(ref.orden.homicidios, ref.valores.homicidios?.[i], true));
     return calidadDe(ix);
   });
   ref.orden.calidad = ordenar(ref.valores.calidad);
@@ -181,6 +187,7 @@ export function referencia(grillas, terr) {
 
 /**
  * Entorno de un inmueble frente a Lima: { seguridad, transporte, …: 0–1, val: valores reales, calidad: 0–10 }.
+ * seguridad combina denuncias (o.denuncias) y homicidios del distrito (o.homicidios, val.homicidios).
  * Seguridad, transporte y servicios salen de sus propios conteos a 500 m; verde, comercio y ruido,
  * de la celda de la grilla donde está.
  */
@@ -200,6 +207,10 @@ export function frenteCiudad(ref, p) {
     o[k] = ref.orden[k] ? rango(ref.orden[k], v, CAPAS[k].menorEsMejor) : null;
   }
   o.tasa = propios.seguridad;
+  o.val.homicidios = ref.terr?.hom?.get(p.distrito) ?? null;
+  o.denuncias = o.seguridad;
+  o.homicidios = ref.orden.homicidios ? rango(ref.orden.homicidios, o.val.homicidios, true) : null;
+  o.seguridad = seguridadIx(o.denuncias, o.homicidios);
   o.calidad = calidadDe(o);
   o.calidadPos = o.calidad == null ? null : rango(ref.orden.calidad, o.calidad, false);
   return o;

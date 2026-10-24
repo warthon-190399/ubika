@@ -27,6 +27,7 @@ export default function Indicadores({ p, ix, onCapa, compacto }) {
               <span className="ind-p">
                 {x == null ? "sin dato" : `mejor que el ${pct(x)} de Lima`}
                 {k === "seguridad" && p.n_delitos_12m != null && ` · ${fmt(p.n_delitos_12m)} denuncias a 500 m en 12 meses`}
+                {k === "seguridad" && ix?.val?.homicidios != null && ` · ${ix.val.homicidios.toFixed(1)} homicidios por 100 mil hab. en el distrito`}
                 {k === "ruido" && " · modelo con vías y aeropuerto, no es una medición"}
               </span>
             )}
