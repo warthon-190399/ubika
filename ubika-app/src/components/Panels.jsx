@@ -122,6 +122,34 @@ export function EntornoPanel({ p, ix, distritos, cerca, crimenDist, onVolver, on
   );
 }
 
+/* ── Rango de precio: dos manijas sobre una misma barra ─── */
+// Mínimo en 0 = sin mínimo; máximo en el tope = sin límite. Las manijas no se cruzan (queda al menos un paso).
+export function textoRango(min, max, tope) {
+  const conMin = min > 0, conMax = max < tope;
+  if (conMin && conMax) return `${soles(min)} – ${soles(max)}`;
+  if (conMin) return `Desde ${soles(min)}`;
+  if (conMax) return `Hasta ${soles(max)}`;
+  return "Cualquiera";
+}
+
+function RangoPrecio({ min, max, tope, paso, onCambio }) {
+  const hi = Math.min(max, tope);
+  const pct = v => `${(100 * v) / tope}%`;
+  return (
+    <div className="pref">
+      <span className="pref-h"><span>Precio</span><span className="mono">{textoRango(min, hi, tope)}</span></span>
+      <div className="rd">
+        <div className="rd-pista" aria-hidden="true"><i className="rd-relleno" style={{ left: pct(min), right: `calc(100% - ${pct(hi)})` }} /></div>
+        <input type="range" aria-label="Precio mínimo" min={0} max={tope} step={paso} value={min}
+          onChange={e => onCambio({ precioMin: Math.min(+e.target.value, hi - paso) })} />
+        <input type="range" aria-label="Precio máximo" min={0} max={tope} step={paso} value={hi}
+          onChange={e => { const v = Math.max(+e.target.value, min + paso); onCambio({ precioMax: v >= tope ? Infinity : v }); }} />
+      </div>
+      <span className="pref-extremos"><span>S/ 0</span><span>{soles(tope)} o más</span></span>
+    </div>
+  );
+}
+
 /* ── Oportunidades ───────────────────────────────────────── */
 export function OportunidadesPanel({ filtros, onFiltros, pesos, onPesos, ranking, total, selected, onSelect, enComparacion, onComparar, lleno,
   distritos, operacion, sinAntiguedad }) {
@@ -138,11 +166,8 @@ export function OportunidadesPanel({ filtros, onFiltros, pesos, onPesos, ranking
             {(distritos || []).map(d => <option key={d.distrito} value={d.distrito}>{d.distrito_nombre} ({d.n_inmuebles})</option>)}
           </select>
         </label>
-        <label className="pref" htmlFor="f-precio">
-          <span className="pref-h"><span>Hasta</span><span className="mono">{filtros.precioMax >= maxPrecio ? "sin límite" : soles(filtros.precioMax)}</span></span>
-          <input id="f-precio" type="range" min={paso * 5} max={maxPrecio} step={paso} value={Math.min(filtros.precioMax, maxPrecio)}
-            onChange={e => onFiltros(f => ({ ...f, precioMax: +e.target.value }))} />
-        </label>
+        <RangoPrecio min={filtros.precioMin ?? 0} max={filtros.precioMax} tope={maxPrecio} paso={paso}
+          onCambio={cambio => onFiltros(f => ({ ...f, ...cambio }))} />
         <div className="campo">
           <span>Dormitorios</span>
           <div className="chips" role="group" aria-label="Dormitorios mínimos">

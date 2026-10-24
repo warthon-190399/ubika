@@ -15,7 +15,7 @@ import CreditoPanel from "./components/CreditoPanel";
 import EvaluadorPanel from "./components/EvaluadorPanel";
 import "./app.css";
 
-const FILTROS_INICIALES = { distrito: "", precioMax: Infinity, dormMin: 0 };
+const FILTROS_INICIALES = { distrito: "", precioMin: 0, precioMax: Infinity, dormMin: 0 };
 
 // La selección para comparar se recuerda en este navegador, una lista por operación
 const leerComparar = op => { try { return JSON.parse(localStorage.getItem(`ubika.comparar.${op}`)) || []; } catch { return []; } };
@@ -101,6 +101,7 @@ export default function App() {
 
   const visibles = useMemo(() => todos.filter(p =>
     (!filtros.distrito || p.distrito === filtros.distrito) &&
+    (p.precio_pen ?? 0) >= filtros.precioMin &&
     (p.precio_pen ?? 0) <= filtros.precioMax &&
     (p.num_dorm ?? 0) >= filtros.dormMin &&
     (!filtraCredito || (p.precio_pen && p.precio_pen <= precioMax))), [todos, filtros, filtraCredito, precioMax]);

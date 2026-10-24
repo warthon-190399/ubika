@@ -155,6 +155,22 @@
 .rg-ley i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
 .rg-ley .b { background: #A9BD57; } .rg-ley .m { background: var(--grafito); width: 3px; }
 
+/* Rango de precio con dos manijas: dos range superpuestos; solo las manijas reciben el puntero */
+.rd { position: relative; height: 28px; }
+.rd-pista { position: absolute; left: 0; right: 0; top: 50%; height: 6px; margin-top: -3px; border-radius: 3px; background: var(--linea); }
+.rd-relleno { position: absolute; top: 0; bottom: 0; border-radius: 3px; background: var(--verde); }
+.rd input[type=range] { position: absolute; inset: 0; width: 100%; height: 28px; margin: 0; background: none;
+  pointer-events: none; -webkit-appearance: none; appearance: none; }
+.rd input[type=range]::-webkit-slider-runnable-track { background: none; height: 28px; }
+.rd input[type=range]::-moz-range-track { background: none; }
+.rd input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; pointer-events: auto; cursor: pointer;
+  width: 20px; height: 20px; margin-top: 4px; border-radius: 50%; background: var(--blanco); border: 2px solid var(--verde);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .2); }
+.rd input[type=range]::-moz-range-thumb { pointer-events: auto; cursor: pointer; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--blanco); border: 2px solid var(--verde); box-shadow: 0 1px 3px rgba(0, 0, 0, .2); }
+.rd input[type=range]:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--amarillo); outline-offset: 2px; }
+.rd input[type=range]:focus-visible::-moz-range-thumb { outline: 2px solid var(--amarillo); outline-offset: 2px; }
+
 .prefs { display: grid; gap: var(--s2); }
 .pref { display: grid; gap: 0; }
 .pref-h { display: flex; justify-content: space-between; font-size: 14px; font-weight: 500; }
