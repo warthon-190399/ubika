@@ -4,7 +4,7 @@
  *   GET /api/salud                      conexión y fecha de los datos
  *   GET /api/propiedades?operacion=…    inmuebles activos con su entorno (v_app_propiedades)
  *   GET /api/distritos?operacion=…      medianas por distrito (v_resumen_distrito)
- *   GET /api/capas/:capa                grilla de la ciudad: seguridad | transporte | servicios
+ *   GET /api/capas/:capa                grilla de la ciudad: seguridad | transporte | corredor | servicios | …
  *   GET /api/cerca?lat=…&lon=…          puntos de interés a 500 m de un punto + la estación más cercana
  *   GET /api/calidad-vida/celdas        score de calidad de vida guardado por celda (calidad_vida_celda)
  *   GET /api/crimen-distritos           denuncias de 12 meses por 10 mil habitantes (v_crimen_distrito)
@@ -36,7 +36,7 @@ const app = express();
 app.use(cors());
 
 const OPERACIONES = new Set(["alquiler", "venta"]);
-const CAPAS = new Set(["seguridad", "transporte", "servicios", "verde", "barrio", "ruido"]);
+const CAPAS = new Set(["seguridad", "transporte", "corredor", "servicios", "verde", "barrio", "ruido"]);
 const operacionDe = req => (OPERACIONES.has(req.query.operacion) ? req.query.operacion : "alquiler");
 
 // Caché simple en memoria: los datos cambian una vez por corrida del pipeline
@@ -71,11 +71,16 @@ app.get("/api/salud", ruta(async () => {
 // El score de calidad de vida guardado (sql/13 + etapa calidad del pipeline). Si la tabla no existe
 // todavía, la app lo calcula como antes en el navegador.
 const hayTabla = nombre => pool.query("SELECT to_regclass($1) IS NOT NULL AS ok", [nombre]).then(r => r.rows[0].ok);
+// Paraderos de corredores en entorno (sql/14): si todavía no están, la app sigue sin ellos
+const hayColumna = (tabla, col) => pool.query(
+  "SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = $1 AND column_name = $2) AS ok",
+  [tabla, col]).then(r => r.rows[0].ok);
 
 app.get("/api/propiedades", ruta(req => {
   const op = operacionDe(req);
   return conCache(`props:${op}`, 5, async () => {
     const conCalidad = await hayTabla("calidad_vida_inmueble");
+    const conCorredor = await hayColumna("entorno", "dist_corredor_m");
     const { rows } = await pool.query(`
       SELECT v.prop_id, operacion, precio_pen, precio_usd, mantenimiento_pen, area_m2, precio_m2_pen,
              num_dorm, num_banios, num_estac, antiguedad_anios, direccion, distrito, distrito_nombre,
@@ -84,9 +89,12 @@ app.get("/api/propiedades", ruta(req => {
              dist_colegio_m, dist_salud_m, dist_comisaria_m, dist_transporte_m, dist_mall_m,
              min_transporte, min_colegio, min_salud, min_comisaria
              ${conCalidad ? ", q.calidad_vida, q.calidad_version" : ""}
+             ${conCorredor ? ", c.dist_corredor_m, c.n_corredores" : ""}
       FROM v_app_propiedades v
       ${conCalidad ? `LEFT JOIN (SELECT prop_id AS q_prop_id, score AS calidad_vida, version AS calidad_version
                        FROM calidad_vida_inmueble) q ON q.q_prop_id = v.prop_id` : ""}
+      ${conCorredor ? `LEFT JOIN (SELECT prop_id AS c_prop_id, dist_corredor_m, n_corredores FROM entorno) c
+                       ON c.c_prop_id = v.prop_id` : ""}
       WHERE operacion = $1
       ORDER BY primera_vez DESC
       LIMIT 5000`, [op]);
@@ -160,7 +168,7 @@ app.get("/api/cerca", ruta(async req => {
       WHERE latitud BETWEEN $1 - $4 AND $1 + $4 AND longitud BETWEEN $2 - $4 * 1.03 AND $2 + $4 * 1.03
     ), estacion AS (
       SELECT categoria, nombre, latitud, longitud, ${DIST_SQL} AS dist_m, true AS mas_cercana
-      FROM puntos_interes WHERE categoria IN ('metro', 'metropolitano', 'tren')
+      FROM puntos_interes WHERE categoria IN ('metro', 'metropolitano', 'tren', 'corredor')
       ORDER BY 5 LIMIT 1
     )
     SELECT * FROM cerca WHERE dist_m <= $3

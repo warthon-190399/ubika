@@ -68,14 +68,15 @@ export default function App() {
   // Verde, comercio y ruido salen de OpenStreetMap; si todavía no están cargados, la app sigue sin ellos.
   const { data: gSeg } = useApi("/api/capas/seguridad");
   const { data: gTra } = useApi("/api/capas/transporte");
+  const { data: gCor } = useApi("/api/capas/corredor");          // paraderos de corredores (si ya se cargaron)
   const { data: gSrv } = useApi("/api/capas/servicios");
   const { data: gVer } = useApi("/api/capas/verde");
   const { data: gBar } = useApi("/api/capas/barrio");
   const { data: gRui } = useApi("/api/capas/ruido");
   // Score de calidad de vida guardado en Neon por celda (si no está, ciudad.js lo calcula)
   const { data: gCal } = useApi("/api/calidad-vida/celdas");
-  const grillas = useMemo(() => ({ seguridad: gSeg, transporte: gTra, servicios: gSrv, verde: gVer, barrio: gBar, ruido: gRui, calidad: gCal }),
-    [gSeg, gTra, gSrv, gVer, gBar, gRui, gCal]);
+  const grillas = useMemo(() => ({ seguridad: gSeg, transporte: gTra, corredor: gCor, servicios: gSrv, verde: gVer, barrio: gBar, ruido: gRui, calidad: gCal }),
+    [gSeg, gTra, gCor, gSrv, gVer, gBar, gRui, gCal]);
 
   // Crimen por 10 mil habitantes, por distrito, y los límites distritales para pintarlo
   const { data: crimenRows } = useApi("/api/crimen-distritos");

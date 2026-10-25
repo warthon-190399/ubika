@@ -38,3 +38,28 @@ test("un inmueble usa su score guardado y la longevidad de su distrito", () => {
   assert.ok(sin.calidad >= 0 && sin.calidad <= 10);
   assert.equal(sin.val.longevidad, 78);
 });
+
+test("transporte: un paradero de corredor cuenta a 1,5 veces su distancia", async () => {
+  const { FACTOR_CORREDOR, transporteEfectivo, accesoTransporte } = await import("../src/lib/scoring.js");
+  assert.equal(FACTOR_CORREDOR, 1.5);
+  assert.equal(transporteEfectivo(900, 400), 600);          // cuenta el paradero (400 × 1,5)
+  assert.equal(transporteEfectivo(500, 400), 500);          // cuenta la estación
+  assert.equal(transporteEfectivo(700, null), 700);         // sin corredores, igual que antes
+  assert.equal(transporteEfectivo(null, 100), 150);
+  assert.deepEqual(accesoTransporte(900, 400), { metros: 400, tipo: "corredor" });   // se muestra la distancia real
+  assert.deepEqual(accesoTransporte(500, 400), { metros: 500, tipo: "estacion" });
+  assert.equal(accesoTransporte(null, null), null);
+});
+
+test("las celdas usan la distancia equivalente si hay grilla de corredores", () => {
+  const terr = territorio(SEG, LIMITES, DIST);
+  const tra = { celdas: [[-12.0, -77.0, 0, 900], [-12.0, -76.99, 0, 500]] };
+  const cor = { celdas: [[-12.0, -77.0, 0, 400], [-12.0, -76.99, 0, 400]] };
+  const ref = referencia({ seguridad: SEG, transporte: tra, corredor: cor }, terr);
+  assert.deepEqual(ref.valores.transporte, [600, 500]);
+  const sinCorr = referencia({ seguridad: SEG, transporte: tra }, terr);
+  assert.deepEqual(sinCorr.valores.transporte, [900, 500]);
+  const o = frenteCiudad(ref, { prop_id: "x", distrito: "a", latitud: -12.0, longitud: -77.0, dist_transporte_m: 900, dist_corredor_m: 400 });
+  assert.equal(o.val.transporte, 400);                       // la ficha muestra 400 m al paradero
+  assert.equal(o.acceso.tipo, "corredor");
+});

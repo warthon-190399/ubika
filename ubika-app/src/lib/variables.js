@@ -65,9 +65,12 @@ export const VARIABLES = {
   },
   transporte: {
     l: "Transporte", titulo: "Cercanía a transporte", paleta: SEQ, bajo: "lejos", alto: "cerca", invertido: true,
-    unidad: "Kilómetros a la estación de metro, tren o Metropolitano más cercana",
-    f: metros, corto: v => (v / 1000).toFixed(1), sufijo: " a la estación",
-    nota: { barrio: "Distancia en línea recta.", distrito: "Mediana de las celdas del distrito." },
+    unidad: "Distancia al transporte masivo: estación de Metro, tren o Metropolitano, o paradero de corredor × 1,5",
+    f: metros, corto: v => (v / 1000).toFixed(1), sufijo: " equivalentes",
+    nota: {
+      barrio: "Distancia en línea recta. Un paradero de Corredor Complementario cuenta como una estación a 1,5 veces su distancia (más lento y menos frecuente).",
+      distrito: "Mediana de las celdas del distrito.",
+    },
   },
   servicios: {
     l: "Servicios", titulo: "Servicios cerca", paleta: SEQ, bajo: "pocos", alto: "muchos",

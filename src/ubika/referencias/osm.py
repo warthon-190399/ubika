@@ -6,18 +6,23 @@ Carga desde OpenStreetMap (API Overpass) lo que hace falta para la calidad de vi
   gimnasios y bancos                                    → puntos_interes
 - Vías grandes (autopistas, vías expresas, principales, secundarias) y la pista del aeropuerto,
   muestreadas cada ~40 m                                → ruido_fuentes (para estimar el ruido)
+- Paraderos de los Corredores Complementarios (rutas de la red SIT de la ATU: Amarillo, Rojo,
+  Azul y Morado); los nodos de un mismo paradero (andén y punto de parada de cada sentido) se
+  juntan en uno                                         → puntos_interes, categoria 'corredor'
 
 Datos © colaboradores de OpenStreetMap, licencia ODbL. Cada grupo se recarga completo dentro de
 una transacción, así que se puede correr las veces que haga falta.
 
     python -m ubika.referencias.osm
     python -m ubika.referencias.osm --solo parques
+    python -m ubika.referencias.osm --solo corredores
 """
 from __future__ import annotations
 
 import argparse
 import logging
 import math
+import re
 import time
 
 import requests
@@ -45,6 +50,8 @@ COMERCIO = {
     ("amenity", "bank"): "banco",
 }
 VIAS = {"motorway": "autopista", "trunk": "autopista", "primary": "principal", "secondary": "secundaria"}
+ROLES_PARADA = ("stop", "platform")       # stop, stop_entry_only, platform_exit_only, …
+JUNTAR_PARADERO_M = 60                    # nodos a menos de esto son el mismo paradero
 
 
 # ── Consulta ─────────────────────────────────────────────────
@@ -62,6 +69,9 @@ def consultas() -> dict[str, str]:
         "comercio": f"[out:json][timeout:180];({comercio});out center;",
         "vias": (f'[out:json][timeout:180];(way["highway"~"^(motorway|trunk|primary|secondary)$"]({b});'
                  f'way["aeroway"="runway"]({b}););out geom;'),
+        # Rutas de los corredores (red SIT) y los nodos que son sus paradas
+        "corredores": (f'[out:json][timeout:180];relation["type"="route"]["network"="SIT"]({b})->.r;'
+                       '(node(r.r);.r;);out body;'),
     }
 
 
@@ -154,11 +164,51 @@ def vias(elementos: list[dict]) -> list[dict]:
     return filas
 
 
+def corredores(elementos: list[dict]) -> list[dict]:
+    """
+    Un punto por paradero físico de los corredores. De cada ruta SIT se toman los nodos con rol de
+    parada; los que están a menos de JUNTAR_PARADERO_M se juntan (andenes de ida y vuelta, punto de
+    parada y andén). El punto queda en el centro del grupo y guarda qué corredores y rutas pasan.
+    """
+    nodos = {e["id"]: e for e in elementos if e["type"] == "node" and "lat" in e}
+    paradas: dict[int, dict] = {}                       # nodo → {corredores, rutas}
+    for r in (e for e in elementos if e["type"] == "relation"):
+        tags = r.get("tags", {})
+        m = re.search(r"Corredor\s+(\w+)", tags.get("name", ""), re.I)
+        corredor = m.group(1).capitalize() if m else (tags.get("network") or "SIT")
+        ruta = tags.get("ref") or tags.get("name")
+        for mb in r.get("members", []):
+            if mb["type"] == "node" and mb.get("role", "").startswith(ROLES_PARADA) and mb["ref"] in nodos:
+                d = paradas.setdefault(mb["ref"], {"corredores": set(), "rutas": set()})
+                d["corredores"].add(corredor)
+                if ruta:
+                    d["rutas"].add(str(ruta))
+    grupos: list[dict] = []
+    for nid in sorted(paradas):
+        n = nodos[nid]
+        cerca = next((g for g in grupos
+                      if math.hypot((n["lat"] - g["lat"]) * M_LAT, (n["lon"] - g["lon"]) * M_LON) <= JUNTAR_PARADERO_M), None)
+        if cerca is None:
+            cerca = {"lat": n["lat"], "lon": n["lon"], "nodos": [], "nombres": [], "corredores": set(), "rutas": set()}
+            grupos.append(cerca)
+        cerca["nodos"].append(n)
+        if n.get("tags", {}).get("name"):
+            cerca["nombres"].append(n["tags"]["name"])
+        cerca["corredores"] |= paradas[nid]["corredores"]
+        cerca["rutas"] |= paradas[nid]["rutas"]
+        cerca["lat"], cerca["lon"] = centro(cerca["nodos"])
+    return [{"categoria": "corredor", "nombre": g["nombres"][0] if g["nombres"] else None, "distrito": None,
+             "latitud": g["lat"], "longitud": g["lon"], "fuente": "osm",
+             "atributos": {"corredores": sorted(g["corredores"]), "rutas": sorted(g["rutas"]),
+                           "osm_ids": [f'node/{n["id"]}' for n in g["nodos"]]}}
+            for g in grupos]
+
+
 # ── Carga ────────────────────────────────────────────────────
 
 def main(argv: list[str] | None = None) -> None:
     p = argparse.ArgumentParser(description="Carga parques, comercio y vías de OpenStreetMap a Neon.")
-    p.add_argument("--solo", choices=("parques", "comercio", "vias"))
+    p.add_argument("--solo", choices=("parques", "comercio", "vias", "corredores"))
     args = p.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(levelname)-7s %(message)s", datefmt="%H:%M:%S")
 
@@ -181,6 +231,15 @@ def main(argv: list[str] | None = None) -> None:
             filas = vias(descargar(q["vias"]))
             total += reemplazar("ruido_fuentes", "fuente = 'osm'", {}, filas)
             log.info("  %d puntos de vías", len(filas))
+        if args.solo in (None, "corredores"):
+            log.info("Descargando paraderos de corredores…")
+            filas = corredores(descargar(q["corredores"]))
+            total += reemplazar("puntos_interes", "categoria = 'corredor' AND fuente = 'osm'", {}, filas)
+            por = {}
+            for f in filas:
+                for co in f["atributos"]["corredores"]:
+                    por[co] = por.get(co, 0) + 1
+            log.info("  %d paraderos de corredores (%s)", len(filas), ", ".join(f"{k} {v}" for k, v in sorted(por.items())))
         c.escritas = total
     log.info("Resumen:\n%s", read_df("""
         SELECT categoria, COUNT(*) AS n FROM puntos_interes WHERE fuente = 'osm' GROUP BY 1

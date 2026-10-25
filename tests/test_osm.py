@@ -81,3 +81,29 @@ def test_capas_de_calidad_de_vida():
     # la grilla urbana no cambia por sumar comercio
     sin = capas.calcular(capas.grilla(caja), pois[pois.categoria.isin(capas.BASE_URBANA)], delitos)
     assert out["celda"].nunique() == sin["celda"].nunique()
+
+
+def test_corredores_junta_nodos_del_mismo_paradero():
+    # Dos rutas: Morado 404 y Azul 301. El paradero «A» tiene dos andenes a ~20 m (uno por sentido);
+    # «B» está a ~500 m y lo usan las dos rutas; el nodo 9 no es parada (rol vacío) y no cuenta.
+    nodos = [
+        {"type": "node", "id": 1, "lat": -12.1000, "lon": -77.0000, "tags": {"name": "Paradero A"}},
+        {"type": "node", "id": 2, "lat": -12.1002, "lon": -77.0000, "tags": {}},
+        {"type": "node", "id": 3, "lat": -12.1045, "lon": -77.0000, "tags": {"name": "Paradero B"}},
+        {"type": "node", "id": 9, "lat": -12.2000, "lon": -77.0000, "tags": {}},
+    ]
+    rutas = [
+        {"type": "relation", "id": 100, "tags": {"name": "Corredor Morado 404 → La Virgen", "ref": "404", "network": "SIT"},
+         "members": [{"type": "node", "ref": 1, "role": "platform"}, {"type": "node", "ref": 2, "role": "stop"},
+                     {"type": "node", "ref": 3, "role": "stop_entry_only"}, {"type": "node", "ref": 9, "role": ""}]},
+        {"type": "relation", "id": 200, "tags": {"name": "Corredor Azul 301", "ref": "301", "network": "SIT"},
+         "members": [{"type": "node", "ref": 3, "role": "platform"}]},
+    ]
+    filas = osm.corredores(nodos + rutas)
+    assert len(filas) == 2
+    a = next(f for f in filas if f["nombre"] == "Paradero A")
+    b = next(f for f in filas if f["nombre"] == "Paradero B")
+    assert a["categoria"] == "corredor" and a["fuente"] == "osm"
+    assert a["atributos"]["corredores"] == ["Morado"] and len(a["atributos"]["osm_ids"]) == 2
+    assert abs(a["latitud"] - (-12.1001)) < 1e-9                    # centro de sus dos andenes
+    assert b["atributos"]["corredores"] == ["Azul", "Morado"] and b["atributos"]["rutas"] == ["301", "404"]

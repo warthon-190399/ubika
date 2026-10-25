@@ -11,6 +11,10 @@ zonas vacías no aparecen como "muy seguras" solo porque nadie denuncia ahí). P
 - transporte: metros a la estación de metro, tren o Metropolitano más cercana. Índice alto = más cerca.
 - servicios:  colegios, salud, comisarías y malls a menos de `radio_m`. Índice alto = más servicios.
 
+Si ya se cargaron los paraderos de corredores (sql/14, osm --solo corredores) se suma:
+
+- corredor: metros al paradero de Corredor Complementario más cercano. Índice alto = más cerca.
+
 Si ya se cargó OpenStreetMap (ubika.referencias.osm) se suman tres capas de calidad de vida:
 
 - verde:  m² de parque con centro a menos de `radio_m`. Índice alto = más parque.
@@ -112,6 +116,12 @@ def calcular(celdas: pd.DataFrame, pois: pd.DataFrame, delitos: pd.DataFrame, ra
     dist, _ = BallTree(_rad(est), metric="haversine").query(x, k=1)
     v = dist[:, 0] * RADIO_TIERRA_M
     salida.append(celdas.assign(capa="transporte", valor=v, indice=percentil(v, mayor_es_mejor=False)))
+    # corredor: metros al paradero de Corredor Complementario más cercano (si ya se cargaron, sql/14)
+    corr = pois[pois["categoria"] == "corredor"]
+    if len(corr):
+        dist, _ = BallTree(_rad(corr), metric="haversine").query(x, k=1)
+        v = dist[:, 0] * RADIO_TIERRA_M
+        salida.append(celdas.assign(capa="corredor", valor=v, indice=percentil(v, mayor_es_mejor=False)))
     # servicios
     srv = pois[pois["categoria"].isin(["colegio", "salud", "comisaria", "mall"])]
     v = BallTree(_rad(srv), metric="haversine").query_radius(x, r=radio_m / RADIO_TIERRA_M, count_only=True).astype(float)

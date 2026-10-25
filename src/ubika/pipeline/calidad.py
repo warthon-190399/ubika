@@ -7,7 +7,8 @@ Siete componentes, cada uno convertido en su POSICIÓN frente a todas las celdas
 
   seguridad   ½ denuncias a 500 m por 10 mil habitantes + ½ homicidios del distrito por 100 mil
   longevidad  edad promedio al morir por causas naturales en el distrito (SINADEF)
-  transporte  metros a la estación de metro, tren o Metropolitano más cercana   (menos = mejor)
+  transporte  metros al transporte masivo más cercano: estación de Metro, tren o Metropolitano, o
+              paradero de Corredor Complementario × factor_corredor               (menos = mejor)
   servicios   colegios + salud + comisarías + malls a 500 m
   verde       m² de parque a 500 m por habitante
   barrio      comercio de todos los días a 500 m
@@ -40,7 +41,7 @@ COMPONENTES = ("seguridad", "longevidad", "transporte", "servicios", "verde", "b
 # Celdas de la grilla dentro de un círculo de 500 m: área del círculo / área de un hexágono de 350 m
 CELDAS_500M = (math.pi * 0.5 ** 2) / ((math.sqrt(3) / 2) * 0.35 ** 2)
 MAX_M_A_CELDA = 400            # un inmueble a más de esto de toda celda urbana no toma verde/barrio/ruido
-CAPAS = ("seguridad", "transporte", "servicios", "verde", "barrio", "ruido")
+CAPAS = ("seguridad", "transporte", "corredor", "servicios", "verde", "barrio", "ruido")
 
 
 def config() -> dict:
@@ -48,7 +49,8 @@ def config() -> dict:
     pesos = {k: float(c["pesos"][k]) for k in COMPONENTES}
     if abs(sum(pesos.values()) - 1) > 1e-6:
         raise ValueError(f"calidad_vida.pesos debe sumar 1 (suma {sum(pesos.values()):.3f})")
-    return {"version": int(c["version"]), "pesos": pesos, "peso_homicidios": float(c["peso_homicidios"])}
+    return {"version": int(c["version"]), "pesos": pesos, "peso_homicidios": float(c["peso_homicidios"]),
+            "factor_corredor": float(c.get("factor_corredor", 1.5))}
 
 
 # ── Funciones puras (probadas en tests/test_calidad.py) ──────
@@ -77,6 +79,15 @@ def combinar_seguridad(pos_denuncias: np.ndarray, pos_homicidios: np.ndarray, pe
     out = (1 - peso_homicidios) * d + peso_homicidios * h
     out = np.where(np.isnan(h), d, out)
     return np.where(np.isnan(d), h, out)
+
+
+def transporte_efectivo(masivo, corredor, factor: float) -> np.ndarray:
+    """
+    Distancia equivalente al transporte masivo: la menor entre la estación de Metro, tren o Metropolitano
+    y el paradero de corredor multiplicado por `factor`. Si falta una, cuenta la otra (como en scoring.js).
+    """
+    m, c = np.asarray(masivo, float), np.asarray(corredor, float) * factor
+    return np.fmin(m, c)                  # fmin ignora NaN: si una falta, devuelve la otra
 
 
 def score(pos: pd.DataFrame, pesos: dict[str, float]) -> tuple[np.ndarray, np.ndarray]:
@@ -133,7 +144,8 @@ def celdas(grilla: pd.DataFrame, distrito: np.ndarray, poblacion: dict, homicidi
         "val_denuncias_10k": 1e4 * col("seguridad") / gente_500m,
         "val_homicidios_100k": g["distrito"].map(homicidios).astype(float),
         "val_edad_al_morir": g["distrito"].map(longevidad).astype(float),
-        "val_transporte_m": col("transporte"),
+        "val_transporte_m": transporte_efectivo(col("transporte"), col("corredor"), conf["factor_corredor"]),
+        "val_corredor_m": col("corredor"),
         "val_servicios": col("servicios"),
         "val_verde_m2_hab": col("verde") / gente_500m,
         "val_barrio": col("barrio"),
@@ -177,7 +189,8 @@ def inmuebles(props: pd.DataFrame, cel: pd.DataFrame, poblacion: dict, homicidio
         if math.sqrt(d2[j]) * 111_320 <= MAX_M_A_CELDA:
             idx[i] = j
     de_celda = lambda c: np.where(idx >= 0, cel[c].to_numpy(float)[np.maximum(idx, 0)], np.nan)
-    num = lambda c: pd.to_numeric(props[c], errors="coerce").astype(float)
+    num = lambda c: (pd.to_numeric(props[c], errors="coerce").astype(float) if c in props
+                     else pd.Series(np.nan, index=props.index))
     servicios = sum(num(c).fillna(0) for c in ("n_colegios", "n_salud", "n_comisarias", "n_malls"))
     v = pd.DataFrame({
         "prop_id": props["prop_id"], "distrito": props["distrito"],
@@ -185,7 +198,8 @@ def inmuebles(props: pd.DataFrame, cel: pd.DataFrame, poblacion: dict, homicidio
         "val_denuncias_10k": (1e4 * num("n_delitos_12m") / (pop_celda * CELDAS_500M)).to_numpy(),
         "val_homicidios_100k": props["distrito"].map(homicidios).astype(float).to_numpy(),
         "val_edad_al_morir": props["distrito"].map(longevidad).astype(float).to_numpy(),
-        "val_transporte_m": num("dist_transporte_m").to_numpy(),
+        "val_transporte_m": transporte_efectivo(num("dist_transporte_m"), num("dist_corredor_m"), conf["factor_corredor"]),
+        "val_corredor_m": num("dist_corredor_m").to_numpy(),
         "val_servicios": servicios.to_numpy(),
         "val_verde_m2_hab": de_celda("val_verde_m2_hab"),
         "val_barrio": de_celda("val_barrio"),
@@ -238,8 +252,11 @@ def correr(c) -> dict:
     cel = celdas(grilla, dist, poblacion, homicidios, longevidad, conf)
     log.info("  %d celdas · %d en un distrito · score mediano %.1f", len(cel), cel["distrito"].notna().sum(), cel["score"].median())
 
-    props = read_df("""
+    con_corredor = "dist_corredor_m" in set(read_df(
+        "SELECT column_name FROM information_schema.columns WHERE table_name = 'entorno'")["column_name"])
+    props = read_df(f"""
         SELECT p.prop_id::text AS prop_id, p.distrito, p.latitud, p.longitud, e.n_delitos_12m, e.dist_transporte_m,
+               {"e.dist_corredor_m" if con_corredor else "NULL::int AS dist_corredor_m"},
                e.n_colegios, e.n_salud, e.n_comisarias, e.n_malls
         FROM propiedades p JOIN entorno e USING (prop_id)
         WHERE p.latitud IS NOT NULL""")

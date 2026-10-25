@@ -1,6 +1,6 @@
 # Metodología del score de calidad de vida
 
-**Versión 1** · octubre 2026 · ubika
+**Versión 2** · octubre 2026 · ubika
 
 El score de calidad de vida resume en un número de **0 a 10** qué tan bien está una zona de Lima y Callao para vivir, frente al resto de la ciudad. Se calcula para cada barrio (celda de ~350 m), cada inmueble y cada distrito, y queda **guardado en Neon** para que la app, los modelos y cualquier análisis usen el mismo valor.
 
@@ -31,7 +31,7 @@ score = 10 × Σ (peso_k × posición_k) / Σ peso_k        (solo los componente
 |---|---|---|---|
 | Seguridad | **25 %** | ½ denuncias de robo y violencia a 500 m por habitante + ½ homicidios del distrito por habitante | hay menos |
 | Longevidad | **10 %** | edad promedio al morir por causas naturales en el distrito | es mayor |
-| Transporte | **15 %** | distancia a la estación de metro, tren o Metropolitano más cercana | es menor |
+| Transporte | **15 %** | distancia al transporte masivo más cercano: estación de Metro o Metropolitano, o paradero de Corredor Complementario × 1,5 | es menor |
 | Servicios | **15 %** | colegios + establecimientos de salud + comisarías + malls a 500 m | hay más |
 | Áreas verdes | **15 %** | m² de parque a 500 m por habitante | hay más |
 | Comercio de barrio | **10 %** | mercados, supermercados, farmacias, restaurantes, gimnasios y bancos a 500 m | hay más |
@@ -54,7 +54,9 @@ score = 10 × Σ (peso_k × posición_k) / Σ peso_k        (solo los componente
 | Establecimientos de salud | IPRESS, MINSA (249) | | punto → 500 m | ✅ servicios | Solo los principales; subestima la oferta |
 | Comisarías | MININTER (134) | | punto → 500 m | ✅ servicios | |
 | Malls | CSV propio (1,509) | | punto → 500 m | ✅ servicios | |
-| Estaciones de metro, tren y Metropolitano | CSV propio (75) | | punto | ✅ transporte | No incluye buses ni corredores |
+| Estaciones de metro, tren y Metropolitano | CSV propio (75) | | punto | ✅ transporte | Faltan 4 estaciones de la Línea 1 y la Línea 2 (pendiente) |
+| Paraderos de los Corredores Complementarios (Amarillo, Rojo, Azul, Morado) | OpenStreetMap, rutas de la red SIT de la ATU (370 paraderos) | 2026 | punto | ✅ transporte | Desde la versión 2; cuentan a 1,5 veces su distancia |
+| Paraderos de bus en general | OpenStreetMap (2,211) | 2026 | punto | ❌ | Lima tiene decenas de miles de paraderos informales y OSM mapeó pocos y de forma desigual: premiaría a los barrios mejor mapeados, no a los mejor servidos |
 | Ruido de tráfico | modelo propio con vías de OSM y el aeropuerto (`ruido_fuentes`) | 2026 | celda | ✅ tranquilidad | Estimado, no medido |
 | Población por distrito | INEI, Censos 2017 (`distritos.poblacion`) | 2017 | distrito | 🔧 | Para las tasas por habitante |
 | Muertes de tránsito | SINADEF | 2017–2024 | distrito | ❌ | Pocos casos por distrito; podría entrar como «seguridad vial» en una versión futura |
@@ -90,6 +92,15 @@ posición = (celdas peores + celdas iguales / 2) / celdas con dato
 
 «Peores» depende del sentido: para denuncias, homicidios, distancia a transporte y ruido, peor = mayor; para el resto, peor = menor.
 
+### 3.4 bis Transporte (desde la versión 2)
+Un paradero de Corredor Complementario es más lento y menos frecuente que una estación de Metro o Metropolitano, así que cuenta como una estación a `factor_corredor` (1,5) veces su distancia:
+
+```
+distancia_transporte = min(metros a la estación más cercana, 1,5 × metros al paradero de corredor más cercano)
+```
+
+Un paradero a 400 m equivale a una estación a 600 m. La ficha de la app muestra la distancia **real** al acceso que cuenta (por ejemplo, «3 min a pie · paradero de corredor») y la posición se calcula con la equivalente. Los paraderos vienen de OpenStreetMap (rutas de la red SIT: 101 Amarillo; 201, 204 y 206 Rojo; 301–306 Azul; 404, 405, 409, 412 y SE-02 Morado); los nodos de un mismo paradero (andenes de cada sentido) se juntan en un punto si están a menos de 60 m.
+
 ### 3.5 Seguridad
 `posición_seguridad = 0,5 × posición_denuncias + 0,5 × posición_homicidios` (`peso_homicidios` en `config.yaml`). Si falta una de las dos, cuenta solo la otra.
 
@@ -121,7 +132,8 @@ Las tres tablas tienen, para cada componente, el **valor real** (`val_*`) y la *
 | `val_homicidios_100k`, `pos_homicidios` | homicidios del distrito por 100 mil habitantes |
 | `pos_seguridad` | combinación de las dos anteriores |
 | `val_edad_al_morir`, `pos_longevidad` | edad promedio al morir por causas naturales en el distrito |
-| `val_transporte_m`, `pos_transporte` | metros a la estación más cercana |
+| `val_transporte_m`, `pos_transporte` | metros equivalentes al transporte masivo (estación, o paradero de corredor × 1,5) |
+| `val_corredor_m` | metros reales al paradero de corredor más cercano (desde la versión 2) |
 | `val_servicios`, `pos_servicios` | colegios + salud + comisarías + malls a 500 m |
 | `val_verde_m2_hab`, `pos_verde` | m² de parque a 500 m por habitante |
 | `val_barrio`, `pos_barrio` | comercio de todos los días a 500 m |
@@ -150,7 +162,7 @@ Requiere que antes estén cargadas las fuentes:
 
 ```bash
 python -m ubika.referencias.sidpol --desde 2026-09-01   # denuncias (mensual)
-python -m ubika.referencias.osm                         # parques, comercio, vías (cada 3–6 meses)
+python -m ubika.referencias.osm                         # parques, comercio, vías y paraderos de corredores (cada 3–6 meses)
 python -m ubika.referencias.sinadef                     # homicidios y edad al morir (cuando MINSA publique)
 python -m ubika.pipeline                                # limpieza → geocoding → entorno → capas → calidad
 ```
@@ -165,33 +177,33 @@ Cada corrida reemplaza las tres tablas completas y queda registrada en `corridas
 
 ---
 
-## 6. Resultados de la versión 1 (24 de octubre de 2026)
+## 6. Resultados de la versión 2 (25 de octubre de 2026)
 
-10,997 celdas (score mediano 5,0; mínimo 1,0; máximo 7,9), 1,122 inmuebles y 50 distritos.
+10,997 celdas (score mediano 5,0; mínimo 1,0; máximo 7,8), 1,122 inmuebles y 50 distritos.
 
 | Puesto | Distrito | Score | Rango p25–p75 | Celdas |
 |---|---|---|---|---|
-| 1 | San Borja | 7.3 | 7.0–7.5 | 95 |
-| 2 | Miraflores | 7.2 | 7.0–7.3 | 87 |
-| 3 | San Isidro | 7.1 | 6.9–7.3 | 93 |
-| 4 | Jesús María | 7.0 | 6.7–7.2 | 40 |
-| 5 | Pueblo Libre | 7.0 | 6.9–7.2 | 42 |
-| 6 | Magdalena del Mar | 6.9 | 6.7–7.0 | 30 |
-| 7 | Lince | 6.8 | 6.6–7.3 | 25 |
-| 8 | Surquillo | 6.8 | 6.5–7.1 | 42 |
+| 1 | Magdalena del Mar | 7.4 | 7.1–7.5 | 30 |
+| 2 | Pueblo Libre | 7.3 | 7.2–7.4 | 42 |
+| 3 | San Borja | 7.2 | 6.9–7.4 | 95 |
+| 4 | San Isidro | 7.2 | 6.9–7.3 | 93 |
+| 5 | Miraflores | 7.1 | 6.9–7.3 | 87 |
+| 6 | Jesús María | 7.1 | 7.0–7.3 | 40 |
+| 7 | San Miguel | 7.0 | 6.7–7.2 | 92 |
+| 8 | Lince | 6.8 | 6.6–7.4 | 25 |
 | 9 | Santiago de Surco | 6.8 | 6.3–7.1 | 332 |
-| 10 | Breña | 6.6 | 6.5–6.7 | 30 |
+| 10 | Surquillo | 6.7 | 6.4–7.0 | 42 |
 | … | | | | |
-| 29 | San Juan de Lurigancho | 5.1 | 4.4–5.8 | 825 |
-| 35 | Cercado de Lima | 4.8 | 4.3–5.1 | 204 |
+| 30 | San Juan de Lurigancho | 5.1 | 4.4–5.8 | 825 |
+| 35 | Cercado de Lima | 4.7 | 4.3–5.1 | 204 |
 | … | | | | |
-| 46 | Cieneguilla | 3.5 | 3.1–3.8 | 306 |
-| 47 | Pachacámac | 3.5 | 3.1–3.9 | 388 |
+| 46 | Pachacámac | 3.6 | 3.1–4.1 | 388 |
+| 47 | Santa Rosa | 3.5 | 3.1–3.9 | 137 |
 | 48 | Pucusana | 3.4 | 3.0–4.0 | 71 |
-| 49 | Ancón | 3.3 | 3.0–3.9 | 218 |
-| 50 | Ventanilla | 3.2 | 3.0–3.5 | 469 |
+| 49 | Ancón | 3.3 | 3.0–3.8 | 218 |
+| 50 | Ventanilla | 3.2 | 2.9–3.4 | 469 |
 
-La tabla completa está en `calidad_vida_distrito`.
+**Cambio frente a la versión 1.** Suben los distritos que tienen corredores: Magdalena del Mar (6.º → 1.º), San Miguel (11.º → 7.º), La Molina (22.º → 13.º), Pueblo Libre (5.º → 2.º). Algunos sin corredores bajan algo (Comas 19.º → 22.º, Chorrillos 23.º → 24.º) sin haber empeorado: como el score es relativo, el resto de la ciudad mejoró. 521 de los 1,122 inmuebles tienen un paradero de corredor a menos de 500 m. La tabla completa está en `calidad_vida_distrito`.
 
 ---
 
@@ -200,7 +212,7 @@ La tabla completa está en `calidad_vida_distrito`.
 1. Edita `config.yaml` → `calidad_vida.pesos` (deben sumar 1) o `peso_homicidios`.
 2. Sube `calidad_vida.version`.
 3. Actualiza los pesos de `CAPAS` en `ubika-app/src/lib/ciudad.js` (y `PESO_HOMICIDIOS` en `scoring.js` si cambió): la app los usa para las barras de cada componente. `tests/test_calidad.py` falla si no coinciden.
-4. Corre `python -m ubika.pipeline --etapas calidad` y `pytest`.
+4. Corre `python -m ubika.pipeline --etapas calidad` y `pytest` (si cambias `factor_corredor`, también `FACTOR_CORREDOR` en `scoring.js`).
 5. Anota el cambio en el historial de abajo, con el motivo.
 
 Para agregar un componente nuevo: su valor por celda en `celdas()` y por inmueble en `inmuebles()` (`calidad.py`), su sentido en `VALORES`, su peso en `config.yaml`, columnas `val_*`/`pos_*` en `sql/13_calidad_vida.sql` y la entrada en `CAPAS` de la app.
@@ -215,7 +227,7 @@ Para agregar un componente nuevo: su valor por celda en `celdas()` y por inmuebl
 - **La longevidad también refleja la edad de la población**: donde vive más gente mayor, la edad al morir sale más alta aunque la salud sea igual. Una versión futura podría ajustarla por estructura de edad (censo).
 - **Denuncias** dependen de cuánto denuncia la gente; los homicidios lo compensan solo en parte.
 - **Servicios** cuenta cantidades, no calidad, y la base de salud (IPRESS) solo tiene los establecimientos principales.
-- **Transporte** solo considera metro, tren y Metropolitano, no buses ni corredores complementarios.
+- **Transporte** considera Metro, Metropolitano y los Corredores Complementarios, pero no buses comunes ni frecuencias. El factor 1,5 del corredor es una decisión de diseño, no una medición. Los paraderos dependen de qué tan completo está OpenStreetMap; faltan 4 estaciones de la Línea 1 y la Línea 2.
 - **Ruido** es un modelo (cercanía a vías grandes y al aeropuerto), no una medición.
 - **335 celdas** fuera de todo distrito se calculan con 4 componentes; su score no es del todo comparable.
 
@@ -225,4 +237,5 @@ Para agregar un componente nuevo: su valor por celda en `celdas()` y por inmuebl
 
 | Versión | Fecha | Cambio |
 |---|---|---|
+| 2 | 2026-10-25 | Transporte suma los paraderos de los Corredores Complementarios (OSM, red SIT) con penalidad × 1,5 (`factor_corredor`). Nuevas columnas `val_corredor_m`, `entorno.dist_corredor_m`, `entorno.n_corredores` y capa `corredor` en `capas_grilla` (`sql/14_corredores.sql`). |
 | 1 | 2026-10-24 | Primera versión guardada en Neon. 7 componentes; seguridad = ½ denuncias + ½ homicidios (SINADEF); se agrega longevidad (10 %); comercio y tranquilidad bajan de 15 % a 10 %. Antes, el score se calculaba solo en la app con 6 componentes (seguridad 25 %, el resto 15 %) y seguridad solo con denuncias. |

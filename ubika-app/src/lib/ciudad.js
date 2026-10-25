@@ -15,7 +15,7 @@
  * la app usa el guardado y solo lo calcula aquí si no está. Los pesos de CAPAS deben ser los de
  * config.yaml (calidad_vida.pesos): tests/test_calidad.py lo comprueba.
  */
-import { fmt, indiceCrimen, seguridadIx } from "./scoring.js";
+import { accesoTransporte, fmt, indiceCrimen, seguridadIx, transporteEfectivo } from "./scoring.js";
 
 /** Componentes del entorno de un inmueble (ficha, comparador, calidad de vida). */
 export const CAPAS = {
@@ -178,7 +178,10 @@ export function referencia(grillas, terr) {
   const seg = deGrilla("seguridad"), verde = deGrilla("verde");
   ref.valores = {
     seguridad: terr ? seg.map((v, i) => tasa10k(v, pop(i))) : null,
-    transporte: deGrilla("transporte"),
+    transporte: (() => {                       // distancia equivalente: estación o paradero de corredor × factor
+      const est = deGrilla("transporte"), corr = deGrilla("corredor");
+      return est && corr ? est.map((v, i) => transporteEfectivo(v, corr[i])) : est;
+    })(),
     servicios: deGrilla("servicios"),
     verde: verde && terr ? verde.map((v, i) => porHab(v, pop(i))) : null,
     barrio: deGrilla("barrio"),
@@ -220,7 +223,7 @@ export function frenteCiudad(ref, p) {
   const popP = ref.terr?.popCelda.get(p.distrito);
   const propios = {
     seguridad: tasa10k(p.n_delitos_12m, popP),
-    transporte: p.dist_transporte_m,
+    transporte: transporteEfectivo(p.dist_transporte_m, p.dist_corredor_m),
     servicios: (p.n_colegios ?? 0) + (p.n_salud ?? 0) + (p.n_comisarias ?? 0) + (p.n_malls ?? 0),
     longevidad: ref.terr?.longevidad?.get(p.distrito) ?? null,   // la de su distrito, no la de la celda
   };
@@ -229,6 +232,9 @@ export function frenteCiudad(ref, p) {
     o.val[k] = v;
     o[k] = ref.orden[k] ? rango(ref.orden[k], v, CAPAS[k].menorEsMejor) : null;
   }
+  // Se ordena por la distancia equivalente, pero se muestra la real al acceso que cuenta
+  o.acceso = accesoTransporte(p.dist_transporte_m, p.dist_corredor_m);
+  if (o.acceso) o.val.transporte = o.acceso.metros;
   o.tasa = propios.seguridad;
   o.val.homicidios = ref.terr?.hom?.get(p.distrito) ?? null;
   o.denuncias = o.seguridad;

@@ -7,7 +7,7 @@ export const CATEGORIAS = {
   colegio:    { l: "Colegios",   uno: "Colegio",           color: "#3E6FB0", emoji: "🏫", de: ["colegio"] },
   salud:      { l: "Salud",      uno: "Centro de salud",   color: "#C8384F", emoji: "🏥", de: ["salud"] },
   comisaria:  { l: "Comisarías", uno: "Comisaría",         color: "#08332F", emoji: "🚓", de: ["comisaria"] },
-  transporte: { l: "Transporte", uno: "Estación",          color: "#7A4FA3", emoji: "🚇", de: ["metro", "metropolitano", "tren"] },
+  transporte: { l: "Transporte", uno: "Estación o paradero de corredor", color: "#7A4FA3", emoji: "🚇", de: ["metro", "metropolitano", "tren", "corredor"] },
   comercio:   { l: "Comercio",   uno: "Comercio grande",   color: "#D8711C", emoji: "🛍️", de: ["mall"] },
   parque:     { l: "Parques",    uno: "Parque",            color: "#3E8E4A", emoji: "🌳", de: ["parque"] },
   // Comercio de todos los días (OpenStreetMap). Los más numerosos arrancan ocultos para no tapar el mapa.

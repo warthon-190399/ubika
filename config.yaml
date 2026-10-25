@@ -80,13 +80,16 @@ entorno:
 calidad_vida:
   # Score de calidad de vida 0–10 (python -m ubika.pipeline --etapas calidad). Metodología completa:
   # docs/metodologia_calidad_vida.md. Si cambias pesos o fórmula, sube la versión: queda en cada fila.
-  version: 1
+  version: 2
   pesos:                         # suman 1; un componente sin dato reparte su peso entre los demás
     seguridad: 0.25              # denuncias a 500 m + homicidios del distrito (ver peso_homicidios)
     longevidad: 0.10             # edad promedio al morir por causas naturales en el distrito
-    transporte: 0.15             # metros a la estación de metro, tren o Metropolitano más cercana
+    transporte: 0.15             # metros al transporte masivo más cercano (ver factor_corredor)
     servicios: 0.15              # colegios, salud, comisarías y malls a 500 m
     verde: 0.15                  # m² de parque a 500 m por habitante
     barrio: 0.10                 # mercados, súper, farmacias, restaurantes, gimnasios y bancos a 500 m
     ruido: 0.10                  # dB de tráfico estimados (menos = mejor)
   peso_homicidios: 0.5           # dentro de seguridad; el resto son denuncias
+  # Transporte: un paradero de Corredor Complementario cuenta como una estación de Metro o Metropolitano
+  # a factor_corredor veces su distancia (más lento y menos frecuente). distancia = min(masivo, factor × corredor)
+  factor_corredor: 1.5

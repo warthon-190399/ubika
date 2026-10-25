@@ -22,6 +22,7 @@ sql/                   esquema de Neon. Se corre a mano en el SQL Editor de Neon
   11_correccion_ubicacion.sql  pin original del portal y motivo de las correcciones de ubicación
   12_edad_defuncion.sql  edad al morir por distrito (SINADEF) para la capa de longevidad
   13_calidad_vida.sql    score de calidad de vida guardado por celda, inmueble y distrito
+  14_corredores.sql      paraderos de los Corredores Complementarios (transporte)
   query.sql              consultas de verificación (solo lectura)
 src/ubika/             paquete Python
   config.py              lee config.yaml y .env
@@ -29,7 +30,7 @@ src/ubika/             paquete Python
   texto.py               normalización de texto
   referencias/sidpol.py  descarga de denuncias policiales (MININTER)
   referencias/puntos.py  carga colegios, salud, malls, transporte e INPE (CSV) y comisarías (MININTER)
-  referencias/osm.py     parques, comercio de barrio y vías ruidosas (OpenStreetMap)
+  referencias/osm.py     parques, comercio de barrio, vías ruidosas y paraderos de corredores (OpenStreetMap)
   referencias/sinadef.py defunciones por distrito de domicilio (MINSA)
   scraping/navent.py     parsers de adondevivir/urbania (misma plataforma)
   scraping/__main__.py   scraper: listado + detalle → raw_listings / raw_detalles
@@ -57,7 +58,7 @@ playwright install chromium      # para los scrapers (Fase 2)
 cp .env.example .env             # y completar los valores
 ```
 
-En Neon, SQL Editor, correr en orden: `00_drop_legacy.sql` (solo la primera vez), `01_schema.sql`, `02_seed_distritos.sql`, `03_views.sql`, `04_delitos.sql`, `05_scraping.sql`, `06_vistas_entorno.sql`, `07_capas.sql`, `08_poblacion.sql`, `09_calidad_vida.sql`, `10_defunciones.sql`, `11_correccion_ubicacion.sql`, `12_edad_defuncion.sql`, `13_calidad_vida.sql`. Después:
+En Neon, SQL Editor, correr en orden: `00_drop_legacy.sql` (solo la primera vez), `01_schema.sql`, `02_seed_distritos.sql`, `03_views.sql`, `04_delitos.sql`, `05_scraping.sql`, `06_vistas_entorno.sql`, `07_capas.sql`, `08_poblacion.sql`, `09_calidad_vida.sql`, `10_defunciones.sql`, `11_correccion_ubicacion.sql`, `12_edad_defuncion.sql`, `13_calidad_vida.sql`, `14_corredores.sql`. Después:
 
 ```bash
 python scripts/check_db.py

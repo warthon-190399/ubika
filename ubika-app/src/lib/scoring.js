@@ -53,6 +53,24 @@ function percentiles(valores) {
  * Si falta uno, cuenta solo el otro.
  */
 export const PESO_HOMICIDIOS = 0.5;
+
+/**
+ * Transporte: un paradero de Corredor Complementario cuenta como una estación de Metro o Metropolitano
+ * a FACTOR_CORREDOR veces su distancia (más lento y menos frecuente). Igual que calidad_vida.factor_corredor
+ * en config.yaml (tests/test_calidad.py lo comprueba). Si falta una distancia, cuenta la otra.
+ */
+export const FACTOR_CORREDOR = 1.5;
+export function transporteEfectivo(masivo, corredor) {
+  const c = corredor == null ? null : FACTOR_CORREDOR * corredor;
+  if (masivo == null) return c;
+  return c == null ? masivo : Math.min(masivo, c);
+}
+/** El acceso real más cercano según esa regla: { metros, tipo: "estacion" | "corredor" }. */
+export function accesoTransporte(masivo, corredor) {
+  if (masivo == null && corredor == null) return null;
+  const porCorredor = masivo == null || (corredor != null && FACTOR_CORREDOR * corredor < masivo);
+  return porCorredor ? { metros: corredor, tipo: "corredor" } : { metros: masivo, tipo: "estacion" };
+}
 export function seguridadIx(denuncias, homicidios) {
   if (denuncias == null) return homicidios ?? null;
   if (homicidios == null) return denuncias;
@@ -80,7 +98,7 @@ export function calcularIndices(props, crimenDist) {
   const delitos = col(p => p.n_delitos_12m);
   const homicidios = col(p => crimenDist?.get(p.distrito)?.tasa_homicidios_100k ?? null);
   const servicios = col(p => (p.n_colegios ?? 0) + (p.n_salud ?? 0) + (p.n_comisarias ?? 0) + (p.n_malls ?? 0));
-  const transporte = col(p => p.dist_transporte_m);
+  const transporte = col(p => transporteEfectivo(p.dist_transporte_m, p.dist_corredor_m));
   const inv = v => (v == null ? null : 1 - v);
 
   const m = new Map();

@@ -9,7 +9,7 @@ import pytest
 
 from ubika.pipeline import calidad as cv
 
-CONF = {"version": 1, "peso_homicidios": 0.5,
+CONF = {"version": 1, "peso_homicidios": 0.5, "factor_corredor": 1.5,
         "pesos": {"seguridad": 0.25, "longevidad": 0.10, "transporte": 0.15, "servicios": 0.15,
                   "verde": 0.15, "barrio": 0.10, "ruido": 0.10}}
 
@@ -26,6 +26,7 @@ def test_config_real_suma_uno_y_coincide_con_la_app():
         assert math.isclose(float(m.group(1)), w), f"{k}: config.yaml {w} ≠ ciudad.js {m.group(1)}"
     js_scoring = (Path(__file__).parents[1] / "ubika-app" / "src" / "lib" / "scoring.js").read_text(encoding="utf-8")
     assert f"PESO_HOMICIDIOS = {conf['peso_homicidios']}" in js_scoring
+    assert f"FACTOR_CORREDOR = {conf['factor_corredor']}" in js_scoring
 
 
 def test_posiciones_como_en_la_app():
@@ -120,3 +121,28 @@ def test_resumen_distritos():
     dis = cv.resumen_distritos(cv.celdas(grilla, dist, POB, HOM, LON, CONF), 1).set_index("distrito")
     assert dis.loc["a", "n_celdas"] == 4 and dis.loc["a", "puesto"] == 1 and dis.loc["b", "puesto"] == 2
     assert dis.loc["a", "score_p25"] <= dis.loc["a", "score"] <= dis.loc["a", "score_p75"]
+
+
+def test_transporte_efectivo_penaliza_al_corredor():
+    f = 1.5
+    # estación a 900 m o paradero a 400 m (equivale a 600): cuenta el paradero
+    assert cv.transporte_efectivo(np.array([900.0]), np.array([400.0]), f).tolist() == [600]
+    # estación a 500 m o paradero a 400 m (equivale a 600): cuenta la estación
+    assert cv.transporte_efectivo(np.array([500.0]), np.array([400.0]), f).tolist() == [500]
+    # sin corredores cargados, todo igual que antes; sin estación, solo el corredor
+    assert cv.transporte_efectivo(np.array([700.0]), np.array([np.nan]), f).tolist() == [700]
+    assert cv.transporte_efectivo(np.array([np.nan]), np.array([100.0]), f).tolist() == [150]
+
+
+def test_celdas_y_inmuebles_usan_el_corredor():
+    grilla, dist = _grilla()
+    grilla["corredor"] = [100] * 4 + [5000] * 4                   # «a» tiene un corredor al lado
+    cel = cv.celdas(grilla, dist, POB, HOM, LON, {**CONF, "factor_corredor": 1.5})
+    assert cel.loc[0, "val_corredor_m"] == 100
+    assert cel.loc[0, "val_transporte_m"] == 150                  # min(300 a la estación, 1.5 × 100)
+    assert cel.loc[4, "val_transporte_m"] == 2000                 # el corredor está lejos: cuenta la estación
+    props = pd.DataFrame([{"prop_id": "p", "distrito": "a", "latitud": -12.0, "longitud": -77.0, "n_delitos_12m": 1,
+                           "dist_transporte_m": 1200, "dist_corredor_m": 200, "n_colegios": 1, "n_salud": 0,
+                           "n_comisarias": 0, "n_malls": 0}])
+    inm = cv.inmuebles(props, cel, POB, HOM, LON, {**CONF, "factor_corredor": 1.5})
+    assert inm.loc[0, "val_transporte_m"] == 300 and inm.loc[0, "val_corredor_m"] == 200

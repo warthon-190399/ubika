@@ -28,6 +28,8 @@ export default function Indicadores({ p, ix, onCapa, compacto }) {
                 {x == null ? "sin dato" : `mejor que el ${pct(x)} de Lima`}
                 {k === "seguridad" && p.n_delitos_12m != null && ` · ${fmt(p.n_delitos_12m)} denuncias a 500 m en 12 meses`}
                 {k === "seguridad" && ix?.val?.homicidios != null && ` · ${ix.val.homicidios.toFixed(1)} homicidios por 100 mil hab. en el distrito`}
+                {k === "transporte" && ix?.acceso && (ix.acceso.tipo === "corredor"
+                  ? " · paradero de corredor (cuenta como estación a 1,5× su distancia)" : " · estación de Metro o Metropolitano")}
                 {k === "ruido" && " · modelo con vías y aeropuerto, no es una medición"}
               </span>
             )}
