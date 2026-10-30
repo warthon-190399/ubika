@@ -202,6 +202,39 @@ export default function MapView({ props, grillas, ciudad, capa, onCapa, escala, 
     return puestas;
   }, [conPrecio, zoomEtiquetas, props, selected?.prop_id, colorDe, conCapa, escalaB]);
 
+  // Avisos encimados a este zoom (el centro de uno cae dentro del círculo del otro): se agrupan alrededor
+  // del de mejor puntaje, que muestra cuántos hay. Al acercar el mapa los grupos se separan solos.
+  const { grupos, tamGrupo } = useMemo(() => {
+    const vp = new WebMercatorViewport({ longitude: 0, latitude: 0, zoom: zoomEtiquetas, width: 1, height: 1 });
+    const px = 2 ** zoomEtiquetas;
+    const orden = [...props].sort((a, b) => (colorDe(b) ?? 0) - (colorDe(a) ?? 0)).map(p => {
+      const [mx, my] = vp.projectFlat([p.longitud, p.latitud]);
+      return { p, x: mx * px, y: -my * px, r: radio(p) };
+    });
+    const CELDA = 32, celdas = new Map();
+    orden.forEach((o, i) => {
+      const k = `${Math.floor(o.x / CELDA)},${Math.floor(o.y / CELDA)}`;
+      celdas.set(k, [...(celdas.get(k) || []), i]);
+    });
+    const usado = new Set(), grupos = [], tamGrupo = new Map();
+    orden.forEach((o, i) => {
+      if (usado.has(i)) return;
+      usado.add(i);
+      const miembros = [o.p];
+      const cx = Math.floor(o.x / CELDA), cy = Math.floor(o.y / CELDA);
+      for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++)
+        for (const j of celdas.get(`${cx + dx},${cy + dy}`) || []) {
+          const q = orden[j];
+          if (usado.has(j) || Math.hypot(q.x - o.x, q.y - o.y) > Math.max(o.r, q.r)) continue;
+          usado.add(j);
+          miembros.push(q.p);
+        }
+      if (miembros.length > 1) grupos.push({ p: o.p, n: miembros.length });
+      miembros.forEach(m => tamGrupo.set(m.prop_id, miembros.length));
+    });
+    return { grupos, tamGrupo };
+  }, [zoomEtiquetas, props, colorDe, conCapa, escalaB]);
+
   const layers = [
     capaTiles("base", BASE),
     ...capasCiudad(),
@@ -244,6 +277,16 @@ export default function MapView({ props, grillas, ciudad, capa, onCapa, escala, 
       onHover: ({ object }) => setHover(object?.prop_id ?? null),
       onClick: ({ object }) => object && onSelect(object),
       updateTriggers: { getRadius: [hover, conCapa, escalaB], getFillColor: [conCapa, colorDe, puntoSobreCapa] },
+    }),
+    // Cuántos avisos hay en el mismo punto: una burbuja con el número a la derecha del círculo
+    grupos.length > 0 && new TextLayer({
+      id: "grupos", data: grupos, parameters: MEZCLA,
+      getPosition: g => [g.p.longitud, g.p.latitud], getText: g => String(g.n),
+      getPixelOffset: g => [radio(g.p) + 8, 0], getSize: 10, getColor: [255, 255, 255, 255],
+      fontFamily: "Inter, system-ui, sans-serif", fontWeight: 700, characterSet: "0123456789",
+      background: true, getBackgroundColor: [8, 51, 47, 240], backgroundPadding: [5, 2], backgroundBorderRadius: 8,
+      getBorderColor: [255, 255, 255, 255], getBorderWidth: 1.5,
+      updateTriggers: { getPixelOffset: [escalaB, conCapa] },
     }),
     // Precio sobre cada burbuja al acercarse (también sobre las capas)
     conPrecio && new TextLayer({
@@ -311,6 +354,7 @@ export default function MapView({ props, grillas, ciudad, capa, onCapa, escala, 
         <div class="tt-r mono">${soles(object.precio_pen)}${porMes(object)}</div>
         <div class="tt-s">${object.num_dorm ?? "—"} dorm · <span class="mono">${fmt(object.area_m2)} m²</span></div>
         ${!conCapa && x != null ? `<div class="tt-v mono">${colorTitulo} ${(x * 10).toFixed(1)}/10</div>` : ""}
+        ${(tamGrupo.get(object.prop_id) ?? 1) > 1 ? `<div class="tt-s">${tamGrupo.get(object.prop_id)} avisos en este punto · acércate para separarlos</div>` : ""}
         <div class="tt-h">Clic para ver su entorno</div>`;
     } else if (V && id.startsWith("hex-")) {
       // Mismo formato en las dos escalas: valor, unidad y dónde
